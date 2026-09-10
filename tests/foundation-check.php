@@ -42,7 +42,7 @@ $expected = [
     'admin/dispatch.php', 'admin/finance.php', 'admin/tickets.php',
     'admin/reviews.php', 'admin/marketing.php', 'admin/faqs.php',
     'admin/posts.php', 'admin/newsletter.php', 'admin/spin.php',
-    'admin/referrals.php',
+    'admin/referrals.php', 'admin/notifications.php',
     'customer/index.php', 'customer/register.php', 'customer/login.php',
     'customer/logout.php', 'customer/forgot-password.php',
     'customer/reset-password.php', 'customer/verify-email.php',
@@ -70,6 +70,7 @@ $expected = [
     'addons/README.md', 'addons/.gitkeep', 'addons/index.php',
     'addons/_example/addon.json', 'addons/_example/README.md',
     'cron/README.md', 'cron/.gitkeep', 'cron/index.php',
+    'cron/send-notifications.php', 'cron/pickup-reminders.php',
     'pwa/README.md', 'pwa/.gitkeep',
     'tests/foundation-check.php', 'tests/index.php', 'tests/phase3-verify.sql',
     'docs/00-PROJECT-PLAN-28-PHASES.md',
@@ -98,6 +99,7 @@ $expected = [
     'docs/19-Phase-19-Verification-Report.md',
     'docs/20-Phase-20-Verification-Report.md',
     'docs/21-Phase-21-Verification-Report.md',
+    'docs/22-Phase-22-Verification-Report.md',
     'README.md',
 ];
 foreach ($expected as $f) {
@@ -221,6 +223,17 @@ check(strpos((string) @file_get_contents($root . '/database/schema.sql'), 'flag_
 check(strpos((string) @file_get_contents($root . '/customer/register.php'), 'ref_capture') !== false, 'register.php: referral capture');
 check(strpos((string) @file_get_contents($root . '/admin/referrals.php'), 'referrals.manage') !== false, 'referrals desk: manage permission');
 check(strpos((string) @file_get_contents($root . '/customer/index.php'), 'customer/referrals.php') !== false, 'dashboard: referrals link');
+check(strpos((string) @file_get_contents($root . '/includes/notify.php'), 'notify_process_queue') !== false, 'notify lib: queue worker');
+check(strpos((string) @file_get_contents($root . '/includes/notify.php'), 'notify_send') !== false, 'notify lib: dispatcher');
+check(strpos((string) @file_get_contents($root . '/includes/notify.php'), 'notify_config') !== false, 'notify lib: channel config');
+check(strpos((string) @file_get_contents($root . '/includes/notify.php'), 'notify_render') !== false, 'notify lib: templates');
+check(strpos((string) @file_get_contents($root . '/includes/notify.php'), 'notify_retry') !== false, 'notify lib: retries');
+check(strpos((string) @file_get_contents($root . '/includes/notify.php'), 'notify_promo') !== false, 'notify lib: promo blast');
+check(strpos((string) @file_get_contents($root . '/includes/notify.php'), 'notify_pickup_reminders') !== false, 'notify lib: pickup reminders');
+check(strpos((string) @file_get_contents($root . '/includes/notify.php'), 'notify_wa_set') !== false, 'notify lib: wa opt-in');
+check(strpos((string) @file_get_contents($root . '/includes/mailer.php'), 'whatsapp_send') !== false, 'mailer: whatsapp sender');
+check(strpos((string) @file_get_contents($root . '/admin/notifications.php'), 'notifications.send') !== false, 'notif desk: send permission');
+check(strpos((string) @file_get_contents($root . '/cron/send-notifications.php'), 'notify_process_queue') !== false, 'cron: queue worker');
 check(strpos((string) @file_get_contents($root . '/checkout.php'), 'guest_checkout') !== false, 'checkout.php: guest toggle gate');
 check(strpos((string) @file_get_contents($root . '/checkout.php'), 'shop.order') !== false, 'checkout.php: order permission');
 check(strpos((string) @file_get_contents($root . '/checkout.php'), 'notify_emit') !== false, 'checkout.php: confirmation notify');

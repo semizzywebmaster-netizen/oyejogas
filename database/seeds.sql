@@ -201,7 +201,9 @@ INSERT INTO `settings` (`key`, `value`, `group_name`) VALUES
 ('referral_reward_referred_minor', '25000', 'referrals'),
 ('referral_min_purchase_minor', '200000', 'referrals'),
 ('referral_reward_expiry_days', '30', 'referrals'),
-('referral_velocity_24h', '5', 'referrals');
+('referral_velocity_24h', '5', 'referrals'),
+('notify_rate_per_minute', '30', 'notifications'),
+('notify_max_attempts', '5', 'notifications');
 
 -- ------------------------------------------------------- product categories
 INSERT INTO `categories` (`slug`, `name`, `description`, `sort_order`, `is_active`) VALUES
@@ -244,7 +246,23 @@ INSERT INTO `notification_templates` (`slug`, `channel`, `event`, `subject`, `bo
 ('payment-confirmed-whatsapp', 'whatsapp', 'payment_confirmation', NULL,
 'Hello {{name}}, payment of {{total}} for order {{order_number}} was received.', 1),
 ('delivery-completed-whatsapp', 'whatsapp', 'delivery_completion', NULL,
-'Hello {{name}}, your order {{order_number}} has been delivered. Thank you for choosing {{site}}.', 1);
+'Hello {{name}}, your order {{order_number}} has been delivered. Thank you for choosing {{site}}.', 1),
+('ticket-update-email', 'email', 'ticket_update', '{{subject}}',
+'Hello {{name}}, there is an update on your support ticket: {{message}}.', 1),
+('wallet-credited-email', 'email', 'wallet_transaction', 'Wallet {{direction}}: {{amount}}',
+'Hello {{name}}, your wallet was {{direction}} {{amount}}. New balance: {{balance}}. {{note}}', 1),
+('referral-reward-email', 'email', 'referral_reward', 'Referral reward received',
+'Hello {{name}}, you earned {{amount}} in referral rewards.', 1),
+('spin-reward-email', 'email', 'spin_reward', 'You won {{prize}}',
+'Hello {{name}}, your spin won {{prize}}! {{detail}}', 1),
+('pickup-reminder-sms', 'sms', 'pickup_reminder', NULL,
+'{{site}}: pickup {{pickup_number}} is scheduled for {{scheduled_date}}. Please keep the cylinder ready.', 1),
+('pickup-reminder-whatsapp', 'whatsapp', 'pickup_reminder', NULL,
+'Hello {{name}}, your {{site}} pickup {{pickup_number}} is scheduled for {{scheduled_date}}.', 1),
+('promo-email', 'email', 'promo', '{{subject}}',
+'{{message}}', 1),
+('promo-whatsapp', 'whatsapp', 'promo', NULL,
+'*{{subject}}*\n{{message}}', 1);
 
 -- ------------------------------------------------------------ starter FAQs
 INSERT INTO `faqs` (`question`, `answer`, `category`, `sort_order`, `is_active`) VALUES

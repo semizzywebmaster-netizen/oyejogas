@@ -393,6 +393,9 @@ function spin_play($campaign_id, $customer_id) {
             $ref = $pdo->query('SELECT `reference` FROM `wallet_transactions` WHERE `id` = ' . (int) $txn_id)->fetchColumn();
             $pdo->prepare("UPDATE `spins` SET `reward_status` = 'credited', `wallet_txn_ref` = ? WHERE `id` = ?")
                 ->execute([$ref, $spin_id]);
+            notify_send('spin_reward', (int) $customer_id,
+                ['prize' => $won['label'], 'detail' => 'It has been credited to your wallet.'],
+                'You won ' . $won['label'], 'Your spin won ' . $won['label'] . '!');
         } else {
             error_log('spin_play: deferred wallet credit for spin ' . $spin_id . ': ' . implode(';', $errs));
         }

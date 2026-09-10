@@ -208,6 +208,16 @@ function wallet_decide_topup($txn_id, $staff_uid, $approve, $note = '') {
             wallet_audit('wallet.topup.rejected', $staff_uid, $t['id'], ['status' => 'pending'], ['status' => 'failed', 'note' => $note]);
         }
         db()->commit();
+        try {
+            if ($approve) {
+                notify_send('wallet_transaction', (int) $w['customer_id'],
+                    ['direction' => 'credited', 'amount' => format_money((int) $t['amount_minor']),
+                     'balance' => format_money($new_bal), 'note' => 'Top-up approved.'],
+                    'Wallet top-up approved', 'Your wallet was credited ' . format_money((int) $t['amount_minor']) . '.');
+            }
+        } catch (Throwable $e) {
+            error_log('wallet topup notify: ' . $e->getMessage());
+        }
         return [true, $approve ? 'Top-up approved.' : 'Top-up rejected.'];
     } catch (PDOException $e) {
         if (db()->inTransaction()) {
@@ -318,7 +328,19 @@ function wallet_adjust($customer_id, $staff_uid, $direction, $amount_minor, $rea
         list($id, $errs) = wallet_credit($customer_id, 'adjustment', $amount, [
             'narration' => 'Adjustment: ' . $reason, 'created_by' => $staff_uid,
         ]);
-        return $id ? [true, 'Adjustment credited.'] : [false, $errs[0] ?? 'Adjustment failed.'];
+        if ($id) {
+            try {
+                $bal = db()->query('SELECT `balance_minor` FROM `wallets` WHERE `customer_id` = ' . (int) $customer_id)->fetchColumn();
+                notify_send('wallet_transaction', (int) $customer_id,
+                    ['direction' => 'credited', 'amount' => format_money($amount),
+                     'balance' => format_money((int) $bal), 'note' => $reason],
+                    'Wallet adjustment', 'Your wallet was credited ' . format_money($amount) . '.');
+            } catch (Throwable $e) {
+                error_log('wallet adjust notify: ' . $e->getMessage());
+            }
+            return [true, 'Adjustment credited.'];
+        }
+        return [false, $errs[0] ?? 'Adjustment failed.'];
     }
     $w = wallet_ensure($customer_id);
     if (!$w || $w['status'] !== 'active') {
@@ -343,6 +365,14 @@ function wallet_adjust($customer_id, $staff_uid, $direction, $amount_minor, $rea
             ->execute([$new_bal, $w['id']]);
         db()->commit();
         wallet_audit('wallet.adjust', $staff_uid, $id, ['direction' => 'debit'], ['amount' => $amount, 'reason' => $reason]);
+        try {
+            notify_send('wallet_transaction', (int) $customer_id,
+                ['direction' => 'debited', 'amount' => format_money($amount),
+                 'balance' => format_money($new_bal), 'note' => $reason],
+                'Wallet adjustment', 'Your wallet was debited ' . format_money($amount) . '.');
+        } catch (Throwable $e) {
+            error_log('wallet adjust notify: ' . $e->getMessage());
+        }
         return [true, 'Adjustment debited.'];
     } catch (PDOException $e) {
         if (db()->inTransaction()) {

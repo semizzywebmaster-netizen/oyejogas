@@ -27,6 +27,21 @@ function db() {
         PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
         PDO::ATTR_EMULATE_PREPARES => false,
     ]);
+    try {
+        // Align MySQL NOW()/CURDATE() with PHP wall time so SQL and PHP
+        // timestamps are comparable (Phase 22 fix: retry/backoff windows,
+        // rate limits, campaign windows). Offset form needs no tz tables.
+        $tz = new DateTimeZone(date_default_timezone_get());
+        $off = $tz->getOffset(new DateTime('now', $tz));
+        $pdo->exec(sprintf(
+            "SET time_zone = '%s%02d:%02d'",
+            $off < 0 ? '-' : '+',
+            abs($off) / 3600,
+            (abs($off) % 3600) / 60
+        ));
+    } catch (Throwable $t) {
+        // Non-fatal: the server time zone stands in.
+    }
     return $pdo;
 }
 
