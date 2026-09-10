@@ -761,6 +761,8 @@ function adm_order_cancel($id, $reason, $actor_id) {
             }
         }
         adm_audit('admin.order_cancel', $actor_id, (int) $id, ['status' => $o['status']], ['reason' => $reason]);
+        require_once BASE_PATH . '/includes/payments.php';
+        pay_invoice_sync((int) $id);
         $pdo->commit();
         $full = adm_order_get((int) $id);
         if ($full) {

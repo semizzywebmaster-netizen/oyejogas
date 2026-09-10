@@ -12,6 +12,7 @@ if (!oyejo_feature('driver_portal')) {
     exit;
 }
 require_once BASE_PATH . '/includes/delivery.php';
+require_once BASE_PATH . '/includes/payments.php';
 
 $me = current_user();
 $profile = del_driver_profile((int) $me['id']);

@@ -121,7 +121,10 @@ if (request_method() === 'POST') {
                 if ($order) {
                     $_SESSION[OYEJO_LAST_ORDER_KEY] = $order['id'];
                     notify_emit($cid, 'order_confirmation', $logged ? $cu['email'] : $f['email'], 'Order ' . $order['number'] . ' confirmed', 'Your order ' . $order['number'] . ' (' . format_money($order['total']) . ') is confirmed. Track it in My account.');
-                    redirect(url('customer/orders.php?view=' . $order['id'] . '&placed=1'));
+                    if (($order['method'] ?? '') === 'wallet') {
+                        redirect(url('customer/orders.php?view=' . $order['id'] . '&placed=1'));
+                    }
+                    redirect(url('customer/payments.php?placed=' . $order['id']));
                 }
                 $errors = array_merge($errors, $place_errs);
             }
@@ -212,7 +215,7 @@ require BASE_PATH . '/includes/header.php';
           <label class="radio"><input type="radio" name="method" value="<?= $key ?>"<?= $f['method'] === $key ? ' checked' : '' ?>> <?= e($m['label']) ?></label>
         <?php endif; ?>
       <?php endforeach; ?>
-      <p class="result-meta">Online payments are recorded now; the live gateway opens in Phase 17.</p>
+      <p class="result-meta">Wallet pays instantly. Bank transfer and online payments are verified after checkout under My payments; cash is collected on delivery.</p>
     </div>
     <p><button class="btn primary" type="submit">Place order</button></p>
   </form>

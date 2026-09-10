@@ -12,6 +12,7 @@ if (!oyejo_feature('delivery_service')) {
 }
 require_permission('deliveries.view');
 require_once BASE_PATH . '/includes/delivery.php';
+require_once BASE_PATH . '/includes/payments.php';
 
 $me = current_user();
 $can_assign = has_permission('deliveries.assign');

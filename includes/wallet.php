@@ -230,7 +230,7 @@ function wallet_decide_topup($txn_id, $staff_uid, $approve, $note = '') {
  * Returns [id|null, errors[], duplicate?].
  */
 function wallet_credit($customer_id, $type, $amount_minor, array $args = []) {
-    $allowed = ['promo', 'referral', 'spin', 'adjustment'];
+    $allowed = ['promo', 'referral', 'spin', 'adjustment', 'refund'];
     if (!in_array($type, $allowed, true)) {
         return [null, ['Invalid credit type.'], false];
     }

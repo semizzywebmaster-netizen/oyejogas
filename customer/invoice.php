@@ -1,11 +1,13 @@
 <?php
 /**
- * Oyejo Gas - printable invoice for an owned order (Phase 10).
- * Rendered on demand from order data; persistent finance invoices arrive in Phase 17.
+ * Oyejo Gas - printable invoice / receipt for an owned order.
+ * Phase 17: persistent invoice numbers, receipts for paid orders and
+ * customer refund requests.
  */
 require_once __DIR__ . '/../includes/bootstrap.php';
 reject_path_info();
 require_once BASE_PATH . '/includes/cart.php';
+require_once BASE_PATH . '/includes/payments.php';
 
 $logged = is_logged_in();
 $me = $logged ? current_user() : null;
@@ -15,7 +17,7 @@ if ($logged) {
     require_permission('shop.order');
 }
 
-$id = (int) ($_GET['id'] ?? 0);
+$id = (int) ($_GET['id'] ?? $_GET['order_id'] ?? 0);
 $s = db()->prepare('SELECT * FROM `orders` WHERE `id` = ? LIMIT 1');
 $s->execute([$id]);
 $o = $s->fetch();
@@ -28,19 +30,46 @@ if (!$o || !$mine) {
     require BASE_PATH . '/includes/footer.php';
     exit;
 }
+
+$message = '';
+$errors = [];
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && $cid > 0) {
+    if (!csrf_verify($_POST['csrf_token'] ?? '')) {
+        $errors[] = 'Your session expired. Please try again.';
+    } elseif (($_POST['action'] ?? '') === 'refund') {
+        [$ok, $msg] = ref_request((int) $o['id'], $_POST['amount'] ?? 0,
+            $_POST['reason'] ?? '', $_POST['method'] ?? 'wallet',
+            ['customer_id' => $cid, 'user_id' => (int) $me['id'], 'is_staff' => false]);
+        $ok ? $message = $msg : $errors[] = $msg;
+    }
+}
+
 $s = db()->prepare('SELECT * FROM `order_items` WHERE `order_id` = ? ORDER BY `id`');
 $s->execute([$o['id']]);
 $items = $s->fetchAll();
 $methods = cart_payment_methods();
+$inv = pay_invoice_for_order((int) $o['id']);
+$receipt_mode = isset($_GET['receipt']) && $o['payment_status'] === 'paid';
+$stmt = db()->prepare('SELECT `payment_reference`, `method` FROM `payments` WHERE `order_id` = ? ORDER BY `id` DESC LIMIT 1');
+$stmt->execute([$o['id']]);
+$pay = $stmt->fetch();
+$stmt = db()->prepare(
+    "SELECT `refund_number`, `amount_minor`, `status` FROM `refunds` WHERE `order_id` = ? ORDER BY `id` DESC"
+);
+$stmt->execute([$o['id']]);
+$refunds = $stmt->fetchAll();
 
-$page_title = 'Invoice INV-' . $o['order_number'];
+$page_title = ($receipt_mode ? 'Receipt ' : 'Invoice ') . ($inv['invoice_number'] ?? ('INV-' . $o['order_number']));
 require BASE_PATH . '/includes/header.php';
 ?>
 <p class="no-print"><a href="<?= e(url('customer/orders.php?view=' . $o['id'])) ?>">&larr; Back to order</a></p>
+<?php if ($message !== '') : ?><div class="alert alert-success no-print"><?= e($message) ?></div><?php endif; ?>
+<?php foreach ($errors as $e) : ?><div class="alert alert-error no-print"><?= e($e) ?></div><?php endforeach; ?>
 <div class="invoice">
-  <h1>Invoice INV-<?= e($o['order_number']) ?></h1>
+  <h1><?= $receipt_mode ? 'Receipt' : 'Invoice' ?> <?= e($inv['invoice_number'] ?? ('INV-' . $o['order_number'])) ?></h1>
   <p><strong>Oyejo Gas</strong> — Cooking gas, delivered.<br>
-    Issued: <?= e(substr($o['created_at'], 0, 16)) ?> · Order: <?= e($o['order_number']) ?></p>
+    Issued: <?= e(substr($inv['issued_at'] ?? $o['created_at'], 0, 16)) ?> · Order: <?= e($o['order_number']) ?>
+    · Status: <?= e(ucfirst($inv['status'] ?? 'issued')) ?></p>
   <p><strong>Bill to:</strong><br><?= nl2br(e((string) $o['address_text'])) ?><br><?= e((string) $o['delivery_phone']) ?></p>
   <div class="table-scroll">
     <table class="data">
@@ -57,7 +86,27 @@ require BASE_PATH . '/includes/header.php';
       </tbody>
     </table>
   </div>
-  <p>Payment: <?= e($methods[$o['payment_method']]['label'] ?? $o['payment_method']) ?> — <?= e(ucfirst($o['payment_status'])) ?>.</p>
+  <p>Payment: <?= e($methods[$o['payment_method']]['label'] ?? (string) $o['payment_method']) ?> — <?= e(ucfirst($o['payment_status'])) ?><?= $pay ? ' · Ref: ' . e($pay['payment_reference']) : '' ?>.</p>
+  <?php if ($refunds) : ?>
+    <p>Refunds:
+      <?php foreach ($refunds as $r) : ?>
+        <?= e($r['refund_number']) ?> (<?= e(format_money($r['amount_minor'])) ?>, <?= e($r['status']) ?>);
+      <?php endforeach; ?>
+    </p>
+  <?php endif; ?>
   <p class="no-print"><button class="btn primary" onclick="window.print()">Print</button></p>
 </div>
+<?php if ($cid > 0 && $o['payment_status'] === 'paid') : ?>
+<div class="card no-print">
+  <h2>Request a refund</h2>
+  <form method="post" action="" class="filter-row">
+    <?= csrf_field() ?>
+    <input type="hidden" name="action" value="refund">
+    <input name="amount" inputmode="decimal" placeholder="Amount ₦" required>
+    <select name="method"><option value="wallet">Wallet</option><option value="bank">Bank</option><option value="cash">Cash</option></select>
+    <input name="reason" maxlength="255" placeholder="Reason" required>
+    <button class="btn small primary" type="submit">Request refund</button>
+  </form>
+</div>
+<?php endif; ?>
 <?php require BASE_PATH . '/includes/footer.php'; ?>

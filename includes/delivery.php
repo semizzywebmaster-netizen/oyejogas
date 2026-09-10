@@ -626,6 +626,9 @@ function del_collect_cash($id, $driver_id, $naira, $notes, $actor_id) {
             ->execute([$minor, (int) $id]);
         del_audit('delivery.cash', $actor_id, (int) $id, null, ['amount_minor' => $minor]);
         $pdo->commit();
+        if ($d['order_id'] && function_exists('pay_cod_autoverify')) {
+            pay_cod_autoverify((int) $d['order_id']);
+        }
         return [true, '₦' . number_format($minor / 100, 2) . ' recorded for ' . $d['delivery_number'] . '.'];
     } catch (Throwable $e) {
         if ($pdo->inTransaction()) {

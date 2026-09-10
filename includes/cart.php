@@ -409,6 +409,15 @@ function cart_place_order(array $in) {
                 db()->prepare('UPDATE `orders` SET `payment_status` = \'paid\' WHERE `id` = ?')
                     ->execute([$order_id]);
             }
+            // 5b. Finance rows (Phase 17): payment record + persistent invoice.
+            $wallet_txn_id = 0;
+            if ($method === 'wallet') {
+                $s = db()->prepare('SELECT `id` FROM `wallet_transactions` WHERE `related_type` = \'order\' AND `related_id` = ? LIMIT 1');
+                $s->execute([$order_id]);
+                $wallet_txn_id = (int) $s->fetchColumn();
+            }
+            require_once BASE_PATH . '/includes/payments.php';
+            pay_record_checkout($order_id, $customer_id, $method, $total, $wallet_txn_id);
             // 6. Items + history.
             $item = db()->prepare(
                 'INSERT INTO `order_items` (`order_id`, `product_id`, `name`, `qty`, `unit_price_minor`, `total_minor`)'
@@ -508,7 +517,11 @@ function order_cancel($order_id, $customer_id, $actor_uid, $reason = '') {
                 ->execute([$new_bal, $w['id']]);
             db()->prepare('UPDATE `orders` SET `payment_status` = \'refunded\' WHERE `id` = ?')
                 ->execute([$order_id]);
+            db()->prepare("UPDATE `payments` SET `status` = 'refunded' WHERE `order_id` = ? AND `method` = 'wallet'")
+                ->execute([$order_id]);
         }
+        require_once BASE_PATH . '/includes/payments.php';
+        pay_invoice_sync($order_id);
         db()->commit();
         return [true, 'Order ' . $o['order_number'] . ' cancelled.'];
     } catch (PDOException $e) {
