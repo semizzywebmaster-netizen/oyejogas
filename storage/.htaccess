@@ -1,0 +1,2 @@
+# Oyejo Gas - never serve this folder over HTTP (logs & backups stay private).
+Require all denied

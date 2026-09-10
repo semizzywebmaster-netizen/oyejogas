@@ -1,0 +1,14 @@
+# Oyejo Gas - uploads stay non-executable (F-06).
+Options -Indexes
+<IfModule mod_php.c>
+    php_flag engine off
+</IfModule>
+<IfModule mod_php7.c>
+    php_flag engine off
+</IfModule>
+<IfModule mod_php8.c>
+    php_flag engine off
+</IfModule>
+<FilesMatch "\.(php|phtml|phar|php[3457]?|phps|pl|py|cgi|sh)$">
+    Require all denied
+</FilesMatch>

@@ -1,0 +1,9 @@
+{
+  "slug": "example",
+  "name": "Example add-on (skeleton)",
+  "version": "0.1.0",
+  "requires": { "oyejo": ">=0.2.0", "php": ">=7.4" },
+  "permissions": [],
+  "toggles": [],
+  "enabled": false
+}

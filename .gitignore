@@ -1,0 +1,24 @@
+# Oyejo Gas
+.env
+.env.*
+!.env.example
+
+# User content & runtime (keep folder guards, ignore payloads)
+uploads/*
+!uploads/.gitkeep
+!uploads/.htaccess
+!uploads/index.php
+storage/logs/*
+!storage/logs/.gitkeep
+!storage/logs/index.php
+storage/backups/*
+!storage/backups/.gitkeep
+!storage/backups/index.php
+storage/cache/*
+!storage/cache/.gitkeep
+!storage/cache/index.php
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+*.log
