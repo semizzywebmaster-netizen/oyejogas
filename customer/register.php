@@ -4,6 +4,7 @@
  */
 require_once __DIR__ . '/../includes/bootstrap.php';
 reject_path_info();
+require_once BASE_PATH . '/includes/referrals.php';
 
 if (!oyejo_feature('customer_registration')) {
     http_response_code(403);
@@ -22,6 +23,8 @@ $done = false;
 $name = '';
 $email = '';
 $phone = '';
+$refcode = strtoupper(trim((string) ($_GET['ref'] ?? '')));
+$ref_notice = '';
 
 if (request_method() === 'POST') {
     if (!csrf_verify(post('csrf_token'))) {
@@ -68,6 +71,15 @@ if (request_method() === 'POST') {
                 $errors[] = $err;
             } else {
                 auth_send_verification(auth_db_user($uid));
+                $rc = strtoupper(trim((string) post('refcode', $refcode)));
+                if ($rc !== '' && oyejo_feature('referrals')) {
+                    $sc = db()->prepare('SELECT `id` FROM `customers` WHERE `user_id` = ?');
+                    $sc->execute([$uid]);
+                    [$ref_ok, $ref_msg] = ref_capture($rc, (int) $sc->fetchColumn(), $uid);
+                    if (!$ref_ok) {
+                        $ref_notice = $ref_msg;
+                    }
+                }
                 $done = true;
             }
         }
@@ -86,6 +98,7 @@ require BASE_PATH . '/includes/header.php';
       <p>Your account was created. We sent a verification link to
         <strong><?= e($email) ?></strong> — open it within 24 hours to activate
         your account, then log in.</p>
+      <?php if ($ref_notice !== '') : ?><p><?= e($ref_notice) ?></p><?php endif; ?>
       <p><a class="btn primary" href="<?= e(url('customer/login.php')) ?>">Go to login</a></p>
     </div>
   <?php else : ?>
@@ -99,6 +112,7 @@ require BASE_PATH . '/includes/header.php';
       <label>Phone (optional, needed for phone verification)<input name="phone" value="<?= e($phone) ?>" maxlength="30"></label>
       <label>Password (min 8, letter + number)<input type="password" name="password" autocomplete="new-password" required></label>
       <label>Confirm password<input type="password" name="password_confirm" autocomplete="new-password" required></label>
+      <label>Referral code (optional)<input name="refcode" value="<?= e($refcode) ?>" maxlength="20"></label>
       <p><button class="btn primary" type="submit">Create account</button></p>
     </form>
     <p>Already registered? <a href="<?= e(url('customer/login.php')) ?>">Log in</a></p>

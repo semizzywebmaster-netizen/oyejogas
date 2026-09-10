@@ -32,7 +32,7 @@ $expected = [
     'includes/wallet.php', 'includes/refills.php', 'includes/pickups.php',
     'includes/inventory.php', 'includes/admin.php', 'includes/delivery.php',
     'includes/payments.php', 'includes/support.php', 'includes/marketing.php',
-    'includes/spin.php',
+    'includes/spin.php', 'includes/referrals.php',
     'includes/footer.php',
     'admin/index.php', 'admin/wallet.php', 'admin/refills.php',
     'admin/pickups.php', 'admin/inventory.php', 'admin/purchases.php',
@@ -42,6 +42,7 @@ $expected = [
     'admin/dispatch.php', 'admin/finance.php', 'admin/tickets.php',
     'admin/reviews.php', 'admin/marketing.php', 'admin/faqs.php',
     'admin/posts.php', 'admin/newsletter.php', 'admin/spin.php',
+    'admin/referrals.php',
     'customer/index.php', 'customer/register.php', 'customer/login.php',
     'customer/logout.php', 'customer/forgot-password.php',
     'customer/reset-password.php', 'customer/verify-email.php',
@@ -50,7 +51,7 @@ $expected = [
     'customer/notifications.php', 'customer/invoice.php', 'customer/reorder.php',
     'customer/tickets.php', 'customer/wallet.php', 'customer/statement.php',
     'customer/refills.php', 'customer/pickups.php', 'customer/payments.php',
-    'customer/reviews.php', 'customer/spin.php',
+    'customer/reviews.php', 'customer/spin.php', 'customer/referrals.php',
     'driver/index.php',
     'api/index.php', 'api/payments-callback.php',
     'install/index.php', 'install/installer.php',
@@ -96,6 +97,7 @@ $expected = [
     'docs/18-Phase-18-Verification-Report.md',
     'docs/19-Phase-19-Verification-Report.md',
     'docs/20-Phase-20-Verification-Report.md',
+    'docs/21-Phase-21-Verification-Report.md',
     'README.md',
 ];
 foreach ($expected as $f) {
@@ -209,6 +211,16 @@ check(strpos((string) @file_get_contents($root . '/database/schema.sql'), 'rewar
 check(strpos((string) @file_get_contents($root . '/admin/spin.php'), 'spin.manage') !== false, 'spin desk: manage permission');
 check(strpos((string) @file_get_contents($root . '/customer/spin.php'), 'spin_to_win') !== false, 'spin page: toggle gate');
 check(strpos((string) @file_get_contents($root . '/customer/index.php'), 'customer/spin.php') !== false, 'dashboard: spin link');
+check(strpos((string) @file_get_contents($root . '/includes/referrals.php'), 'ref_capture') !== false, 'referral lib: capture');
+check(strpos((string) @file_get_contents($root . '/includes/referrals.php'), 'ref_qualify_due') !== false, 'referral lib: qualification');
+check(strpos((string) @file_get_contents($root . '/includes/referrals.php'), 'ref_claim') !== false, 'referral lib: claim');
+check(strpos((string) @file_get_contents($root . '/includes/referrals.php'), 'ref_reverse') !== false, 'referral lib: reversal');
+check(strpos((string) @file_get_contents($root . '/includes/referrals.php'), 'ref_flag') !== false, 'referral lib: flags');
+check(strpos((string) @file_get_contents($root . '/includes/referrals.php'), 'ref_settings') !== false, 'referral lib: settings');
+check(strpos((string) @file_get_contents($root . '/database/schema.sql'), 'flag_note') !== false, 'schema: referral flag notes');
+check(strpos((string) @file_get_contents($root . '/customer/register.php'), 'ref_capture') !== false, 'register.php: referral capture');
+check(strpos((string) @file_get_contents($root . '/admin/referrals.php'), 'referrals.manage') !== false, 'referrals desk: manage permission');
+check(strpos((string) @file_get_contents($root . '/customer/index.php'), 'customer/referrals.php') !== false, 'dashboard: referrals link');
 check(strpos((string) @file_get_contents($root . '/checkout.php'), 'guest_checkout') !== false, 'checkout.php: guest toggle gate');
 check(strpos((string) @file_get_contents($root . '/checkout.php'), 'shop.order') !== false, 'checkout.php: order permission');
 check(strpos((string) @file_get_contents($root . '/checkout.php'), 'notify_emit') !== false, 'checkout.php: confirmation notify');

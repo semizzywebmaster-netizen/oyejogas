@@ -198,7 +198,10 @@ INSERT INTO `settings` (`key`, `value`, `group_name`) VALUES
 ('min_order_minor', '0', 'orders'),
 ('wallet_topup_min_minor', '10000', 'wallet'),
 ('referral_reward_referrer_minor', '50000', 'referrals'),
-('referral_reward_referred_minor', '25000', 'referrals');
+('referral_reward_referred_minor', '25000', 'referrals'),
+('referral_min_purchase_minor', '200000', 'referrals'),
+('referral_reward_expiry_days', '30', 'referrals'),
+('referral_velocity_24h', '5', 'referrals');
 
 -- ------------------------------------------------------- product categories
 INSERT INTO `categories` (`slug`, `name`, `description`, `sort_order`, `is_active`) VALUES

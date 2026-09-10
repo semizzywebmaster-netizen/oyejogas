@@ -29,6 +29,7 @@ $desks = [
     ['Posts', 'admin/posts.php', 'marketing.posts'],
     ['Newsletter', 'admin/newsletter.php', 'marketing.newsletter'],
     ['Spin-to-win', 'admin/spin.php', 'spin.manage'],
+    ['Referrals', 'admin/referrals.php', 'referrals.manage'],
     ['Settings', 'admin/settings.php', 'settings.view'],
     ['Add-ons', 'admin/addons.php', 'addons.view'],
 ];

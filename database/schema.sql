@@ -883,6 +883,7 @@ CREATE TABLE IF NOT EXISTS `referrals` (
     `code_used` VARCHAR(20) NULL,
     `status` ENUM('pending','qualified','rewarded','expired','flagged') NOT NULL DEFAULT 'pending',
     `qualified_at` DATETIME NULL,
+    `flag_note` VARCHAR(255) NULL,
     `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`),
     UNIQUE KEY `uq_referrals_referred` (`referred_customer_id`),
