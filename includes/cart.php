@@ -445,7 +445,7 @@ function cart_place_order(array $in) {
             if ($e->getCode() === '23000' && stripos($e->getMessage(), 'uq_orders_number') !== false) {
                 continue;
             }
-            error_log('cart_place_order: ' . $e->getMessage());
+            report_error('orders', 'error', $e);
             return [null, ['Could not place your order. Please try again.']];
         } catch (Exception $e) {
             if (db()->inTransaction()) {

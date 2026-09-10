@@ -199,7 +199,7 @@ function auth_register_customer($name, $email, $phone, $password) {
         if ($e->getCode() === '23000') {
             return [null, 'That email or phone is already registered. Try logging in.'];
         }
-        error_log('[oyejo] register failed: ' . $e->getMessage());
+        report_error('auth', 'error', $e);
         return [null, 'Registration failed. Please try again.'];
     }
 }

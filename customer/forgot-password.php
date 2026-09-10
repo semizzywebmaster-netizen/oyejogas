@@ -10,6 +10,10 @@ if (is_logged_in()) {
 
 $sent = false;
 if (request_method() === 'POST') {
+    [$rl_ok, $rl_retry] = rate_limit('pwreset', rate_ip(), 5, 3600);
+    if (!$rl_ok) {
+        err_429($rl_retry);
+    }
     if (!csrf_verify(post('csrf_token'))) {
         flash('error', 'Security token mismatch. Reload and try again.');
         redirect(url('customer/forgot-password.php'));

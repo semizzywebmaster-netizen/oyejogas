@@ -30,6 +30,10 @@ $subject = '';
 $message = '';
 
 if (request_method() === 'POST') {
+    [$rl_ok, $rl_retry] = rate_limit('contact', rate_ip(), 5, 3600);
+    if (!$rl_ok) {
+        err_429($rl_retry);
+    }
     if (!csrf_verify(post('csrf_token'))) {
         $errors[] = 'Security token mismatch. Reload and try again.';
     } elseif (trim((string) post('company', '')) !== '') {

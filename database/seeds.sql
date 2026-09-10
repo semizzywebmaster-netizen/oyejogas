@@ -96,6 +96,8 @@ INSERT INTO `permissions` (`slug`, `name`, `group_name`) VALUES
 ('toggles.manage', 'Manage feature toggles', 'settings'),
 ('backups.create', 'Create backups', 'ops'),
 ('backups.restore', 'Restore backups', 'ops'),
+('logs.view', 'View error logs', 'ops'),
+('logs.manage', 'Resolve errors and rotate logs', 'ops'),
 ('audit.view', 'View audit logs', 'ops'),
 ('reports.view', 'View reports', 'reports'),
 ('addons.view', 'View add-ons', 'addons'),
@@ -206,7 +208,9 @@ INSERT INTO `settings` (`key`, `value`, `group_name`) VALUES
 ('notify_max_attempts', '5', 'notifications'),
 ('backup_retention_days', '14', 'ops'),
 ('backup_keep_min', '3', 'ops'),
-('backup_max_age_hours', '24', 'ops');
+('backup_max_age_hours', '24', 'ops'),
+('log_max_mb', '5', 'ops'),
+('log_keep_files', '5', 'ops');
 
 -- ------------------------------------------------------- product categories
 INSERT INTO `categories` (`slug`, `name`, `description`, `sort_order`, `is_active`) VALUES

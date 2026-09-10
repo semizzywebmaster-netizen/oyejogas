@@ -21,6 +21,7 @@ require_once __DIR__ . '/mailer.php';
 require_once __DIR__ . '/auth.php';
 require_once __DIR__ . '/rbac.php';
 require_once __DIR__ . '/notify.php';
+require_once __DIR__ . '/errors.php';
 
 // --- Uninstalled apps go to the installer (Phase 4) ---
 if (PHP_SAPI !== 'cli' && !defined('OYEJO_SKIP_INSTALL_CHECK')) {
@@ -52,9 +53,30 @@ auth_tick();
 // --- Maintenance mode (Phase 23): locked storefront, staff exempt ---
 oyejo_maintenance_gate();
 
-// --- Safety net for uncaught exceptions (full handler in Phase 25) ---
+// --- Central error handling (Phase 25): refs, safe pages, fatal capture ---
 set_exception_handler(function ($e) {
-    error_log('[oyejo] Uncaught ' . get_class($e) . ': ' . $e->getMessage());
+    $ref = report_error(err_domain_for($e), 'critical', $e);
+    if (!APP_DEBUG) {
+        show_error(500, null, $ref);
+    }
+    // Debug mode: show the error via PHP's own display.
+    http_response_code(500);
+    echo '<pre style="padding:20px">Uncaught ' . htmlspecialchars(get_class($e)) . ': '
+        . htmlspecialchars($e->getMessage()) . "\n"
+        . htmlspecialchars($e->getTraceAsString()) . '</pre>';
+    exit;
+});
+
+// Fatal shutdown capture (E_ERROR/E_PARSE bypass the handler above).
+register_shutdown_function(function () {
+    $e = error_get_last();
+    if (!$e || !in_array($e['type'], [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR], true)) {
+        return;
+    }
+    $ref = report_error('system', 'critical', 'Fatal: ' . $e['message'], ['file' => $e['file'], 'line' => $e['line']]);
+    if (PHP_SAPI === 'cli' || headers_sent()) {
+        return;
+    }
     if (!APP_DEBUG) {
         http_response_code(500);
         $p = BASE_PATH . '/errors/500.php';
@@ -63,14 +85,7 @@ set_exception_handler(function ($e) {
         } else {
             echo 'Something went wrong. Please try again later.';
         }
-        exit;
     }
-    // Debug mode: show the error via PHP's own display.
-    http_response_code(500);
-    echo '<pre style="padding:20px">Uncaught ' . htmlspecialchars(get_class($e)) . ': '
-        . htmlspecialchars($e->getMessage()) . "\n"
-        . htmlspecialchars($e->getTraceAsString()) . '</pre>';
-    exit;
 });
 
 // --- CSRF helpers ---

@@ -223,7 +223,7 @@ function wallet_decide_topup($txn_id, $staff_uid, $approve, $note = '') {
         if (db()->inTransaction()) {
             db()->rollBack();
         }
-        error_log('[oyejo] topup decision failed: ' . $e->getMessage());
+        report_error('wallet', 'error', $e);
         return [false, 'Could not record the decision. Please try again.'];
     } catch (Exception $e) {
         if (db()->inTransaction()) {

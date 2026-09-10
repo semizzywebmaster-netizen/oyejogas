@@ -12,6 +12,8 @@
 - Live jobs (Phase 24): `backup.php` (daily 02:00 — full database dump
   to `storage/backups/` + retention cleanup; failures are recorded in
   the `backups` table and alerted via `admin_alert_email`/ops.log).
+- Live jobs (Phase 25): `rotate-logs.php` (daily 03:00 — size-based
+  rotation of app/mail/sms/whatsapp/ops logs, keeps 5 files each).
 
 Example cPanel cron (hourly backup check, Phase 24):
 

@@ -133,7 +133,7 @@ function pay_notify($payment, $subject, $body) {
         notify_emit((int) $payment['customer_id'], 'payment_update',
             (string) ($payment['customer_email'] ?? ''), $subject, $body, 'email');
     } catch (Throwable $e) {
-        error_log('pay_notify: ' . $e->getMessage());
+        report_error('payments', 'error', $e);
     }
 }
 
@@ -165,6 +165,7 @@ function pay_upload_proof($payment_id, $customer_id, $file) {
     $ext = $info[2] === IMAGETYPE_PNG ? 'png' : 'jpg';
     $name = 'PROOF-' . (int) $payment_id . '-' . bin2hex(random_bytes(4)) . '.' . $ext;
     if (!move_uploaded_file($file['tmp_name'], $dir . '/' . $name)) {
+        report_error('files', 'error', 'Receipt upload failed for payment ' . (int) $payment_id);
         return [false, 'Could not store the receipt.'];
     }
     db()->prepare('UPDATE `payments` SET `proof_image` = ? WHERE `id` = ?')
@@ -258,7 +259,7 @@ function pay_verify($id, $approve, $actor_id, $note = '') {
         if ($pdo->inTransaction()) {
             $pdo->rollBack();
         }
-        error_log('pay_verify: ' . $e->getMessage());
+        report_error('payments', 'error', $e);
         return [false, 'Could not decide the payment. Please try again.'];
     }
 }

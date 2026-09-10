@@ -32,7 +32,7 @@ $expected = [
     'includes/wallet.php', 'includes/refills.php', 'includes/pickups.php',
     'includes/inventory.php', 'includes/admin.php', 'includes/delivery.php',
     'includes/payments.php', 'includes/support.php', 'includes/marketing.php',
-    'includes/spin.php', 'includes/referrals.php', 'includes/ops.php',
+    'includes/spin.php', 'includes/referrals.php', 'includes/ops.php', 'includes/errors.php',
     'includes/footer.php',
     'admin/index.php', 'admin/wallet.php', 'admin/refills.php',
     'admin/pickups.php', 'admin/inventory.php', 'admin/purchases.php',
@@ -42,7 +42,7 @@ $expected = [
     'admin/dispatch.php', 'admin/finance.php', 'admin/tickets.php',
     'admin/reviews.php', 'admin/marketing.php', 'admin/faqs.php',
     'admin/posts.php', 'admin/newsletter.php', 'admin/spin.php',
-    'admin/referrals.php', 'admin/notifications.php', 'admin/backups.php',
+    'admin/referrals.php', 'admin/notifications.php', 'admin/backups.php', 'admin/logs.php',
     'customer/index.php', 'customer/register.php', 'customer/login.php',
     'customer/logout.php', 'customer/forgot-password.php',
     'customer/reset-password.php', 'customer/verify-email.php',
@@ -55,7 +55,7 @@ $expected = [
     'driver/index.php',
     'api/index.php', 'api/payments-callback.php',
     'install/index.php', 'install/installer.php',
-    'errors/404.php', 'errors/403.php', 'errors/500.php', 'errors/503.php',
+    'errors/404.php', 'errors/403.php', 'errors/500.php', 'errors/503.php', 'errors/419.php', 'errors/429.php',
     'assets/css/style.css', 'assets/js/app.js', 'assets/images/logo.svg',
     'assets/images/product-placeholder.svg',
     'assets/images/.gitkeep', 'assets/icons/.gitkeep',
@@ -70,7 +70,7 @@ $expected = [
     'addons/README.md', 'addons/.gitkeep', 'addons/index.php',
     'addons/_example/addon.json', 'addons/_example/README.md',
     'cron/README.md', 'cron/.gitkeep', 'cron/index.php',
-    'cron/send-notifications.php', 'cron/pickup-reminders.php', 'cron/backup.php',
+    'cron/send-notifications.php', 'cron/pickup-reminders.php', 'cron/backup.php', 'cron/rotate-logs.php',
     'pwa/README.md', 'pwa/.gitkeep',
     'tests/foundation-check.php', 'tests/index.php', 'tests/phase3-verify.sql',
     'docs/00-PROJECT-PLAN-28-PHASES.md',
@@ -102,6 +102,7 @@ $expected = [
     'docs/22-Phase-22-Verification-Report.md',
     'docs/23-Phase-23-Verification-Report.md',
     'docs/24-Phase-24-Verification-Report.md',
+    'docs/25-Phase-25-Verification-Report.md',
     'README.md',
 ];
 foreach ($expected as $f) {
@@ -254,6 +255,16 @@ check(strpos((string) @file_get_contents($root . '/includes/ops.php'), 'ops_back
 check(strpos((string) @file_get_contents($root . '/admin/backups.php'), 'backups.restore') !== false, 'backups desk: restore permission');
 check(strpos((string) @file_get_contents($root . '/cron/backup.php'), 'ops_backup_run') !== false, 'cron: scheduled backup');
 check(strpos((string) @file_get_contents($root . '/database/schema.sql'), 'CREATE TABLE IF NOT EXISTS `backups`') !== false, 'schema: backups table');
+check(strpos((string) @file_get_contents($root . '/includes/errors.php'), 'report_error') !== false, 'errors lib: reporter');
+check(strpos((string) @file_get_contents($root . '/includes/errors.php'), 'show_error') !== false, 'errors lib: safe pages');
+check(strpos((string) @file_get_contents($root . '/includes/errors.php'), 'rate_limit') !== false, 'errors lib: rate limiter');
+check(strpos((string) @file_get_contents($root . '/includes/errors.php'), 'logs_rotate') !== false, 'errors lib: rotation');
+check(strpos((string) @file_get_contents($root . '/includes/errors.php'), 'err_resolve') !== false, 'errors lib: resolve tracking');
+check(strpos((string) @file_get_contents($root . '/includes/bootstrap.php'), 'register_shutdown_function') !== false, 'bootstrap: fatal capture');
+check(strpos((string) @file_get_contents($root . '/customer/reset-password.php'), 'err_419') !== false, 'reset: 419 on expired link');
+check(strpos((string) @file_get_contents($root . '/contact.php'), 'err_429') !== false, 'contact: 429 throttle');
+check(strpos((string) @file_get_contents($root . '/admin/logs.php'), 'logs.manage') !== false, 'logs desk: manage permission');
+check(strpos((string) @file_get_contents($root . '/database/schema.sql'), 'CREATE TABLE IF NOT EXISTS `error_reports`') !== false, 'schema: error reports');
 check(strpos((string) @file_get_contents($root . '/checkout.php'), 'guest_checkout') !== false, 'checkout.php: guest toggle gate');
 check(strpos((string) @file_get_contents($root . '/checkout.php'), 'shop.order') !== false, 'checkout.php: order permission');
 check(strpos((string) @file_get_contents($root . '/checkout.php'), 'notify_emit') !== false, 'checkout.php: confirmation notify');

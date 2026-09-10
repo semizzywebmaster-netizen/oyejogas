@@ -393,7 +393,7 @@ function notify_process_queue($limit = 100) {
         }
         return [count($rows), $sent, $failed, ''];
     } catch (Throwable $t) {
-        error_log('notify_process_queue: ' . $t->getMessage());
+        report_error('notifications', 'error', $t);
         return [0, 0, 0, 'worker error'];
     }
 }

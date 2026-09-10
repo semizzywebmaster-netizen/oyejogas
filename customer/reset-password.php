@@ -18,6 +18,9 @@ if ($token === '') {
         $errors[] = $err;
     }
 }
+if (request_method() !== 'POST' && !$row) {
+    err_419($errors[0] ?? null); // expired/invalid single-use link
+}
 
 if ($row && request_method() === 'POST') {
     if (!csrf_verify(post('csrf_token'))) {

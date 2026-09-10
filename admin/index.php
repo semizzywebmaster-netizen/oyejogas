@@ -32,6 +32,7 @@ $desks = [
     ['Referrals', 'admin/referrals.php', 'referrals.manage'],
     ['Notifications', 'admin/notifications.php', 'notifications.view'],
     ['Backups', 'admin/backups.php', 'backups.create'],
+    ['Error logs', 'admin/logs.php', 'logs.view'],
     ['Settings', 'admin/settings.php', 'settings.view'],
     ['Add-ons', 'admin/addons.php', 'addons.view'],
 ];

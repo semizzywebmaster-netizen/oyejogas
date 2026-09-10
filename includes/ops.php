@@ -53,6 +53,7 @@ function ops_backup_run($actor_id, $source = 'manual') {
         } catch (Throwable $t) {
             // Recording failed too; the alert below still goes out.
         }
+        report_error('system', 'error', 'Backup failed (' . $source . '): ' . $msg);
         ops_alert('Oyejo Gas backup FAILED (' . $source . ')', $msg);
         return [false, $msg, null];
     };

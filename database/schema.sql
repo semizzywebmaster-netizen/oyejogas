@@ -1088,7 +1088,40 @@ CREATE TABLE IF NOT EXISTS `backups` (
     CONSTRAINT `fk_backups_creator` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- -------------------------------------------------------- error_reports
+CREATE TABLE IF NOT EXISTS `error_reports` (
+    `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `signature` CHAR(64) NOT NULL COMMENT 'sha256(domain|class|message|file|line)',
+    `domain` VARCHAR(20) NOT NULL,
+    `level` VARCHAR(10) NOT NULL DEFAULT 'error',
+    `message` VARCHAR(500) NOT NULL,
+    `file` VARCHAR(255) NULL,
+    `line` INT UNSIGNED NULL,
+    `occurrences` INT UNSIGNED NOT NULL DEFAULT 1,
+    `first_seen` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `last_seen` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    `status` ENUM('open','resolved') NOT NULL DEFAULT 'open',
+    `resolved_by` INT UNSIGNED NULL,
+    `resolved_at` DATETIME NULL,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uq_errors_sig` (`signature`),
+    KEY `idx_errors_status` (`status`, `last_seen`),
+    CONSTRAINT `fk_errors_resolver` FOREIGN KEY (`resolved_by`) REFERENCES `users` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ---------------------------------------------------------- rate_limits
+CREATE TABLE IF NOT EXISTS `rate_limits` (
+    `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `scope` VARCHAR(40) NOT NULL,
+    `key_hash` CHAR(64) NOT NULL COMMENT 'sha256(scope|key): no raw IPs/emails',
+    `hits` INT UNSIGNED NOT NULL DEFAULT 1,
+    `window_start` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uq_ratelimit_scope` (`scope`, `key_hash`),
+    KEY `idx_ratelimit_window` (`window_start`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- =====================================================================
 SET FOREIGN_KEY_CHECKS = 1;
--- End of schema: 61 tables + 2 triggers.
+-- End of schema: 63 tables + 2 triggers.
 -- =====================================================================
