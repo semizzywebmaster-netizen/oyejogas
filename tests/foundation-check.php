@@ -24,13 +24,14 @@ $expected = [
     '.htaccess', '.env.example', '.gitignore', 'index.php',
     'about.php', 'contact.php', 'faq.php', 'terms.php', 'privacy.php',
     'shop.php', 'product.php', 'cart.php', 'checkout.php',
+    'blog.php', 'post.php', 'newsletter.php',
     'config/config.php', 'config/database.php', 'config/.htaccess',
     'includes/bootstrap.php', 'includes/functions.php', 'includes/auth.php',
     'includes/mailer.php', 'includes/rbac.php', 'includes/header.php',
     'includes/catalog.php', 'includes/cart.php', 'includes/notify.php',
     'includes/wallet.php', 'includes/refills.php', 'includes/pickups.php',
     'includes/inventory.php', 'includes/admin.php', 'includes/delivery.php',
-    'includes/payments.php', 'includes/support.php',
+    'includes/payments.php', 'includes/support.php', 'includes/marketing.php',
     'includes/footer.php',
     'admin/index.php', 'admin/wallet.php', 'admin/refills.php',
     'admin/pickups.php', 'admin/inventory.php', 'admin/purchases.php',
@@ -38,7 +39,8 @@ $expected = [
     'admin/roles.php', 'admin/products.php', 'admin/orders.php',
     'admin/coupons.php', 'admin/settings.php', 'admin/addons.php',
     'admin/dispatch.php', 'admin/finance.php', 'admin/tickets.php',
-    'admin/reviews.php',
+    'admin/reviews.php', 'admin/marketing.php', 'admin/faqs.php',
+    'admin/posts.php', 'admin/newsletter.php',
     'customer/index.php', 'customer/register.php', 'customer/login.php',
     'customer/logout.php', 'customer/forgot-password.php',
     'customer/reset-password.php', 'customer/verify-email.php',
@@ -91,6 +93,7 @@ $expected = [
     'docs/16-Phase-16-Verification-Report.md',
     'docs/17-Phase-17-Verification-Report.md',
     'docs/18-Phase-18-Verification-Report.md',
+    'docs/19-Phase-19-Verification-Report.md',
     'README.md',
 ];
 foreach ($expected as $f) {
@@ -177,6 +180,23 @@ check(strpos((string) @file_get_contents($root . '/customer/tickets.php'), 'sup_
 check(strpos((string) @file_get_contents($root . '/contact.php'), 'sup_create') !== false, 'contact.php: ticket creation');
 check(strpos((string) @file_get_contents($root . '/product.php'), 'rev_product_summary') !== false, 'product.php: review summary');
 check(strpos((string) @file_get_contents($root . '/customer/index.php'), 'customer/reviews.php') !== false, 'dashboard: reviews link');
+check(strpos((string) @file_get_contents($root . '/includes/marketing.php'), 'mk_banner_save') !== false, 'marketing lib: banners');
+check(strpos((string) @file_get_contents($root . '/includes/marketing.php'), 'mk_campaign_save') !== false, 'marketing lib: campaigns');
+check(strpos((string) @file_get_contents($root . '/includes/marketing.php'), 'mk_announce_save') !== false, 'marketing lib: announcements');
+check(strpos((string) @file_get_contents($root . '/includes/marketing.php'), 'mk_faq_save') !== false, 'marketing lib: FAQs');
+check(strpos((string) @file_get_contents($root . '/includes/marketing.php'), 'mk_post_save') !== false, 'marketing lib: posts');
+check(strpos((string) @file_get_contents($root . '/includes/marketing.php'), 'mk_section_save') !== false, 'marketing lib: homepage sections');
+check(strpos((string) @file_get_contents($root . '/includes/marketing.php'), 'mk_subscribe') !== false, 'marketing lib: newsletter');
+check(strpos((string) @file_get_contents($root . '/includes/marketing.php'), 'mk_reports') !== false, 'marketing lib: reports');
+check(strpos((string) @file_get_contents($root . '/admin/marketing.php'), 'marketing.campaigns') !== false, 'marketing desk: campaign permission');
+check(strpos((string) @file_get_contents($root . '/admin/marketing.php'), 'marketing.banners') !== false, 'marketing desk: banner permission');
+check(strpos((string) @file_get_contents($root . '/admin/faqs.php'), 'marketing.faqs') !== false, 'faqs desk: manage permission');
+check(strpos((string) @file_get_contents($root . '/admin/posts.php'), 'marketing.posts') !== false, 'posts desk: manage permission');
+check(strpos((string) @file_get_contents($root . '/admin/newsletter.php'), 'marketing.newsletter') !== false, 'newsletter desk: manage permission');
+check(strpos((string) @file_get_contents($root . '/blog.php'), 'mk_posts_published') !== false, 'blog.php: published list');
+check(strpos((string) @file_get_contents($root . '/post.php'), 'mk_post_by_slug') !== false, 'post.php: published single');
+check(strpos((string) @file_get_contents($root . '/newsletter.php'), 'mk_subscribe') !== false, 'newsletter.php: subscribe form');
+check(strpos((string) @file_get_contents($root . '/index.php'), 'mk_banners_live') !== false, 'index.php: live banners');
 check(strpos((string) @file_get_contents($root . '/checkout.php'), 'guest_checkout') !== false, 'checkout.php: guest toggle gate');
 check(strpos((string) @file_get_contents($root . '/checkout.php'), 'shop.order') !== false, 'checkout.php: order permission');
 check(strpos((string) @file_get_contents($root . '/checkout.php'), 'notify_emit') !== false, 'checkout.php: confirmation notify');

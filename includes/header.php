@@ -13,6 +13,7 @@ $mainNav = [
     ['Pickup', url('customer/pickups.php')],
     ['About', url('about.php')],
     ['FAQ', url('faq.php')],
+    ['Blog', url('blog.php')],
     ['Contact', url('contact.php')],
 ];
 if (is_logged_in()) {

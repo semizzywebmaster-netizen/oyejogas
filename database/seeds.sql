@@ -283,6 +283,20 @@ INSERT INTO `coupons` (`code`, `name`, `type`, `value`, `min_order_minor`, `max_
 ('WELCOME10', 'Welcome 10% off', 'percent', 10, 500000, 200000, 100, 0, NOW() - INTERVAL 1 DAY, NOW() + INTERVAL 90 DAY, 1),
 ('FLAT500', 'Flat 500 off', 'fixed', 50000, 1000000, NULL, NULL, 0, NOW() - INTERVAL 1 DAY, NOW() + INTERVAL 90 DAY, 1);
 
+-- ---------------------------------------------------------- demo CMS content
+INSERT INTO `faqs` (`question`, `answer`, `category`, `sort_order`, `is_active`) VALUES
+('How fast is delivery?', 'Same-day in most Lagos zones when you order before 2pm.', 'delivery', 1, 1),
+('How do refills work?', 'Book a refill, we pick up your empty cylinder and return it filled, or swap it instantly.', 'refill', 2, 1),
+('Which payment methods do you accept?', 'Wallet, bank transfer, card online, or cash on delivery.', 'payment', 3, 1),
+('Is my deposit refundable?', 'Yes. Cylinder deposits are refunded when you return our cylinder in good condition.', 'cylinder', 4, 1);
+
+INSERT INTO `announcements` (`title`, `body`, `audience`, `is_active`) VALUES
+('Welcome to Oyejo Gas', 'Order LPG, book refills and track deliveries from your account.', 'all', 1);
+
+INSERT INTO `homepage_sections` (`slug`, `title`, `content`, `sort_order`, `is_active`) VALUES
+('safety_note', 'Safety first', 'Every cylinder is weighed, sealed and leak-checked before dispatch.\n\nNever use a cylinder with a damaged valve - call us for a free swap check.', 10, 1),
+('service_area', 'Where we deliver', 'We currently serve Lagos zones with same-day slots.\n\nMore cities are coming soon.', 20, 1);
+
 -- ------------------------------------------------------- wallet settings
 INSERT INTO `settings` (`key`, `value`, `group_name`) VALUES
 ('wallet_topup_max_minor', '50000000', 'wallet'),

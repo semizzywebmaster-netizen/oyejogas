@@ -7,6 +7,7 @@ reject_path_info();
 require_login();
 require_permission('portal.customer');
 require_once BASE_PATH . '/includes/cart.php';
+require_once BASE_PATH . '/includes/marketing.php';
 
 $me = current_user();
 $uid = (int) $me['id'];
@@ -77,6 +78,14 @@ require BASE_PATH . '/includes/header.php';
   <p class="pill">Customer portal</p>
   <h1>Welcome, <?= e($u['name']) ?>!</h1>
 </div>
+<?php $my_ann = mk_announce_for('customers'); ?>
+<?php if ($my_ann) : ?>
+<section class="announce">
+  <?php foreach ($my_ann as $a) : ?>
+    <div class="alert alert-info"><strong><?= e($a['title']) ?></strong> — <?= e($a['body']) ?></div>
+  <?php endforeach; ?>
+</section>
+<?php endif; ?>
 
 <div class="grid dash-stats">
   <article class="card"><h3><?= $order_count ?></h3><p>Orders</p><p><a href="<?= e(url('customer/orders.php')) ?>">View orders</a></p></article>

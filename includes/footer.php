@@ -18,7 +18,9 @@ if (!defined('OYEJO_BOOT')) {
       <strong>Company</strong>
       <p><a href="<?= e(url('about.php')) ?>">About</a><br>
       <a href="<?= e(url('contact.php')) ?>">Contact</a><br>
-      <a href="<?= e(url('faq.php')) ?>">FAQ</a></p>
+      <a href="<?= e(url('faq.php')) ?>">FAQ</a><br>
+      <a href="<?= e(url('blog.php')) ?>">Blog</a><br>
+      <a href="<?= e(url('newsletter.php')) ?>">Newsletter</a></p>
     </div>
     <div>
       <strong>Legal</strong>

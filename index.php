@@ -5,10 +5,15 @@
  */
 require_once __DIR__ . '/includes/bootstrap.php';
 reject_path_info();
+require_once BASE_PATH . '/includes/marketing.php';
 
 $announcements = [];
 $featured = [];
 $categories = [];
+$banners_top = [];
+$banners_bottom = [];
+$sections = [];
+$campaigns = [];
 try {
     $announcements = db()->query(
         "SELECT `title`, `body` FROM `announcements` WHERE `is_active` = 1 AND `audience` = 'all'
@@ -27,6 +32,10 @@ try {
     $categories = db()->query(
         'SELECT `name`, `description` FROM `categories` WHERE `is_active` = 1 ORDER BY `sort_order` LIMIT 4'
     )->fetchAll();
+    $banners_top = mk_banners_live('home_top');
+    $banners_bottom = mk_banners_live('home_bottom');
+    $sections = mk_sections_live();
+    $campaigns = mk_campaigns_live();
 } catch (Throwable $t) {
     // Fail soft: static content below still renders.
 }
@@ -34,6 +43,24 @@ try {
 $page_title = 'Home';
 require BASE_PATH . '/includes/header.php';
 ?>
+<?php foreach ($banners_top as $b) : ?>
+<section class="banner">
+  <?php if (!empty($b['link_url'])) : ?><a href="<?= e($b['link_url']) ?>"><?php endif; ?>
+  <?php if (!empty($b['image'])) : ?><img src="<?= e($b['image']) ?>" alt="<?= e($b['title']) ?>"><?php else : ?><strong><?= e($b['title']) ?></strong><?php endif; ?>
+  <?php if (!empty($b['link_url'])) : ?></a><?php endif; ?>
+</section>
+<?php endforeach; ?>
+<?php if ($campaigns) : ?>
+<section class="campaigns">
+  <h2>Current offers</h2>
+  <div class="grid">
+    <?php foreach ($campaigns as $c) : ?>
+      <article class="card"><h3><?= e($c['name']) ?></h3>
+        <?php if (!empty($c['description'])) : ?><p><?= e($c['description']) ?></p><?php endif; ?></article>
+    <?php endforeach; ?>
+  </div>
+</section>
+<?php endif; ?>
 <?php if ($announcements) : ?>
 <section class="announce">
   <?php foreach ($announcements as $a) : ?>
@@ -192,4 +219,17 @@ require BASE_PATH . '/includes/header.php';
   </ol>
   <p class="cta"><a class="btn primary" href="<?= e(url('contact.php')) ?>">Talk to us</a></p>
 </section>
+<?php foreach ($banners_bottom as $b) : ?>
+<section class="banner">
+  <?php if (!empty($b['link_url'])) : ?><a href="<?= e($b['link_url']) ?>"><?php endif; ?>
+  <?php if (!empty($b['image'])) : ?><img src="<?= e($b['image']) ?>" alt="<?= e($b['title']) ?>"><?php else : ?><strong><?= e($b['title']) ?></strong><?php endif; ?>
+  <?php if (!empty($b['link_url'])) : ?></a><?php endif; ?>
+</section>
+<?php endforeach; ?>
+<?php foreach ($sections as $s) : ?>
+<section>
+  <h2><?= e($s['title']) ?></h2>
+  <?= mk_render_blocks($s['content'] ?? '') ?>
+</section>
+<?php endforeach; ?>
 <?php require BASE_PATH . '/includes/footer.php'; ?>
