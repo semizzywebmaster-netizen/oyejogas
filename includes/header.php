@@ -10,6 +10,7 @@ $mainNav = [
     ['Home', url('')],
     ['Shop', url('shop.php')],
     ['Refill', url('customer/refills.php')],
+    ['Pickup', url('customer/pickups.php')],
     ['About', url('about.php')],
     ['FAQ', url('faq.php')],
     ['Contact', url('contact.php')],
