@@ -31,6 +31,7 @@ $desks = [
     ['Spin-to-win', 'admin/spin.php', 'spin.manage'],
     ['Referrals', 'admin/referrals.php', 'referrals.manage'],
     ['Notifications', 'admin/notifications.php', 'notifications.view'],
+    ['Backups', 'admin/backups.php', 'backups.create'],
     ['Settings', 'admin/settings.php', 'settings.view'],
     ['Add-ons', 'admin/addons.php', 'addons.view'],
 ];

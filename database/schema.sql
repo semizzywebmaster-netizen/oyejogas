@@ -1068,7 +1068,27 @@ CREATE TABLE IF NOT EXISTS `login_attempts` (
     KEY `idx_login_ip` (`ip_address`, `created_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- --------------------------------------------------------------- backups
+CREATE TABLE IF NOT EXISTS `backups` (
+    `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `filename` VARCHAR(120) NOT NULL,
+    `bytes` INT UNSIGNED NOT NULL DEFAULT 0,
+    `tables` INT UNSIGNED NOT NULL DEFAULT 0,
+    `rows` INT UNSIGNED NOT NULL DEFAULT 0,
+    `seconds` DECIMAL(8,2) NOT NULL DEFAULT 0,
+    `source` ENUM('manual','scheduled','pre-restore') NOT NULL DEFAULT 'manual',
+    `status` ENUM('ok','failed') NOT NULL DEFAULT 'ok',
+    `sha256` CHAR(64) NULL,
+    `error` VARCHAR(500) NULL,
+    `created_by` INT UNSIGNED NULL,
+    `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uq_backups_file` (`filename`),
+    KEY `idx_backups_created` (`created_at`),
+    CONSTRAINT `fk_backups_creator` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- =====================================================================
 SET FOREIGN_KEY_CHECKS = 1;
--- End of schema: 60 tables + 2 triggers.
+-- End of schema: 61 tables + 2 triggers.
 -- =====================================================================

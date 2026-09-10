@@ -9,6 +9,9 @@
 - Live jobs (Phase 22): `send-notifications.php` (every minute — delivers
   the queued queue with rate limits + retries), `pickup-reminders.php`
   (daily 08:00 — queues tomorrow's pickup reminders).
+- Live jobs (Phase 24): `backup.php` (daily 02:00 — full database dump
+  to `storage/backups/` + retention cleanup; failures are recorded in
+  the `backups` table and alerted via `admin_alert_email`/ops.log).
 
 Example cPanel cron (hourly backup check, Phase 24):
 

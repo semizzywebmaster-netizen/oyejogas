@@ -32,7 +32,7 @@ $expected = [
     'includes/wallet.php', 'includes/refills.php', 'includes/pickups.php',
     'includes/inventory.php', 'includes/admin.php', 'includes/delivery.php',
     'includes/payments.php', 'includes/support.php', 'includes/marketing.php',
-    'includes/spin.php', 'includes/referrals.php',
+    'includes/spin.php', 'includes/referrals.php', 'includes/ops.php',
     'includes/footer.php',
     'admin/index.php', 'admin/wallet.php', 'admin/refills.php',
     'admin/pickups.php', 'admin/inventory.php', 'admin/purchases.php',
@@ -42,7 +42,7 @@ $expected = [
     'admin/dispatch.php', 'admin/finance.php', 'admin/tickets.php',
     'admin/reviews.php', 'admin/marketing.php', 'admin/faqs.php',
     'admin/posts.php', 'admin/newsletter.php', 'admin/spin.php',
-    'admin/referrals.php', 'admin/notifications.php',
+    'admin/referrals.php', 'admin/notifications.php', 'admin/backups.php',
     'customer/index.php', 'customer/register.php', 'customer/login.php',
     'customer/logout.php', 'customer/forgot-password.php',
     'customer/reset-password.php', 'customer/verify-email.php',
@@ -70,7 +70,7 @@ $expected = [
     'addons/README.md', 'addons/.gitkeep', 'addons/index.php',
     'addons/_example/addon.json', 'addons/_example/README.md',
     'cron/README.md', 'cron/.gitkeep', 'cron/index.php',
-    'cron/send-notifications.php', 'cron/pickup-reminders.php',
+    'cron/send-notifications.php', 'cron/pickup-reminders.php', 'cron/backup.php',
     'pwa/README.md', 'pwa/.gitkeep',
     'tests/foundation-check.php', 'tests/index.php', 'tests/phase3-verify.sql',
     'docs/00-PROJECT-PLAN-28-PHASES.md',
@@ -101,6 +101,7 @@ $expected = [
     'docs/21-Phase-21-Verification-Report.md',
     'docs/22-Phase-22-Verification-Report.md',
     'docs/23-Phase-23-Verification-Report.md',
+    'docs/24-Phase-24-Verification-Report.md',
     'README.md',
 ];
 foreach ($expected as $f) {
@@ -245,6 +246,14 @@ check(strpos((string) @file_get_contents($root . '/includes/header.php'), "setti
 check(strpos((string) @file_get_contents($root . '/index.php'), 'marketing_campaigns') !== false, 'toggles: marketing gated');
 check(strpos((string) @file_get_contents($root . '/admin/addons.php'), "oyejo_feature('addons')") !== false, 'toggles: addons gated');
 check(strpos((string) @file_get_contents($root . '/includes/notify.php'), "'push' => 'push_notifications'") !== false, 'toggles: push wired');
+check(strpos((string) @file_get_contents($root . '/includes/ops.php'), 'ops_backup_run') !== false, 'ops lib: backup runner');
+check(strpos((string) @file_get_contents($root . '/includes/ops.php'), 'ops_restore') !== false, 'ops lib: restore');
+check(strpos((string) @file_get_contents($root . '/includes/ops.php'), 'ops_health') !== false, 'ops lib: health checks');
+check(strpos((string) @file_get_contents($root . '/includes/ops.php'), 'ops_cleanup') !== false, 'ops lib: cleanup');
+check(strpos((string) @file_get_contents($root . '/includes/ops.php'), 'ops_backup_download') !== false, 'ops lib: secure download');
+check(strpos((string) @file_get_contents($root . '/admin/backups.php'), 'backups.restore') !== false, 'backups desk: restore permission');
+check(strpos((string) @file_get_contents($root . '/cron/backup.php'), 'ops_backup_run') !== false, 'cron: scheduled backup');
+check(strpos((string) @file_get_contents($root . '/database/schema.sql'), 'CREATE TABLE IF NOT EXISTS `backups`') !== false, 'schema: backups table');
 check(strpos((string) @file_get_contents($root . '/checkout.php'), 'guest_checkout') !== false, 'checkout.php: guest toggle gate');
 check(strpos((string) @file_get_contents($root . '/checkout.php'), 'shop.order') !== false, 'checkout.php: order permission');
 check(strpos((string) @file_get_contents($root . '/checkout.php'), 'notify_emit') !== false, 'checkout.php: confirmation notify');
