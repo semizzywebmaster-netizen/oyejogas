@@ -24,8 +24,12 @@ oyejo-gas/
 |-------|-------|--------|
 | 1 | Requirements and master feature checklist | ✅ Approved |
 | 2 | Single-folder project foundation | ✅ Approved |
-| 3 | Database architecture (60 tables, verified) | ✅ READY FOR YOUR APPROVAL |
-| 4–28 | See `docs/00-PROJECT-PLAN-28-PHASES.md` | ⬜ Not started |
+| 3 | Database architecture (60 tables, verified) | ✅ Approved |
+| 4 | Installation and seed system | ✅ READY FOR YOUR APPROVAL |
+| 5–28 | See `docs/00-PROJECT-PLAN-28-PHASES.md` | ⬜ Not started |
+
+**New sites:** open the homepage once and the one-click installer
+(see `docs/04-INSTALLATION-GUIDE.md`) sets up database, seeds and admin.
 
 ## Phase workflow (every phase)
 
@@ -54,9 +58,8 @@ No phase is marked complete with known issues outstanding.
 
 ```bash
 cd oyejo-gas
-cp .env.example .env
-php -S localhost:8000
-php tests/foundation-check.php   # exit 0 = foundation intact
+php -S localhost:8000   # then open http://localhost:8000/install/
+php tests/foundation-check.php   # exit 0 = project files intact
 ```
 
 ## Documents
@@ -65,4 +68,5 @@ php tests/foundation-check.php   # exit 0 = foundation intact
 - `docs/01-MASTER-REQUIREMENTS-CHECKLIST.md` — **master checklist for final testing**
 - `docs/02-FOUNDATION-STRUCTURE.md` — folder map, conventions, security model
 - `docs/03-DATABASE-DICTIONARY.md` — 60-table catalogue + conventions
-- `docs/03-Phase-3-Verification-Report.md` — Phase 3 test evidence
+- `docs/04-INSTALLATION-GUIDE.md` — install, reinstall, troubleshooting
+- `docs/04-Phase-4-Verification-Report.md` — Phase 4 test evidence

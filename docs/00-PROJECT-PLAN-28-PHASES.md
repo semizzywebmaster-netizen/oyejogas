@@ -11,8 +11,8 @@ corrected, and approved before the next phase begins.
 |---|-------|---------------|--------|----------|
 | 1 | Requirements and master feature checklist | Define every approved feature; create master requirements checklist used in final testing | 🟢 Approved | ☑ |
 | 2 | Single-folder project foundation | Unified structure: PHP app, MySQL files, CSS, JS, images, uploads, admin/customer/driver pages, config, logs, backups, add-ons | 🟢 Approved | ☑ |
-| 3 | Database architecture | Full MySQL schema: users→add-ons; FKs, indexes, constraints, relationships verified | 🟡 Built — awaiting your approval | ☐ |
-| 4 | Installation and seed system | Installer, env setup, seed data, roles, permissions, default admin, categories, settings, validation; reinstall protection | ⬜ | ☐ |
+| 3 | Database architecture | Full MySQL schema: users→add-ons; FKs, indexes, constraints, relationships verified | 🟢 Approved | ☑ |
+| 4 | Installation and seed system | Installer, env setup, seed data, roles, permissions, default admin, categories, settings, validation; reinstall protection | 🟡 Built — awaiting your approval | ☐ |
 | 5 | Authentication and account registration | Registration, login/logout, hashing, reset, email+phone verification, sessions, activation, suspension, throttling, secure redirects | ⬜ | ☐ |
 | 6 | Roles, permissions, access control | 12 roles + permission-level controls (not role-name only) | ⬜ | ☐ |
 | 7 | Public website and responsive design | Home, header/footer, hero, services, LPG/refill/pickup/delivery sections, about, contact, FAQ, terms, privacy, announcements, responsive | ⬜ | ☐ |

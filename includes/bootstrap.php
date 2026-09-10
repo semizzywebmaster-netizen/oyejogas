@@ -18,6 +18,16 @@ require_once __DIR__ . '/../config/config.php';
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/functions.php';
 
+// --- Uninstalled apps go to the installer (Phase 4) ---
+if (PHP_SAPI !== 'cli' && !defined('OYEJO_SKIP_INSTALL_CHECK')) {
+    $scriptPath = str_replace('\\', '/', (string) ($_SERVER['SCRIPT_NAME'] ?? ''));
+    $inInstaller = stripos($scriptPath, '/install/') !== false;
+    if (!$inInstaller && !is_file(STORAGE_PATH . '/install.lock')) {
+        header('Location: ' . url('install/'));
+        exit;
+    }
+}
+
 // --- Secure session defaults (full auth arrives in Phase 5) ---
 if (session_status() === PHP_SESSION_NONE) {
     $secure = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')

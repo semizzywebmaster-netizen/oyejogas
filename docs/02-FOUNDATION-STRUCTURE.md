@@ -19,7 +19,7 @@ oyejo-gas/
 ├── driver/              # Driver portal (stub → Phase 16)
 ├── api/                 # JSON stub → endpoints arrive with their phases
 ├── errors/              # Standalone 404/403/500 pages (→ Phase 25)
-├── install/             # Installer placeholder (→ Phase 4)
+├── install/             # One-click installer: wizard + library (Phase 4)
 ├── assets/css|js|images|icons/
 ├── uploads/             # User uploads (PHP execution OFF, no indexing)
 ├── database/            # schema.sql, seeds.sql, migrations/ (→ Phases 3–4)

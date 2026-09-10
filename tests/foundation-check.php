@@ -1,7 +1,7 @@
 #!/usr/bin/env php
 <?php
 /**
- * Oyejo Gas - Phase 2 foundation checker.
+ * Oyejo Gas - project file checker (grows every phase).
  * Usage: php tests/foundation-check.php   (exit 0 = all pass)
  * Checks: expected files exist, key protections present, php -l on all PHP.
  */
@@ -26,7 +26,7 @@ $expected = [
     'includes/bootstrap.php', 'includes/functions.php',
     'includes/header.php', 'includes/footer.php',
     'admin/index.php', 'customer/index.php', 'driver/index.php',
-    'api/index.php', 'install/index.php',
+    'api/index.php', 'install/index.php', 'install/installer.php',
     'errors/404.php', 'errors/403.php', 'errors/500.php',
     'assets/css/style.css', 'assets/js/app.js', 'assets/images/logo.svg',
     'assets/images/.gitkeep', 'assets/icons/.gitkeep',
@@ -42,9 +42,14 @@ $expected = [
     'addons/_example/addon.json', 'addons/_example/README.md',
     'cron/README.md', 'cron/.gitkeep', 'cron/index.php',
     'pwa/README.md', 'pwa/.gitkeep',
-    'tests/foundation-check.php', 'tests/index.php',
+    'tests/foundation-check.php', 'tests/index.php', 'tests/phase3-verify.sql',
     'docs/00-PROJECT-PLAN-28-PHASES.md',
     'docs/01-MASTER-REQUIREMENTS-CHECKLIST.md',
+    'docs/01-Phase-1-Verification-Report.md',
+    'docs/02-FOUNDATION-STRUCTURE.md',
+    'docs/02-Phase-2-Verification-Report.md',
+    'docs/03-DATABASE-DICTIONARY.md',
+    'docs/03-Phase-3-Verification-Report.md',
     'README.md',
 ];
 foreach ($expected as $f) {
@@ -61,10 +66,15 @@ check(strpos((string) @file_get_contents($root . '/storage/.htaccess'), 'Require
 check(strpos((string) @file_get_contents($root . '/config/config.php'), 'OYEJO_BOOT') !== false, 'config.php: direct-access guard');
 check(strpos((string) @file_get_contents($root . '/includes/bootstrap.php'), 'csrf_token') !== false, 'bootstrap.php: CSRF helpers');
 check(strpos((string) @file_get_contents($root . '/includes/bootstrap.php'), 'oyejo_feature') !== false, 'bootstrap.php: feature toggles');
+check(strpos((string) @file_get_contents($root . '/includes/bootstrap.php'), 'install.lock') !== false, 'bootstrap.php: installer redirect');
 check(strpos((string) @file_get_contents($root . '/.env.example'), 'WHATSAPP_API_KEY') !== false, '.env.example: whatsapp keys');
 check(strpos((string) @file_get_contents($root . '/assets/css/style.css'), '.hero') !== false, 'style.css: hero styles');
 check(strpos((string) @file_get_contents($root . '/assets/js/app.js'), 'window.Oyejo') !== false, 'app.js: Oyejo helper');
 check(strpos((string) @file_get_contents($root . '/index.php'), 'reject_path_info') !== false, 'index.php: PATH_INFO 404 guard');
+check(strpos((string) @file_get_contents($root . '/install/installer.php'), 'inst_split_sql') !== false, 'installer.php: DELIMITER-aware splitter');
+check(strpos((string) @file_get_contents($root . '/install/installer.php'), 'install.lock') !== false, 'installer.php: reinstall lock');
+check(strpos((string) @file_get_contents($root . '/database/seeds.sql'), 'super_admin') !== false, 'seeds.sql: roles seeded');
+check(strpos((string) @file_get_contents($root . '/database/seeds.sql'), 'feature_toggles') !== false, 'seeds.sql: toggles seeded');
 $manifest = json_decode((string) @file_get_contents($root . '/addons/_example/addon.json'), true);
 check(is_array($manifest) && ($manifest['slug'] ?? '') === 'example', 'addon.json: valid manifest');
 

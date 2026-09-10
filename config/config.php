@@ -65,14 +65,25 @@ $__app_url = (string) env('APP_URL', '');
 if ($__app_url === '') {
     $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
     $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
-    $script = $_SERVER['SCRIPT_NAME'] ?? '/index.php';
-    $dir = rtrim(str_replace('\\', '/', dirname($script)), '/');
-    $__app_url = $scheme . '://' . $host . (($dir === '/' || $dir === '.' || $dir === '') ? '' : $dir);
+    // Map the running script back to the app root: strip the in-app path
+    // (e.g. /customer/index.php) from the URL path. Correct for every entry
+    // point and for subdirectory installs (where dirname() lies).
+    $scriptName = str_replace('\\', '/', (string) ($_SERVER['SCRIPT_NAME'] ?? '/index.php'));
+    $scriptFile = str_replace('\\', '/', (string) ($_SERVER['SCRIPT_FILENAME'] ?? ''));
+    $fsBase = str_replace('\\', '/', BASE_PATH);
+    $dir = '';
+    if ($scriptFile !== '' && strpos($scriptFile, $fsBase) === 0) {
+        $rel = '/' . ltrim(substr($scriptFile, strlen($fsBase)), '/');
+        if ($rel !== '/' && substr($scriptName, -strlen($rel)) === $rel) {
+            $dir = substr($scriptName, 0, strlen($scriptName) - strlen($rel));
+        }
+    }
+    $__app_url = $scheme . '://' . $host . rtrim($dir, '/');
 }
 define('APP_URL', rtrim($__app_url, '/'));
 $__parts = parse_url(APP_URL);
 define('APP_BASE', rtrim($__parts['path'] ?? '', '/'));
-unset($__app_url, $__parts, $scheme, $host, $script, $dir);
+unset($__app_url, $__parts, $scheme, $host, $scriptName, $scriptFile, $fsBase, $rel, $dir);
 
 // --- Database credentials (used by config/database.php) ---
 define('DB_HOST', env('DB_HOST', '127.0.0.1'));
