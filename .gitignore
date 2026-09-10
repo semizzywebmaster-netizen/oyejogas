@@ -3,6 +3,9 @@
 .env.*
 !.env.example
 
+# Install lock is per-environment state, never committed
+storage/install.lock
+
 # User content & runtime (keep folder guards, ignore payloads)
 uploads/*
 !uploads/.gitkeep

@@ -22,9 +22,11 @@ function check($cond, $label) {
 
 $expected = [
     '.htaccess', '.env.example', '.gitignore', 'index.php',
+    'about.php', 'contact.php', 'faq.php', 'terms.php', 'privacy.php',
     'config/config.php', 'config/database.php', 'config/.htaccess',
     'includes/bootstrap.php', 'includes/functions.php', 'includes/auth.php',
-    'includes/mailer.php', 'includes/header.php', 'includes/footer.php',
+    'includes/mailer.php', 'includes/rbac.php', 'includes/header.php',
+    'includes/footer.php',
     'admin/index.php',
     'customer/index.php', 'customer/register.php', 'customer/login.php',
     'customer/logout.php', 'customer/forgot-password.php',
@@ -57,6 +59,8 @@ $expected = [
     'docs/03-Phase-3-Verification-Report.md',
     'docs/04-INSTALLATION-GUIDE.md',
     'docs/04-Phase-4-Verification-Report.md',
+    'docs/05-Phase-5-Verification-Report.md',
+    'docs/06-Phase-6-Verification-Report.md',
     'README.md',
 ];
 foreach ($expected as $f) {
@@ -76,13 +80,20 @@ check(strpos((string) @file_get_contents($root . '/includes/bootstrap.php'), 'cs
 check(strpos((string) @file_get_contents($root . '/includes/bootstrap.php'), 'oyejo_feature') !== false, 'bootstrap.php: feature toggles');
 check(strpos((string) @file_get_contents($root . '/includes/bootstrap.php'), 'install.lock') !== false, 'bootstrap.php: installer redirect');
 check(strpos((string) @file_get_contents($root . '/includes/bootstrap.php'), 'auth_tick') !== false, 'bootstrap.php: session tick');
+check(strpos((string) @file_get_contents($root . '/includes/bootstrap.php'), '/rbac.php') !== false, 'bootstrap.php: loads RBAC');
 check(strpos((string) @file_get_contents($root . '/includes/auth.php'), 'password_verify') !== false, 'auth.php: password_verify login');
 check(strpos((string) @file_get_contents($root . '/includes/auth.php'), 'safe_next') !== false, 'auth.php: safe redirects');
 check(strpos((string) @file_get_contents($root . '/includes/auth.php'), 'AUTH_IDLE_TIMEOUT') !== false, 'auth.php: session timeouts');
+check(strpos((string) @file_get_contents($root . '/includes/rbac.php'), 'rbac_my_permissions') !== false, 'rbac.php: permission loader');
+check(strpos((string) @file_get_contents($root . '/includes/rbac.php'), 'access.denied') !== false, 'rbac.php: denial logging');
 check(strpos((string) @file_get_contents($root . '/includes/mailer.php'), 'mail.log') !== false, 'mailer.php: logged mailbox');
+check(strpos((string) @file_get_contents($root . '/contact.php'), 'company') !== false, 'contact.php: honeypot field');
+check(strpos((string) @file_get_contents($root . '/faq.php'), 'FROM `faqs`') !== false, 'faq.php: reads faqs table');
+check(strpos((string) @file_get_contents($root . '/includes/footer.php'), 'terms.php') !== false, 'footer.php: legal links');
 check(strpos((string) @file_get_contents($root . '/.env.example'), 'WHATSAPP_API_KEY') !== false, '.env.example: whatsapp keys');
 check(strpos((string) @file_get_contents($root . '/.env.example'), 'APP_KEY') !== false, '.env.example: APP_KEY template');
 check(strpos((string) @file_get_contents($root . '/assets/css/style.css'), '.hero') !== false, 'style.css: hero styles');
+check(strpos((string) @file_get_contents($root . '/assets/css/style.css'), '@media (max-width: 420px)') !== false, 'style.css: phone breakpoint');
 check(strpos((string) @file_get_contents($root . '/assets/js/app.js'), 'window.Oyejo') !== false, 'app.js: Oyejo helper');
 check(strpos((string) @file_get_contents($root . '/index.php'), 'reject_path_info') !== false, 'index.php: PATH_INFO 404 guard');
 check(strpos((string) @file_get_contents($root . '/install/installer.php'), 'inst_split_sql') !== false, 'installer.php: DELIMITER-aware splitter');

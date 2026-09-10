@@ -48,6 +48,28 @@ function auth_tick() {
         flash('error', 'Session device changed. Please log in again.');
         return;
     }
+    // Revalidate against the database: suspension or role change takes
+    // effect on the very next request (privilege is server-side, Phase 6).
+    try {
+        $fresh = db()->prepare(
+            'SELECT u.role_id, u.status, r.slug AS role FROM `users` u
+             JOIN `roles` r ON r.id = u.role_id WHERE u.id = ? LIMIT 1'
+        );
+        $fresh->execute([(int) $_SESSION['user']['id']]);
+        $row = $fresh->fetch();
+        if (!$row || $row['status'] === 'suspended') {
+            auth_session_clear();
+            flash('error', 'Your account is no longer available. Please log in again.');
+            return;
+        }
+        if ((int) $row['role_id'] !== (int) $_SESSION['user']['role_id']) {
+            $_SESSION['user']['role_id'] = (int) $row['role_id'];
+            $_SESSION['user']['role'] = (string) $row['role'];
+            unset($_SESSION['perms'], $_SESSION['perms_role']);
+        }
+    } catch (Throwable $t) {
+        // DB unreachable: keep the session (permission checks fail closed).
+    }
     $_SESSION['last_activity'] = $now;
     if (($now - (int) ($_SESSION['last_regen'] ?? 0)) > AUTH_REGEN_EVERY) {
         session_regenerate_id(true);

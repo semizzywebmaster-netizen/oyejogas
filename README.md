@@ -4,6 +4,7 @@ Single-folder PHP + MySQL LPG e-commerce and gas-service platform.
 
 > Developed in **28 verified phases**. Each phase is built, checked for missing
 > files, tested, corrected, and approved before the next phase begins.
+> Phases 6+ run on **autopilot**: verified + committed per phase, reported here.
 
 ## Project location
 
@@ -12,7 +13,8 @@ The folder root **is** the web root (upload its contents to `public_html`).
 
 ```text
 oyejo-gas/
-├── index.php  admin/  customer/  driver/  api/  errors/  install/
+├── index.php  about.php  contact.php  faq.php  terms.php  privacy.php
+├── admin/  customer/  driver/  api/  errors/  install/
 ├── config/  includes/  assets/  uploads/  database/  storage/
 ├── addons/  cron/  pwa/  tests/  docs/
 ├── .htaccess  .env.example  .gitignore
@@ -22,23 +24,20 @@ oyejo-gas/
 
 | Phase | Title | Status |
 |-------|-------|--------|
-| 1 | Requirements and master feature checklist | ✅ Approved |
-| 2 | Single-folder project foundation | ✅ Approved |
-| 3 | Database architecture (60 tables, verified) | ✅ Approved |
-| 4 | Installation and seed system | ✅ Approved |
-| 5 | Authentication and account registration | ✅ READY FOR YOUR APPROVAL |
-| 6–28 | See `docs/00-PROJECT-PLAN-28-PHASES.md` | ⬜ Not started |
+| 1–6 | Foundation → RBAC (all verified) | ✅ Approved |
+| 7 | Public website and responsive design | 🟡 In progress (autopilot) |
+| 8–28 | See `docs/00-PROJECT-PLAN-28-PHASES.md` | ⬜ Not started |
 
 **New sites:** open the homepage once and the one-click installer
 (see `docs/04-INSTALLATION-GUIDE.md`) sets up database, seeds and admin.
 
-## Phase workflow (every phase)
+## Phase workflow (every phase, incl. autopilot)
 
 1. **Build** — create the phase's files/features
 2. **Missing-file check** — verify every expected file exists
 3. **Test** — run syntax checks + functional checks
 4. **Correct** — fix all known issues found
-5. **Approve** — you approve before the next phase begins
+5.. **Approve/commit** — owner approval (phases 1–5) or autopilot sign-off (6+)
 
 No phase is marked complete with known issues outstanding.
 
@@ -70,4 +69,4 @@ php tests/foundation-check.php   # exit 0 = project files intact
 - `docs/02-FOUNDATION-STRUCTURE.md` — folder map, conventions, security model
 - `docs/03-DATABASE-DICTIONARY.md` — 60-table catalogue + conventions
 - `docs/04-INSTALLATION-GUIDE.md` — install, reinstall, troubleshooting
-- `docs/05-Phase-5-Verification-Report.md` — Phase 5 test evidence
+- `docs/05-Phase-5-Verification-Report.md` … `docs/28-*` — per-phase evidence

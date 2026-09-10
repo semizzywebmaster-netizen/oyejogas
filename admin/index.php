@@ -4,13 +4,14 @@
  */
 require_once __DIR__ . '/../includes/bootstrap.php';
 reject_path_info();
+require_permission('portal.admin');
 $page_title = 'Admin console';
 require BASE_PATH . '/includes/header.php';
 ?>
 <section class="stub">
   <p class="pill">Admin portal</p>
   <h1>Admin console</h1>
-  <p class="lede">Full administration unlocks in <strong>Phase 15</strong> (access control in Phase 6).</p>
+  <p class="lede">Full administration unlocks in <strong>Phase 15</strong> (this area is protected by role-based access).</p>
   <div class="card">
     <h2>On the roadmap</h2>
     <ul class="ticks">

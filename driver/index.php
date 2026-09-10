@@ -4,6 +4,7 @@
  */
 require_once __DIR__ . '/../includes/bootstrap.php';
 reject_path_info();
+require_permission('portal.driver');
 $page_title = 'Driver portal';
 require BASE_PATH . '/includes/header.php';
 ?>

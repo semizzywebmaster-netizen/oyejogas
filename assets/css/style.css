@@ -1,6 +1,5 @@
 /* =====================================================================
-   Oyejo Gas - base stylesheet (foundation).
-   Full public-site design arrives in Phase 7; later phases extend this.
+   Oyejo Gas - stylesheet (Phase 7: public site + responsive).
    ===================================================================== */
 :root {
   --green: #0b6b3a;
@@ -40,8 +39,8 @@ header.site {
 }
 .nav { display: flex; align-items: center; gap: 16px; min-height: 66px; }
 .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--ink); font-weight: 800; font-size: 20px; }
-.links { margin-left: auto; display: flex; gap: 4px; }
-.links a { text-decoration: none; color: var(--ink); padding: 10px 14px; border-radius: 10px; font-weight: 600; }
+.links { margin-left: auto; display: flex; gap: 4px; align-items: center; flex-wrap: wrap; }
+.links a { text-decoration: none; color: var(--ink); padding: 10px 12px; border-radius: 10px; font-weight: 600; }
 .links a:hover { background: #eef4ee; }
 .who { padding: 10px 6px; color: var(--muted); font-weight: 600; white-space: nowrap; }
 .hamburger { display: none; margin-left: auto; font-size: 24px; background: none; border: 1px solid var(--line); border-radius: 10px; padding: 4px 12px; cursor: pointer; }
@@ -85,10 +84,21 @@ header.site {
   font-size: 14px;
   margin: 0;
 }
-.stub .pill, section .pill { background: #e9f3ec; border-color: #c4ddcc; color: var(--green-dark); }
+.stub .pill, section .pill, .page-hero .pill { background: #e9f3ec; border-color: #c4ddcc; color: var(--green-dark); }
+.hero .pill { background: rgba(255, 255, 255, 0.16); border-color: rgba(255, 255, 255, 0.35); color: #fff; }
 
 section { margin-bottom: 36px; }
 section h2 { font-size: 26px; }
+.section-lead { color: var(--muted); font-size: 17px; margin-top: -8px; }
+
+/* --- Page hero (inner pages) --- */
+.page-hero { margin-bottom: 24px; }
+.page-hero h1 { margin: 8px 0 0; font-size: 34px; }
+
+/* --- Two-column split --- */
+.split { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: start; }
+.split .card { margin-bottom: 0; }
+.card + .card { margin-top: 18px; }
 
 /* --- Buttons --- */
 .btn { display: inline-block; text-decoration: none; font-weight: 700; padding: 12px 22px; border-radius: 12px; border: 2px solid transparent; cursor: pointer; }
@@ -104,6 +114,21 @@ section h2 { font-size: 26px; }
 .card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 22px; }
 .card h3 { margin-top: 0; }
 .badge { display: inline-block; background: #eef4ee; color: var(--green-dark); font-size: 13px; font-weight: 700; padding: 3px 12px; border-radius: 999px; }
+.price del { color: var(--muted); margin-right: 8px; }
+.price strong { font-size: 20px; color: var(--green-dark); }
+
+/* --- Announcements --- */
+.announce { margin-bottom: 20px; }
+.announce .alert { margin: 8px 0; }
+
+/* --- FAQ --- */
+.faq-list details.card { margin-bottom: 12px; padding: 16px 20px; }
+.faq-list summary { cursor: pointer; font-weight: 700; }
+.faq-list summary:hover { color: var(--green-dark); }
+
+/* --- Legal pages --- */
+.legal .card h2 { font-size: 20px; margin-top: 24px; }
+.legal .card h2:first-child { margin-top: 0; }
 
 /* --- Steps / stubs --- */
 .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 18px; list-style: none; padding: 0; counter-reset: step; }
@@ -119,33 +144,46 @@ section h2 { font-size: 26px; }
 .alert-info { background: #e8f1fd; border: 1px solid #bcd4f7; color: #1d4fa3; }
 .alert.fade { opacity: 0; }
 
-/* --- Forms (used from Phase 5 onward) --- */
+/* --- Forms --- */
 form.stack { display: grid; gap: 14px; max-width: 560px; }
 label { font-weight: 600; display: grid; gap: 6px; }
 input, select, textarea { font: inherit; padding: 11px 14px; border: 1px solid #c9d2c9; border-radius: 10px; width: 100%; }
 input:focus, select:focus, textarea:focus { outline: 2px solid var(--green); border-color: var(--green); }
 button.btn.primary { border: none; }
 
-/* --- Tables (used from Phase 10 onward) --- */
+/* --- Tables --- */
 table.data { width: 100%; border-collapse: collapse; background: var(--card); border-radius: var(--radius); overflow: hidden; }
 table.data th, table.data td { padding: 12px 14px; border-bottom: 1px solid var(--line); text-align: left; }
 table.data th { background: #eef4ee; }
+.table-scroll { overflow-x: auto; }
 
 /* --- Footer --- */
 footer.site { background: #10241a; color: #cfe0d4; margin-top: 24px; }
-.foot { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; padding-top: 32px; padding-bottom: 24px; }
+.foot { display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr; gap: 20px; padding-top: 32px; padding-bottom: 24px; }
 .foot a { color: #fff; }
 .foot strong { color: #fff; }
 .tiny { padding-bottom: 24px; font-size: 14px; opacity: 0.8; }
 
 /* --- Responsive --- */
+@media (max-width: 1000px) {
+  .foot { grid-template-columns: 1fr 1fr; }
+}
 @media (max-width: 900px) {
   .hero { grid-template-columns: 1fr; padding: 28px; }
   .hero h1 { font-size: 32px; }
+  .split { grid-template-columns: 1fr; }
 }
 @media (max-width: 760px) {
   .hamburger { display: block; }
-  .links { display: none; position: absolute; top: 66px; left: 0; right: 0; background: var(--card); border-bottom: 1px solid var(--line); flex-direction: column; padding: 10px 20px 16px; }
+  .links { display: none; position: absolute; top: 66px; left: 0; right: 0; background: var(--card); border-bottom: 1px solid var(--line); flex-direction: column; align-items: stretch; padding: 10px 20px 16px; }
   .links.open { display: flex; }
   header.site .nav { position: relative; }
+  .page-hero h1 { font-size: 28px; }
+  .foot { grid-template-columns: 1fr; }
+  main.wrap { padding-top: 20px; }
+}
+@media (max-width: 420px) {
+  .hero { padding: 22px; }
+  .hero h1 { font-size: 28px; }
+  .btn { width: 100%; text-align: center; }
 }

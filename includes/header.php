@@ -1,13 +1,17 @@
 <?php
 /**
- * Oyejo Gas - shared page header.
- * Full public-site design arrives in Phase 7; this is the working shell.
+ * Oyejo Gas - shared page header (Phase 7 navigation).
  */
 if (!defined('OYEJO_BOOT')) {
     http_response_code(403);
     exit('Forbidden');
 }
-$mainNav = [['Home', url('')]];
+$mainNav = [
+    ['Home', url('')],
+    ['About', url('about.php')],
+    ['FAQ', url('faq.php')],
+    ['Contact', url('contact.php')],
+];
 if (is_logged_in()) {
     $mainNav[] = ['My account', url('customer/')];
 } else {

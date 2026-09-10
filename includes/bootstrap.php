@@ -12,13 +12,14 @@ if (isset($_SERVER['SCRIPT_FILENAME']) && basename($_SERVER['SCRIPT_FILENAME']) 
 }
 
 define('OYEJO_BOOT', true);
-define('OYEJO_VERSION', '0.5.0');
+define('OYEJO_VERSION', '0.6.0');
 
 require_once __DIR__ . '/../config/config.php';
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/functions.php';
 require_once __DIR__ . '/mailer.php';
 require_once __DIR__ . '/auth.php';
+require_once __DIR__ . '/rbac.php';
 
 // --- Uninstalled apps go to the installer (Phase 4) ---
 if (PHP_SAPI !== 'cli' && !defined('OYEJO_SKIP_INSTALL_CHECK')) {
@@ -101,30 +102,8 @@ function require_login() {
     }
 }
 
-/** Permission check - default deny until Phase 6 implements RBAC. */
-function has_permission($permission) {
-    $u = current_user();
-    if (!$u) {
-        return false;
-    }
-    if (!empty($u['role']) && $u['role'] === 'super_admin') {
-        return true;
-    }
-    return false;
-}
-
-function require_permission($permission) {
-    if (!has_permission($permission)) {
-        http_response_code(403);
-        $p = BASE_PATH . '/errors/403.php';
-        if (is_readable($p)) {
-            include $p;
-        } else {
-            echo 'Forbidden';
-        }
-        exit;
-    }
-}
+// NOTE: has_permission()/require_permission() live in includes/rbac.php
+// (real permission-level enforcement since Phase 6).
 
 // --- Feature toggles (admin center arrives in Phase 23) ---
 function oyejo_default_features() {

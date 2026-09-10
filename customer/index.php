@@ -17,7 +17,7 @@ require BASE_PATH . '/includes/header.php';
     <a class="btn ghost" href="<?= e(url('customer/register.php')) ?>">Create account</a>
   </p>
 </section>
-<?php else : $u = current_user(); ?>
+<?php else : require_permission('portal.customer'); $u = current_user(); ?>
 <section class="stub">
   <p class="pill">Customer portal</p>
   <h1>Welcome, <?= e($u['name']) ?>!</h1>
