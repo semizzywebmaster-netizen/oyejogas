@@ -23,8 +23,9 @@ oyejo-gas/
 | Phase | Title | Status |
 |-------|-------|--------|
 | 1 | Requirements and master feature checklist | ✅ Approved |
-| 2 | Single-folder project foundation | ✅ READY FOR YOUR APPROVAL |
-| 3–28 | See `docs/00-PROJECT-PLAN-28-PHASES.md` | ⬜ Not started |
+| 2 | Single-folder project foundation | ✅ Approved |
+| 3 | Database architecture (60 tables, verified) | ✅ READY FOR YOUR APPROVAL |
+| 4–28 | See `docs/00-PROJECT-PLAN-28-PHASES.md` | ⬜ Not started |
 
 ## Phase workflow (every phase)
 
@@ -63,4 +64,5 @@ php tests/foundation-check.php   # exit 0 = foundation intact
 - `docs/00-PROJECT-PLAN-28-PHASES.md` — the 28-phase tracker
 - `docs/01-MASTER-REQUIREMENTS-CHECKLIST.md` — **master checklist for final testing**
 - `docs/02-FOUNDATION-STRUCTURE.md` — folder map, conventions, security model
-- `docs/02-Phase-2-Verification-Report.md` — Phase 2 test evidence
+- `docs/03-DATABASE-DICTIONARY.md` — 60-table catalogue + conventions
+- `docs/03-Phase-3-Verification-Report.md` — Phase 3 test evidence
