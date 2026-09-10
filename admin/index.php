@@ -22,6 +22,8 @@ $desks = [
     ['Products', 'admin/products.php', 'products.view'],
     ['Coupons', 'admin/coupons.php', 'coupons.manage'],
     ['Finance', 'admin/finance.php', 'payments.view'],
+    ['Support', 'admin/tickets.php', 'tickets.manage'],
+    ['Reviews', 'admin/reviews.php', 'reviews.moderate'],
     ['Settings', 'admin/settings.php', 'settings.view'],
     ['Add-ons', 'admin/addons.php', 'addons.view'],
 ];

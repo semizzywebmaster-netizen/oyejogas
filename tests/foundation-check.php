@@ -30,14 +30,15 @@ $expected = [
     'includes/catalog.php', 'includes/cart.php', 'includes/notify.php',
     'includes/wallet.php', 'includes/refills.php', 'includes/pickups.php',
     'includes/inventory.php', 'includes/admin.php', 'includes/delivery.php',
-    'includes/payments.php',
+    'includes/payments.php', 'includes/support.php',
     'includes/footer.php',
     'admin/index.php', 'admin/wallet.php', 'admin/refills.php',
     'admin/pickups.php', 'admin/inventory.php', 'admin/purchases.php',
     'admin/customers.php', 'admin/staff.php', 'admin/drivers.php',
     'admin/roles.php', 'admin/products.php', 'admin/orders.php',
     'admin/coupons.php', 'admin/settings.php', 'admin/addons.php',
-    'admin/dispatch.php', 'admin/finance.php',
+    'admin/dispatch.php', 'admin/finance.php', 'admin/tickets.php',
+    'admin/reviews.php',
     'customer/index.php', 'customer/register.php', 'customer/login.php',
     'customer/logout.php', 'customer/forgot-password.php',
     'customer/reset-password.php', 'customer/verify-email.php',
@@ -46,6 +47,7 @@ $expected = [
     'customer/notifications.php', 'customer/invoice.php', 'customer/reorder.php',
     'customer/tickets.php', 'customer/wallet.php', 'customer/statement.php',
     'customer/refills.php', 'customer/pickups.php', 'customer/payments.php',
+    'customer/reviews.php',
     'driver/index.php',
     'api/index.php', 'api/payments-callback.php',
     'install/index.php', 'install/installer.php',
@@ -87,6 +89,8 @@ $expected = [
     'docs/14-Phase-14-Verification-Report.md',
     'docs/15-Phase-15-Verification-Report.md',
     'docs/16-Phase-16-Verification-Report.md',
+    'docs/17-Phase-17-Verification-Report.md',
+    'docs/18-Phase-18-Verification-Report.md',
     'README.md',
 ];
 foreach ($expected as $f) {
@@ -157,6 +161,22 @@ check(strpos((string) @file_get_contents($root . '/includes/payments.php'), 'pay
 check(strpos((string) @file_get_contents($root . '/includes/payments.php'), 'ref_decide') !== false, 'payments lib: refund decisions');
 check(strpos((string) @file_get_contents($root . '/includes/payments.php'), 'recon_mark') !== false, 'payments lib: reconciliation');
 check(strpos((string) @file_get_contents($root . '/includes/payments.php'), 'pay_cod_autoverify') !== false, 'payments lib: COD autoverify');
+check(strpos((string) @file_get_contents($root . '/includes/support.php'), 'sup_create') !== false, 'support lib: ticket creation');
+check(strpos((string) @file_get_contents($root . '/includes/support.php'), 'sup_reply_staff') !== false, 'support lib: staff replies');
+check(strpos((string) @file_get_contents($root . '/includes/support.php'), 'sup_close_customer') !== false, 'support lib: customer close');
+check(strpos((string) @file_get_contents($root . '/includes/support.php'), 'rev_submit') !== false, 'support lib: review submit');
+check(strpos((string) @file_get_contents($root . '/includes/support.php'), 'rev_moderate') !== false, 'support lib: review moderation');
+check(strpos((string) @file_get_contents($root . '/includes/support.php'), 'delivered') !== false, 'support lib: verified-purchase gate');
+check(strpos((string) @file_get_contents($root . '/database/schema.sql'), "'complaint','refund'") !== false, 'schema: complaint/refund categories');
+check(strpos((string) @file_get_contents($root . '/database/schema.sql'), 'guest_email') !== false, 'schema: guest tickets');
+check(strpos((string) @file_get_contents($root . '/admin/tickets.php'), 'tickets.manage') !== false, 'tickets desk: manage permission');
+check(strpos((string) @file_get_contents($root . '/admin/tickets.php'), 'finance.php?order_id=') !== false, 'tickets desk: finance handoff');
+check(strpos((string) @file_get_contents($root . '/admin/reviews.php'), 'reviews.moderate') !== false, 'reviews desk: moderate permission');
+check(strpos((string) @file_get_contents($root . '/customer/reviews.php'), 'rev_submit') !== false, 'reviews page: submit form');
+check(strpos((string) @file_get_contents($root . '/customer/tickets.php'), 'sup_close_customer') !== false, 'tickets page: customer close');
+check(strpos((string) @file_get_contents($root . '/contact.php'), 'sup_create') !== false, 'contact.php: ticket creation');
+check(strpos((string) @file_get_contents($root . '/product.php'), 'rev_product_summary') !== false, 'product.php: review summary');
+check(strpos((string) @file_get_contents($root . '/customer/index.php'), 'customer/reviews.php') !== false, 'dashboard: reviews link');
 check(strpos((string) @file_get_contents($root . '/checkout.php'), 'guest_checkout') !== false, 'checkout.php: guest toggle gate');
 check(strpos((string) @file_get_contents($root . '/checkout.php'), 'shop.order') !== false, 'checkout.php: order permission');
 check(strpos((string) @file_get_contents($root . '/checkout.php'), 'notify_emit') !== false, 'checkout.php: confirmation notify');
@@ -176,7 +196,7 @@ check(strpos((string) @file_get_contents($root . '/customer/notifications.php'),
 check(strpos((string) @file_get_contents($root . '/customer/invoice.php'), 'pay_invoice_for_order') !== false, 'invoice.php: persistent invoice');
 check(strpos((string) @file_get_contents($root . '/customer/invoice.php'), 'Receipt') !== false, 'invoice.php: receipt mode');
 check(strpos((string) @file_get_contents($root . '/customer/reorder.php'), 'cart_add') !== false, 'reorder.php: re-add lines');
-check(strpos((string) @file_get_contents($root . '/customer/tickets.php'), 'ticket_replies') !== false, 'tickets.php: replies');
+check(strpos((string) @file_get_contents($root . '/customer/tickets.php'), 'sup_reply_customer') !== false, 'tickets.php: replies');
 check(strpos((string) @file_get_contents($root . '/customer/tickets.php'), 'tickets.own') !== false, 'tickets.php: own-tickets permission');
 check(strpos((string) @file_get_contents($root . '/customer/wallet.php'), 'wallet_request_topup') !== false, 'wallet page: top-up form');
 check(strpos((string) @file_get_contents($root . '/customer/statement.php'), 'Opening balance') !== false, 'statement.php: derived statement');

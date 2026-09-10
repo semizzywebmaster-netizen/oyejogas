@@ -667,8 +667,10 @@ CREATE TABLE IF NOT EXISTS `refunds` (
 CREATE TABLE IF NOT EXISTS `support_tickets` (
     `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
     `ticket_number` VARCHAR(30) NOT NULL,
-    `customer_id` INT UNSIGNED NOT NULL,
-    `category` ENUM('order','payment','delivery','refill','product','other') NOT NULL DEFAULT 'other',
+    `customer_id` INT UNSIGNED NULL,
+    `guest_email` VARCHAR(190) NULL,
+    `order_id` INT UNSIGNED NULL,
+    `category` ENUM('order','payment','delivery','refill','product','complaint','refund','other') NOT NULL DEFAULT 'other',
     `priority` ENUM('low','normal','high','urgent') NOT NULL DEFAULT 'normal',
     `status` ENUM('open','pending','resolved','closed') NOT NULL DEFAULT 'open',
     `subject` VARCHAR(190) NOT NULL,
@@ -677,7 +679,9 @@ CREATE TABLE IF NOT EXISTS `support_tickets` (
     PRIMARY KEY (`id`),
     UNIQUE KEY `uq_tickets_number` (`ticket_number`),
     KEY `idx_tickets_customer` (`customer_id`, `status`),
-    CONSTRAINT `fk_tickets_customer` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`id`) ON DELETE RESTRICT
+    KEY `idx_tickets_order` (`order_id`),
+    CONSTRAINT `fk_tickets_customer` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`id`) ON DELETE RESTRICT,
+    CONSTRAINT `fk_tickets_order` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ---------------------------------------------------------- ticket_replies

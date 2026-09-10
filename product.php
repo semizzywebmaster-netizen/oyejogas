@@ -5,6 +5,7 @@
 require_once __DIR__ . '/includes/bootstrap.php';
 reject_path_info();
 require_once BASE_PATH . '/includes/catalog.php';
+require_once BASE_PATH . '/includes/support.php';
 
 $slug = trim((string) ($_GET['slug'] ?? ''));
 $p = null;
@@ -128,6 +129,30 @@ require BASE_PATH . '/includes/header.php';
       </article>
     <?php endforeach; ?>
   </div>
+</section>
+<?php endif; ?>
+
+<?php if (oyejo_feature('reviews')) : ?>
+<?php $rev_sum = rev_product_summary((int) $p['id']); $rev_list = $rev_sum['n'] > 0 ? rev_product_list((int) $p['id']) : []; ?>
+<section>
+  <h2>Reviews<?php if ($rev_sum['n'] > 0) : ?> (<?= number_format((float) $rev_sum['avg'], 1) ?>★ from <?= (int) $rev_sum['n'] ?>)<?php endif; ?></h2>
+  <?php if (!$rev_list) : ?>
+    <div class="card"><p>No reviews yet.</p></div>
+  <?php else : ?>
+    <?php foreach ($rev_list as $rv) : ?>
+      <article class="card">
+        <p><strong><?= str_repeat('★', (int) $rv['rating']) . str_repeat('☆', 5 - (int) $rv['rating']) ?></strong>
+          by <?= e($rv['customer_name']) ?> <span class="result-meta"><?= e(substr($rv['created_at'], 0, 10)) ?></span></p>
+        <?php if (!empty($rv['title'])) : ?><p><strong><?= e($rv['title']) ?></strong></p><?php endif; ?>
+        <?php if (!empty($rv['body'])) : ?><p><?= nl2br(e($rv['body'])) ?></p><?php endif; ?>
+      </article>
+    <?php endforeach; ?>
+  <?php endif; ?>
+  <?php if (is_logged_in()) : ?>
+    <p><a class="btn" href="<?= e(url('customer/reviews.php?kind=product&ref=' . (int) $p['id'])) ?>">Write a review</a></p>
+  <?php else : ?>
+    <p><a href="<?= e(url('customer/login.php')) ?>">Log in</a> to write a review.</p>
+  <?php endif; ?>
 </section>
 <?php endif; ?>
 <?php require BASE_PATH . '/includes/footer.php'; ?>

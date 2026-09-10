@@ -1,11 +1,11 @@
 <?php
 /**
- * Oyejo Gas - contact page (Phase 7).
- * Messages are emailed to the site contact address; Phase 18 upgrades
- * this to support tickets.
+ * Oyejo Gas - contact page (Phase 18: every message becomes a support ticket).
  */
 require_once __DIR__ . '/includes/bootstrap.php';
 reject_path_info();
+require_once BASE_PATH . '/includes/cart.php';
+require_once BASE_PATH . '/includes/support.php';
 
 $contact = ['email' => env('MAIL_FROM', ''), 'phone' => '', 'address' => 'Lagos, Nigeria'];
 try {
@@ -45,19 +45,38 @@ if (request_method() === 'POST') {
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             $errors[] = 'Enter a valid email address.';
         }
-        if (strlen($subject) < 3 || strlen($subject) > 150) {
-            $errors[] = 'Subject must be 3–150 characters.';
+        if (strlen($subject) < 5 || strlen($subject) > 150) {
+            $errors[] = 'Subject must be 5–150 characters.';
         }
         if (strlen($message) < 10 || strlen($message) > 2000) {
             $errors[] = 'Message must be 10–2000 characters.';
         }
+        $category = (string) post('category', 'other');
+        if (!isset(sup_categories()[$category])) {
+            $category = 'other';
+        }
         if (!$errors) {
-            send_mail(
-                $contact['email'] !== '' ? $contact['email'] : env('MAIL_FROM', 'no-reply@localhost'),
-                'Contact: ' . $subject,
-                "From: $name <$email>\n\n$message"
+            $cid = null;
+            $uid = 0;
+            if (is_logged_in()) {
+                $uid = (int) current_user()['id'];
+                $cid = cart_customer_id($uid) ?: null;
+            }
+            [$ticket_id, $ticket_num] = sup_create(
+                $cid, $cid ? '' : $email, $category, 'normal', $subject,
+                $cid ? $message : ("Name: $name\nEmail: $email\n\n$message"),
+                0, $uid
             );
-            $sent = true;
+            if (!$ticket_id) {
+                $errors[] = $ticket_num;
+            } else {
+                send_mail(
+                    $contact['email'] !== '' ? $contact['email'] : env('MAIL_FROM', 'no-reply@localhost'),
+                    'New ticket ' . $ticket_num . ': ' . $subject,
+                    "From: $name <$email>\nTicket: $ticket_num\n\n$message"
+                );
+                $sent = true;
+            }
         }
     }
 }
@@ -72,7 +91,7 @@ require BASE_PATH . '/includes/header.php';
 <section class="split">
   <div>
     <?php if ($sent) : ?>
-      <div class="card"><p>Thanks — your message is on its way. We reply within one business day.</p></div>
+      <div class="card"><p>Thanks — your message is on its way. We reply within one business day.<?php if (!empty($ticket_num)) : ?> Your reference is <strong><?= e($ticket_num) ?></strong><?php if (is_logged_in()) : ?> — track it under <a href="<?= e(url('customer/tickets.php')) ?>">Support</a><?php endif; ?>.<?php endif; ?></p></div>
     <?php else : ?>
       <?php foreach ($errors as $e) : ?>
         <div class="alert alert-error"><?= e($e) ?></div>
@@ -83,6 +102,11 @@ require BASE_PATH . '/includes/header.php';
         <label>Your name<input name="name" value="<?= e($name) ?>" required maxlength="100"></label>
         <label>Email<input type="email" name="email" value="<?= e($email) ?>" required maxlength="190"></label>
         <label>Subject<input name="subject" value="<?= e($subject) ?>" required maxlength="150"></label>
+        <label>Topic
+          <select name="category">
+            <?php foreach (sup_categories() as $k => $v) : ?><option value="<?= $k ?>"><?= e($v) ?></option><?php endforeach; ?>
+          </select>
+        </label>
         <label>Message<textarea name="message" rows="6" required maxlength="2000"><?= e($message) ?></textarea></label>
         <p><button class="btn primary" type="submit">Send message</button></p>
       </form>

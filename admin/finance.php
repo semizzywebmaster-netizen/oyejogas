@@ -202,7 +202,7 @@ require BASE_PATH . '/includes/header.php';
   <form method="post" action="" class="filter-row">
     <?= csrf_field() ?>
     <input type="hidden" name="action" value="refund_create">
-    <input name="order_id" inputmode="numeric" placeholder="Order ID" required>
+    <input name="order_id" inputmode="numeric" placeholder="Order ID" required value="<?= ((int) ($_GET['order_id'] ?? 0)) > 0 ? (int) $_GET['order_id'] : '' ?>">
     <input name="amount" inputmode="decimal" placeholder="Amount ₦" required>
     <select name="method"><option value="wallet">Wallet</option><option value="bank">Bank</option><option value="cash">Cash</option></select>
     <input name="reason" maxlength="255" placeholder="Reason" required>

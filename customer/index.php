@@ -25,6 +25,10 @@ $s = db()->prepare("SELECT COUNT(*) FROM `support_tickets` WHERE `customer_id` =
 $s->execute([$cid]);
 $open_tickets = (int) $s->fetchColumn();
 
+$s = db()->prepare('SELECT COUNT(*) FROM `reviews` WHERE `customer_id` = ?');
+$s->execute([$cid]);
+$review_count = (int) $s->fetchColumn();
+
 $s = db()->prepare('SELECT * FROM `wallets` WHERE `customer_id` = ? LIMIT 1');
 $s->execute([$cid]);
 $wallet = $s->fetch();
@@ -79,6 +83,7 @@ require BASE_PATH . '/includes/header.php';
   <article class="card"><h3><?= $wallet ? e(format_money($wallet['balance_minor'])) : e(format_money(0)) ?></h3><p>Wallet balance</p><p><a href="<?= e(url('customer/wallet.php')) ?>">Open wallet</a></p></article>
   <article class="card"><h3><?= $ref_count ?></h3><p>Referrals</p><p class="result-meta">Reward capture opens in Phase 21</p></article>
   <article class="card"><h3><?= $open_tickets ?></h3><p>Open tickets</p><p><a href="<?= e(url('customer/tickets.php')) ?>">Support</a></p></article>
+  <?php if (oyejo_feature('reviews')) : ?><article class="card"><h3><?= $review_count ?></h3><p>Reviews</p><p><a href="<?= e(url('customer/reviews.php')) ?>">My reviews</a></p></article><?php endif; ?>
 </div>
 
 <div class="grid dash-grid">
