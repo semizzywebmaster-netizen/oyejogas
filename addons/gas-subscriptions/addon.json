@@ -1,0 +1,34 @@
+{
+    "slug": "gas-subscriptions",
+    "name": "Gas Subscriptions",
+    "version": "0.1.0",
+    "description": "Recurring cylinder refill plans with automatic scheduling and renewal billing. (Stub: manifest only; build in a later release.)",
+    "requires": {
+        "oyejo": ">=0.26.0",
+        "php": ">=7.4"
+    },
+    "permissions": [
+        {
+            "slug": "subscriptions.view",
+            "label": "View Gas Subscriptions"
+        },
+        {
+            "slug": "subscriptions.manage",
+            "label": "Manage Gas Subscriptions"
+        }
+    ],
+    "toggles": [
+        {
+            "key": "plans",
+            "label": "Subscription plans",
+            "default": true
+        }
+    ],
+    "settings": [
+        {
+            "key": "default_cycle",
+            "label": "Default billing cycle",
+            "default": "monthly"
+        }
+    ]
+}

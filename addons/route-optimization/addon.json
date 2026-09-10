@@ -1,0 +1,34 @@
+{
+    "slug": "route-optimization",
+    "name": "Route Optimization",
+    "version": "0.1.0",
+    "description": "Delivery route planning with stop sequencing and driver assignment. (Stub: manifest only; build in a later release.)",
+    "requires": {
+        "oyejo": ">=0.26.0",
+        "php": ">=7.4"
+    },
+    "permissions": [
+        {
+            "slug": "routes.view",
+            "label": "View Route Optimization"
+        },
+        {
+            "slug": "routes.manage",
+            "label": "Manage Route Optimization"
+        }
+    ],
+    "toggles": [
+        {
+            "key": "optimizer",
+            "label": "Route optimizer",
+            "default": true
+        }
+    ],
+    "settings": [
+        {
+            "key": "max_stops",
+            "label": "Max stops per route",
+            "default": "20"
+        }
+    ]
+}

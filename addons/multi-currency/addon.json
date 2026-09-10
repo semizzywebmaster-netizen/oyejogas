@@ -1,0 +1,34 @@
+{
+    "slug": "multi-currency",
+    "name": "Multi-currency",
+    "version": "0.1.0",
+    "description": "Prices and payments in more than one currency with daily rates. (Stub: manifest only; build in a later release.)",
+    "requires": {
+        "oyejo": ">=0.26.0",
+        "php": ">=7.4"
+    },
+    "permissions": [
+        {
+            "slug": "currency.view",
+            "label": "View Multi-currency"
+        },
+        {
+            "slug": "currency.manage",
+            "label": "Manage Multi-currency"
+        }
+    ],
+    "toggles": [
+        {
+            "key": "conversion",
+            "label": "Currency conversion",
+            "default": true
+        }
+    ],
+    "settings": [
+        {
+            "key": "base_currency",
+            "label": "Base currency",
+            "default": "NGN"
+        }
+    ]
+}

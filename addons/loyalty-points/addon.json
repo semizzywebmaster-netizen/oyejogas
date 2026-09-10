@@ -1,0 +1,34 @@
+{
+    "slug": "loyalty-points",
+    "name": "Loyalty Points",
+    "version": "0.1.0",
+    "description": "Customers earn points per naira spent and redeem them at checkout. (Stub: manifest only; build in a later release.)",
+    "requires": {
+        "oyejo": ">=0.26.0",
+        "php": ">=7.4"
+    },
+    "permissions": [
+        {
+            "slug": "loyalty.view",
+            "label": "View Loyalty Points"
+        },
+        {
+            "slug": "loyalty.manage",
+            "label": "Manage Loyalty Points"
+        }
+    ],
+    "toggles": [
+        {
+            "key": "earn",
+            "label": "Earning engine",
+            "default": true
+        }
+    ],
+    "settings": [
+        {
+            "key": "points_per_naira",
+            "label": "Points per naira",
+            "default": "1"
+        }
+    ]
+}

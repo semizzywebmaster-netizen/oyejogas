@@ -1,0 +1,34 @@
+{
+    "slug": "whatsapp-automation",
+    "name": "WhatsApp Automation",
+    "version": "0.1.0",
+    "description": "Drip campaigns, refill reminders and order follow-ups over WhatsApp. (Stub: manifest only; build in a later release.)",
+    "requires": {
+        "oyejo": ">=0.26.0",
+        "php": ">=7.4"
+    },
+    "permissions": [
+        {
+            "slug": "whatsapp.view",
+            "label": "View WhatsApp Automation"
+        },
+        {
+            "slug": "whatsapp.manage",
+            "label": "Manage WhatsApp Automation"
+        }
+    ],
+    "toggles": [
+        {
+            "key": "reminders",
+            "label": "Auto reminders",
+            "default": true
+        }
+    ],
+    "settings": [
+        {
+            "key": "reminder_hours",
+            "label": "Reminder lead hours",
+            "default": "24"
+        }
+    ]
+}

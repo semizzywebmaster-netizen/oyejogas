@@ -61,6 +61,19 @@ require BASE_PATH . '/includes/header.php';
     <?php endforeach; ?>
   </p>
 </div>
+<?php $addon_desks = addon_menus(); ?>
+<?php if ($addon_desks) : ?>
+<div class="card">
+  <h2>Add-on desks</h2>
+  <p class="filter-row">
+    <?php foreach ($addon_desks as [$label, $path, $perm]) : ?>
+      <?php if (has_permission($perm)) : ?>
+        <a class="btn small ghost" href="<?= e(url($path)) ?>"><?= e($label) ?></a>
+      <?php endif; ?>
+    <?php endforeach; ?>
+  </p>
+</div>
+<?php endif; ?>
 <div class="card">
   <h2>Recent orders</h2>
   <?php if (!$d['recent_orders']) : ?><p class="result-meta">No orders yet.</p>

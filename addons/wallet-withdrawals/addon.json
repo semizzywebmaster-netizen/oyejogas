@@ -1,0 +1,34 @@
+{
+    "slug": "wallet-withdrawals",
+    "name": "Wallet Withdrawals",
+    "version": "0.1.0",
+    "description": "Customer withdrawal requests from wallet balance to bank accounts. (Stub: manifest only; build in a later release.)",
+    "requires": {
+        "oyejo": ">=0.26.0",
+        "php": ">=7.4"
+    },
+    "permissions": [
+        {
+            "slug": "withdrawals.view",
+            "label": "View Wallet Withdrawals"
+        },
+        {
+            "slug": "withdrawals.manage",
+            "label": "Manage Wallet Withdrawals"
+        }
+    ],
+    "toggles": [
+        {
+            "key": "requests",
+            "label": "Withdrawal requests",
+            "default": true
+        }
+    ],
+    "settings": [
+        {
+            "key": "daily_limit",
+            "label": "Daily limit (minor)",
+            "default": "2000000"
+        }
+    ]
+}

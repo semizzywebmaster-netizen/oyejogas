@@ -1,0 +1,34 @@
+{
+    "slug": "multi-language",
+    "name": "Multi-language",
+    "version": "0.1.0",
+    "description": "Translated storefront and notifications with per-customer locale. (Stub: manifest only; build in a later release.)",
+    "requires": {
+        "oyejo": ">=0.26.0",
+        "php": ">=7.4"
+    },
+    "permissions": [
+        {
+            "slug": "language.view",
+            "label": "View Multi-language"
+        },
+        {
+            "slug": "language.manage",
+            "label": "Manage Multi-language"
+        }
+    ],
+    "toggles": [
+        {
+            "key": "switcher",
+            "label": "Language switcher",
+            "default": true
+        }
+    ],
+    "settings": [
+        {
+            "key": "default_locale",
+            "label": "Default locale",
+            "default": "en"
+        }
+    ]
+}

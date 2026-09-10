@@ -34,7 +34,7 @@ corrected, and approved before the next phase begins.
 | 23 | Central feature-control and website settings | 25 ON/OFF toggles incl. maintenance mode; enforced server-side | 🟢 Done | ☑ |
 | 24 | Backups, restore, site health, diagnostics | Manual/scheduled backups, history, status, secure downloads, restore confirmation, cleanup, failure alerts, 15+ health checks | 🟢 Done | ☑ |
 | 25 | Error handling, logging, recovery | 404/403/419/429/500 + 8 failure domains; safe messages, protected logs, ref numbers, rotation, admin viewer, maintenance, recovery notifications, resolved tracking | 🟢 Done (2026-09-11, E2E 44/44, checker 405/405) | ☑ |
-| 26 | Add-on and future-feature architecture | Registration, versioning, settings, permissions, menus, migrations, toggles, dependencies, install/update status, logs, enable/disable; 11 future add-ons specified | ⬜ | ☐ |
+| 26 | Add-on and future-feature architecture | Registration, versioning, settings, permissions, menus, migrations, toggles, dependencies, install/update status, logs, enable/disable; 11 future add-ons specified | 🟢 Done (2026-09-11, E2E 43/43, checker 434/434) | ☑ |
 | 27 | PWA, security, testing, performance | Manifest, icons, install, service worker, offline fallback, caching, connection detection, mobile nav, push, mobile dashboards; 15 security test areas | ⬜ | ☐ |
 | 28 | Final deployment, verification, ZIP packaging | 20 check groups + `oyejo-gas.zip` with 11 contents; zero known issues at ship | ⬜ | ☐ |
 

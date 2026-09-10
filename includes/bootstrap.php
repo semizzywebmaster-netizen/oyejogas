@@ -12,7 +12,7 @@ if (isset($_SERVER['SCRIPT_FILENAME']) && basename($_SERVER['SCRIPT_FILENAME']) 
 }
 
 define('OYEJO_BOOT', true);
-define('OYEJO_VERSION', '0.6.0');
+define('OYEJO_VERSION', '0.26.0'); // platform version add-ons declare against
 
 require_once __DIR__ . '/../config/config.php';
 require_once __DIR__ . '/../config/database.php';
@@ -22,6 +22,7 @@ require_once __DIR__ . '/auth.php';
 require_once __DIR__ . '/rbac.php';
 require_once __DIR__ . '/notify.php';
 require_once __DIR__ . '/errors.php';
+require_once __DIR__ . '/addons.php';
 
 // --- Uninstalled apps go to the installer (Phase 4) ---
 if (PHP_SAPI !== 'cli' && !defined('OYEJO_SKIP_INSTALL_CHECK')) {

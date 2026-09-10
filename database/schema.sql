@@ -1036,6 +1036,7 @@ CREATE TABLE IF NOT EXISTS `addons` (
     `slug` VARCHAR(80) NOT NULL,
     `name` VARCHAR(150) NOT NULL,
     `version` VARCHAR(20) NOT NULL DEFAULT '0.1.0',
+    `installed_version` VARCHAR(20) NULL COMMENT 'Manifest version at install/update; NULL until installed',
     `status` ENUM('registered','installed','enabled','disabled') NOT NULL DEFAULT 'registered',
     `settings` TEXT NULL COMMENT 'JSON',
     `installed_at` DATETIME NULL,
@@ -1048,12 +1049,25 @@ CREATE TABLE IF NOT EXISTS `addons` (
 CREATE TABLE IF NOT EXISTS `addon_logs` (
     `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
     `addon_id` INT UNSIGNED NOT NULL,
+    `actor_id` INT UNSIGNED NULL,
     `action` VARCHAR(100) NOT NULL,
     `detail` TEXT NULL,
     `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`),
     KEY `idx_addonlogs_addon` (`addon_id`),
-    CONSTRAINT `fk_addonlogs_addon` FOREIGN KEY (`addon_id`) REFERENCES `addons` (`id`) ON DELETE CASCADE
+    CONSTRAINT `fk_addonlogs_addon` FOREIGN KEY (`addon_id`) REFERENCES `addons` (`id`) ON DELETE CASCADE,
+    CONSTRAINT `fk_addonlogs_actor` FOREIGN KEY (`actor_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ------------------------------------------------------- addon_migrations
+CREATE TABLE IF NOT EXISTS `addon_migrations` (
+    `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `addon_id` INT UNSIGNED NOT NULL,
+    `filename` VARCHAR(120) NOT NULL,
+    `applied_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uq_addonmigration` (`addon_id`, `filename`),
+    CONSTRAINT `fk_addonmigration_addon` FOREIGN KEY (`addon_id`) REFERENCES `addons` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ---------------------------------------------------------- login_attempts
@@ -1123,5 +1137,5 @@ CREATE TABLE IF NOT EXISTS `rate_limits` (
 
 -- =====================================================================
 SET FOREIGN_KEY_CHECKS = 1;
--- End of schema: 63 tables + 2 triggers.
+-- End of schema: 64 tables + 2 triggers.
 -- =====================================================================

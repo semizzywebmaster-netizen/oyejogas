@@ -1,0 +1,11 @@
+{
+  "slug": "example",
+  "name": "Example add-on",
+  "version": "0.2.0",
+  "description": "Reference implementation for the Oyejo add-on system: one permission, one toggle, one setting, one page and one migration.",
+  "requires": { "oyejo": ">=0.26.0", "php": ">=7.4" },
+  "permissions": [{ "slug": "example.view", "label": "View the example add-on page" }],
+  "toggles": [{ "key": "widget", "label": "Example widget", "default": true }],
+  "settings": [{ "key": "welcome", "label": "Welcome text", "default": "Hello from the example add-on!" }],
+  "menus": [{ "label": "Example page", "page": "hello", "permission": "example.view" }]
+}

@@ -1,0 +1,34 @@
+{
+    "slug": "multi-branch",
+    "name": "Multiple Branches",
+    "version": "0.1.0",
+    "description": "Branch-scoped stock, staff and sales with inter-branch transfers. (Stub: manifest only; build in a later release.)",
+    "requires": {
+        "oyejo": ">=0.26.0",
+        "php": ">=7.4"
+    },
+    "permissions": [
+        {
+            "slug": "branches.view",
+            "label": "View Multiple Branches"
+        },
+        {
+            "slug": "branches.manage",
+            "label": "Manage Multiple Branches"
+        }
+    ],
+    "toggles": [
+        {
+            "key": "switcher",
+            "label": "Branch switcher",
+            "default": true
+        }
+    ],
+    "settings": [
+        {
+            "key": "default_branch",
+            "label": "Default branch code",
+            "default": "HQ"
+        }
+    ]
+}

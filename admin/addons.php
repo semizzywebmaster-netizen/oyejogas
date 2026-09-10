@@ -1,6 +1,8 @@
 <?php
 /**
- * Oyejo Gas - add-on registry desk (Phase 15, AD-19).
+ * Oyejo Gas - add-on management desk (Phase 26, AO-01…AO-12).
+ * Scan/register, dependency checks, install, enable/disable, update,
+ * migrations and activity log. Add-on settings live under Settings.
  */
 require_once __DIR__ . '/../includes/bootstrap.php';
 reject_path_info();
@@ -24,18 +26,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif (!oyejo_feature('addons')) {
         $errors[] = 'The add-on system is disabled. Enable it in Settings first.';
     } else {
-        [$ok, $msg] = adm_addon_status($_POST['slug'] ?? '', $_POST['to_status'] ?? '', (int) $me['id']);
-        $ok ? $message = $msg : $errors[] = $msg;
+        $action = $_POST['action'] ?? '';
+        $slug = (string) ($_POST['slug'] ?? '');
+        if ($action === 'scan') {
+            $r = addon_sync((int) $me['id']);
+            $message = 'Scan done: ' . $r['registered'] . ' registered, ' . $r['updated'] . ' updated.';
+            foreach ($r['errors'] as $s => $e) {
+                $errors[] = $s . ': ' . $e;
+            }
+        } elseif ($action === 'install') {
+            [$ok, $msg] = addon_install($slug, (int) $me['id']);
+            $ok ? $message = $msg : $errors[] = $msg;
+        } elseif ($action === 'enable' || $action === 'disable') {
+            [$ok, $msg] = addon_set_status($slug, $action === 'enable' ? 'enabled' : 'disabled', (int) $me['id']);
+            $ok ? $message = $msg : $errors[] = $msg;
+        } elseif ($action === 'update') {
+            [$ok, $msg] = addon_update($slug, (int) $me['id']);
+            $ok ? $message = $msg : $errors[] = $msg;
+        } else {
+            $errors[] = 'Unknown action.';
+        }
     }
 }
 
-$rows = adm_addons();
-$flow = [
-    'registered' => ['installed'],
-    'installed' => ['enabled', 'disabled'],
-    'enabled' => ['disabled'],
-    'disabled' => ['enabled'],
-];
+$rows = addon_list();
+$view = (string) ($_GET['view'] ?? '');
+$detail = $view !== '' ? addon_get($view) : null;
+if ($view !== '' && $detail === null) {
+    $errors[] = 'Add-on not found.';
+    $view = '';
+}
 
 $page_title = 'Add-ons';
 require BASE_PATH . '/includes/header.php';
@@ -45,26 +65,63 @@ require BASE_PATH . '/includes/header.php';
 <?php if ($message !== '') : ?><div class="alert alert-success"><?= e($message) ?></div><?php endif; ?>
 <?php foreach ($errors as $e) : ?><div class="alert alert-error"><?= e($e) ?></div><?php endforeach; ?>
 
+<?php if ($view === '') : ?>
 <div class="card">
-  <?php if (!$rows) : ?><p class="result-meta">No add-ons registered yet. Drop one into <code>addons/</code> (see <code>addons/README.md</code>).</p>
+  <?php if ($can_manage && oyejo_feature('addons')) : ?>
+    <form method="post" action="" class="inline-form">
+      <?= csrf_field() ?>
+      <input type="hidden" name="action" value="scan">
+      <button class="btn small primary" type="submit">Scan addons/ for new &amp; updated add-ons</button>
+    </form>
+  <?php endif; ?>
+  <?php if (!$rows) : ?><p class="result-meta">No add-ons registered yet. Drop one into <code>addons/</code> (see <code>docs/ADDON-DEVELOPMENT.md</code>), then scan.</p>
   <?php else : ?>
     <div class="table-scroll"><table class="data">
-      <thead><tr><th>Add-on</th><th>Version</th><th>Status</th><th>Installed</th><th></th></tr></thead>
+      <thead><tr><th>Add-on</th><th>Versions</th><th>Status</th><th></th></tr></thead>
       <tbody>
         <?php foreach ($rows as $a) : ?>
-          <tr><td><strong><?= e($a['name']) ?></strong><br><span class="result-meta"><?= e($a['slug']) ?></span></td>
-            <td><?= e($a['version']) ?></td><td><?= e(ucfirst($a['status'])) ?></td>
-            <td><?= e((string) ($a['installed_at'] ?: '—')) ?></td>
+          <tr><td><strong><a href="<?= e(url('admin/addons.php?view=' . $a['slug'])) ?>"><?= e($a['name']) ?></a></strong>
+              <br><span class="result-meta"><?= e($a['slug']) ?></span>
+              <?php if (!$a['on_disk']) : ?><br><span class="result-meta">Files missing — reinstall or remove the folder contents.</span><?php endif; ?></td>
+            <td><span class="result-meta">manifest</span> <?= e($a['version']) ?><br>
+              <span class="result-meta">installed</span> <?= e((string) ($a['installed_version'] ?: '—')) ?>
+              <?php if ($a['update_available']) : ?><br><strong>Update available</strong><?php endif; ?>
+              <?php if ($a['pending_migrations']) : ?><br><span class="result-meta"><?= (int) $a['pending_migrations'] ?> pending migration(s)</span><?php endif; ?></td>
+            <td><?= e(ucfirst($a['status'])) ?></td>
             <td>
-              <?php if ($can_manage) : ?>
-                <?php foreach ($flow[$a['status']] ?? [] as $n) : ?>
+              <?php if ($can_manage && oyejo_feature('addons')) : ?>
+                <?php if ($a['status'] === 'registered') : ?>
                   <form method="post" action="" class="inline-form">
                     <?= csrf_field() ?>
+                    <input type="hidden" name="action" value="install">
                     <input type="hidden" name="slug" value="<?= e($a['slug']) ?>">
-                    <input type="hidden" name="to_status" value="<?= $n ?>">
-                    <button class="btn small<?= $n === 'enabled' ? ' primary' : ' ghost' ?>" type="submit"><?= e(ucfirst($n)) ?></button>
+                    <button class="btn small primary" type="submit">Install</button>
                   </form>
-                <?php endforeach; ?>
+                <?php endif; ?>
+                <?php if (in_array($a['status'], ['installed', 'disabled'], true)) : ?>
+                  <form method="post" action="" class="inline-form">
+                    <?= csrf_field() ?>
+                    <input type="hidden" name="action" value="enable">
+                    <input type="hidden" name="slug" value="<?= e($a['slug']) ?>">
+                    <button class="btn small primary" type="submit">Enable</button>
+                  </form>
+                <?php endif; ?>
+                <?php if ($a['status'] === 'enabled') : ?>
+                  <form method="post" action="" class="inline-form">
+                    <?= csrf_field() ?>
+                    <input type="hidden" name="action" value="disable">
+                    <input type="hidden" name="slug" value="<?= e($a['slug']) ?>">
+                    <button class="btn small ghost" type="submit">Disable</button>
+                  </form>
+                <?php endif; ?>
+                <?php if ($a['update_available'] || $a['pending_migrations']) : ?>
+                  <form method="post" action="" class="inline-form">
+                    <?= csrf_field() ?>
+                    <input type="hidden" name="action" value="update">
+                    <input type="hidden" name="slug" value="<?= e($a['slug']) ?>">
+                    <button class="btn small ghost" type="submit">Update</button>
+                  </form>
+                <?php endif; ?>
               <?php endif; ?>
             </td></tr>
         <?php endforeach; ?>
@@ -72,4 +129,48 @@ require BASE_PATH . '/includes/header.php';
     </table></div>
   <?php endif; ?>
 </div>
+<?php else : ?>
+  <?php
+  [$manifest] = addon_read_manifest($detail['slug']);
+  [$dep_ok, $dep_issues] = addon_check($detail['slug']);
+  [$applied, $pending] = addon_migrations_status($detail['slug']);
+  $logs = addon_logs((int) $detail['id']);
+  ?>
+  <p><a class="btn small ghost" href="<?= e(url('admin/addons.php')) ?>">&larr; All add-ons</a></p>
+  <div class="card">
+    <h2><?= e($detail['name']) ?> <span class="result-meta"><?= e($detail['slug']) ?> · <?= e(ucfirst($detail['status'])) ?></span></h2>
+    <?php if ($manifest !== null && trim((string) ($manifest['description'] ?? '')) !== '') : ?>
+      <p><?= e($manifest['description']) ?></p>
+    <?php endif; ?>
+    <p class="result-meta">Manifest v<?= e($detail['version']) ?> · Installed v<?= e((string) ($detail['installed_version'] ?: '—')) ?> ·
+      Installed <?= e((string) ($detail['installed_at'] ?: '—')) ?></p>
+    <h3>Dependency check</h3>
+    <?php if ($dep_ok) : ?><p>All dependencies are met.</p>
+    <?php else : ?><ul><?php foreach ($dep_issues as $i) : ?><li><?= e($i) ?></li><?php endforeach; ?></ul><?php endif; ?>
+    <h3>Migrations</h3>
+    <?php if (!$applied && !$pending) : ?><p class="result-meta">This add-on ships no migrations.</p>
+    <?php else : ?><ul>
+      <?php foreach ($applied as $f) : ?><li><?= e($f) ?> — applied</li><?php endforeach; ?>
+      <?php foreach ($pending as $f) : ?><li><?= e($f) ?> — pending</li><?php endforeach; ?>
+    </ul><?php endif; ?>
+    <?php if ($manifest !== null && ($manifest['settings'] ?? []) !== []) : ?>
+      <p><a class="btn small ghost" href="<?= e(url('admin/settings.php')) ?>">Edit <?= e($detail['name']) ?> settings</a></p>
+    <?php endif; ?>
+  </div>
+  <div class="card">
+    <h2>Activity log</h2>
+    <?php if (!$logs) : ?><p class="result-meta">No activity yet.</p>
+    <?php else : ?>
+      <div class="table-scroll"><table class="data">
+        <thead><tr><th>When</th><th>Action</th><th>Detail</th><th>By</th></tr></thead>
+        <tbody>
+          <?php foreach ($logs as $l) : ?>
+            <tr><td><?= e($l['created_at']) ?></td><td><?= e($l['action']) ?></td>
+              <td><?= e((string) ($l['detail'] ?: '—')) ?></td><td><?= e((string) ($l['actor'] ?: 'system')) ?></td></tr>
+          <?php endforeach; ?>
+        </tbody>
+      </table></div>
+    <?php endif; ?>
+  </div>
+<?php endif; ?>
 <?php require BASE_PATH . '/includes/footer.php'; ?>

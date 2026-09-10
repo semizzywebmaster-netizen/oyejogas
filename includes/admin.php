@@ -873,7 +873,7 @@ function adm_coupon_delete($id, $actor_id) {
 /* ---------------- settings (AD-15…AD-17) ---------------- */
 
 function adm_setting_groups() {
-    return [
+    $groups = [
         'site' => ['site_name', 'tagline'],
         'contact' => ['contact_email', 'contact_phone', 'contact_address'],
         'locale' => ['currency', 'currency_symbol', 'timezone'],
@@ -884,6 +884,17 @@ function adm_setting_groups() {
             'online_gateway_label'],
         'notifications' => ['notif_from_name', 'notif_from_email', 'admin_alert_email'],
     ];
+    // Installed add-ons contribute one group each (AO-03).
+    if (function_exists('addon_setting_groups')) {
+        try {
+            foreach (addon_setting_groups() as $g => $keys) {
+                $groups[$g] = $keys;
+            }
+        } catch (Throwable $t) {
+            // Schema not installed yet - core groups still work.
+        }
+    }
+    return $groups;
 }
 
 function adm_settings($group = '') {

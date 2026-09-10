@@ -27,7 +27,7 @@ ErrorDocument 500 /errors/500.php
 # (PHP still reads them from the filesystem: installer, backups, etc.)
 RedirectMatch 403 ^/(config|includes|storage|database)(/.*)?$
 RedirectMatch 403 ^/(tests|docs|cron)(/.*)?$
-RedirectMatch 403 ^/addons/_example(/.*)?$
+RedirectMatch 403 ^/addons(/.*)?$
 
 # --- Security headers ---
 <IfModule mod_headers.c>

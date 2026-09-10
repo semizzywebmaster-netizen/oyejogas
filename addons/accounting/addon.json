@@ -1,0 +1,34 @@
+{
+    "slug": "accounting",
+    "name": "Accounting Integration",
+    "version": "0.1.0",
+    "description": "Export sales, payouts and taxes to external accounting packages. (Stub: manifest only; build in a later release.)",
+    "requires": {
+        "oyejo": ">=0.26.0",
+        "php": ">=7.4"
+    },
+    "permissions": [
+        {
+            "slug": "accounting.view",
+            "label": "View Accounting Integration"
+        },
+        {
+            "slug": "accounting.manage",
+            "label": "Manage Accounting Integration"
+        }
+    ],
+    "toggles": [
+        {
+            "key": "export",
+            "label": "Ledger export",
+            "default": true
+        }
+    ],
+    "settings": [
+        {
+            "key": "export_format",
+            "label": "Export format",
+            "default": "csv"
+        }
+    ]
+}

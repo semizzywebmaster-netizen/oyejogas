@@ -1,0 +1,34 @@
+{
+    "slug": "corporate-accounts",
+    "name": "Corporate Accounts",
+    "version": "0.1.0",
+    "description": "Credit accounts for estates, restaurants and resellers with statements and limits. (Stub: manifest only; build in a later release.)",
+    "requires": {
+        "oyejo": ">=0.26.0",
+        "php": ">=7.4"
+    },
+    "permissions": [
+        {
+            "slug": "corporate.view",
+            "label": "View Corporate Accounts"
+        },
+        {
+            "slug": "corporate.manage",
+            "label": "Manage Corporate Accounts"
+        }
+    ],
+    "toggles": [
+        {
+            "key": "credit",
+            "label": "Credit sales",
+            "default": true
+        }
+    ],
+    "settings": [
+        {
+            "key": "default_credit_limit",
+            "label": "Default credit limit (minor)",
+            "default": "5000000"
+        }
+    ]
+}

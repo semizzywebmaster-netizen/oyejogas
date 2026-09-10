@@ -1,0 +1,34 @@
+{
+    "slug": "franchise",
+    "name": "Franchise Management",
+    "version": "0.1.0",
+    "description": "Franchise onboarding, royalties and territory reporting. (Stub: manifest only; build in a later release.)",
+    "requires": {
+        "oyejo": ">=0.26.0",
+        "php": ">=7.4"
+    },
+    "permissions": [
+        {
+            "slug": "franchise.view",
+            "label": "View Franchise Management"
+        },
+        {
+            "slug": "franchise.manage",
+            "label": "Manage Franchise Management"
+        }
+    ],
+    "toggles": [
+        {
+            "key": "royalties",
+            "label": "Royalty tracking",
+            "default": true
+        }
+    ],
+    "settings": [
+        {
+            "key": "royalty_percent",
+            "label": "Royalty percent",
+            "default": "5"
+        }
+    ]
+}

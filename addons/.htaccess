@@ -1,0 +1,2 @@
+# Add-on folders are never served directly. Pages run through admin/addon.php.
+Require all denied

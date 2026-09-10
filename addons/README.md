@@ -1,13 +1,19 @@
-# Add-ons (skeleton — full system in Phase 26)
+# Add-ons
 
 Each add-on is one folder: `addons/<slug>/` with an `addon.json` manifest
-(see `_example/addon.json`), plus optional `pages/`, `migrations/`,
-`assets/` and `README.md`.
+(see `example/`), plus optional `pages/`, `migrations/`, `assets/` and
+`README.md`. Folders starting with `_` (like docs-only helpers) are never
+scanned.
 
-Lifecycle (Phase 26 implements): register → dependency check → install
-(migrations) → enable/disable → update, all logged and permission-gated.
+Lifecycle (Admin → Add-ons): **Scan** (register new manifests, refresh
+versions) → **dependency check** (platform, PHP, other add-ons) →
+**Install** (migrations, toggles, permissions, settings) →
+**Enable/Disable** → **Update** (new manifest version + pending
+migrations). Every step is logged per add-on and audited.
 
-Planned future add-ons: loyalty points, gas subscriptions, corporate
-accounts, multiple branches, franchise management, accounting integration,
-WhatsApp automation, route optimization, wallet withdrawals, multi-language,
-multi-currency.
+Add-on folders are blocked from direct web access (root `.htaccess` +
+local `.htaccess`); pages render through `admin/addon.php`, which checks
+the system toggle, add-on status and the manifest permission.
+
+Full manifest reference and page-authoring rules:
+`docs/ADDON-DEVELOPMENT.md`.

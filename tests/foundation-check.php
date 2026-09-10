@@ -33,6 +33,7 @@ $expected = [
     'includes/inventory.php', 'includes/admin.php', 'includes/delivery.php',
     'includes/payments.php', 'includes/support.php', 'includes/marketing.php',
     'includes/spin.php', 'includes/referrals.php', 'includes/ops.php', 'includes/errors.php',
+    'includes/addons.php',
     'includes/footer.php',
     'admin/index.php', 'admin/wallet.php', 'admin/refills.php',
     'admin/pickups.php', 'admin/inventory.php', 'admin/purchases.php',
@@ -43,6 +44,7 @@ $expected = [
     'admin/reviews.php', 'admin/marketing.php', 'admin/faqs.php',
     'admin/posts.php', 'admin/newsletter.php', 'admin/spin.php',
     'admin/referrals.php', 'admin/notifications.php', 'admin/backups.php', 'admin/logs.php',
+    'admin/addon.php',
     'customer/index.php', 'customer/register.php', 'customer/login.php',
     'customer/logout.php', 'customer/forgot-password.php',
     'customer/reset-password.php', 'customer/verify-email.php',
@@ -67,8 +69,15 @@ $expected = [
     'storage/logs/index.php', 'storage/logs/.gitkeep',
     'storage/backups/index.php', 'storage/backups/.gitkeep',
     'storage/cache/index.php', 'storage/cache/.gitkeep',
-    'addons/README.md', 'addons/.gitkeep', 'addons/index.php',
-    'addons/_example/addon.json', 'addons/_example/README.md',
+    'addons/README.md', 'addons/.gitkeep', 'addons/index.php', 'addons/.htaccess',
+    'addons/example/addon.json', 'addons/example/README.md',
+    'addons/example/pages/hello.php', 'addons/example/migrations/001-example-notes.sql',
+    'addons/loyalty-points/addon.json', 'addons/gas-subscriptions/addon.json',
+    'addons/corporate-accounts/addon.json', 'addons/multi-branch/addon.json',
+    'addons/franchise/addon.json', 'addons/accounting/addon.json',
+    'addons/whatsapp-automation/addon.json', 'addons/route-optimization/addon.json',
+    'addons/wallet-withdrawals/addon.json', 'addons/multi-language/addon.json',
+    'addons/multi-currency/addon.json',
     'cron/README.md', 'cron/.gitkeep', 'cron/index.php',
     'cron/send-notifications.php', 'cron/pickup-reminders.php', 'cron/backup.php', 'cron/rotate-logs.php',
     'pwa/README.md', 'pwa/.gitkeep',
@@ -103,6 +112,8 @@ $expected = [
     'docs/23-Phase-23-Verification-Report.md',
     'docs/24-Phase-24-Verification-Report.md',
     'docs/25-Phase-25-Verification-Report.md',
+    'docs/26-Phase-26-Verification-Report.md',
+    'docs/ADDON-DEVELOPMENT.md',
     'README.md',
 ];
 foreach ($expected as $f) {
@@ -265,6 +276,17 @@ check(strpos((string) @file_get_contents($root . '/customer/reset-password.php')
 check(strpos((string) @file_get_contents($root . '/contact.php'), 'err_429') !== false, 'contact: 429 throttle');
 check(strpos((string) @file_get_contents($root . '/admin/logs.php'), 'logs.manage') !== false, 'logs desk: manage permission');
 check(strpos((string) @file_get_contents($root . '/database/schema.sql'), 'CREATE TABLE IF NOT EXISTS `error_reports`') !== false, 'schema: error reports');
+check(strpos((string) @file_get_contents($root . '/includes/bootstrap.php'), 'OYEJO_VERSION') !== false, 'bootstrap: platform version');
+check(strpos((string) @file_get_contents($root . '/includes/addons.php'), 'function addon_install') !== false, 'addons lib: installer');
+check(strpos((string) @file_get_contents($root . '/includes/addons.php'), 'function addon_migrate') !== false, 'addons lib: migrations');
+check(strpos((string) @file_get_contents($root . '/includes/addons.php'), 'function addon_check_manifest') !== false, 'addons lib: dependency checks');
+check(strpos((string) @file_get_contents($root . '/includes/addons.php'), 'function addon_set_status') !== false, 'addons lib: enable/disable');
+check(strpos((string) @file_get_contents($root . '/includes/addons.php'), 'function addon_page_file') !== false, 'addons lib: page resolver');
+check(strpos((string) @file_get_contents($root . '/includes/addons.php'), 'function addon_menus') !== false, 'addons lib: console menus');
+check(strpos((string) @file_get_contents($root . '/includes/admin.php'), 'addon_setting_groups') !== false, 'settings: add-on groups merge');
+check(strpos((string) @file_get_contents($root . '/admin/addon.php'), 'addon_page_file') !== false, 'addon router: manifest gating');
+check(strpos((string) @file_get_contents($root . '/database/schema.sql'), 'CREATE TABLE IF NOT EXISTS `addon_migrations`') !== false, 'schema: addon migrations');
+check(strpos((string) @file_get_contents($root . '/.htaccess'), 'RedirectMatch 403 ^/addons') !== false, 'htaccess: addons blocked');
 check(strpos((string) @file_get_contents($root . '/checkout.php'), 'guest_checkout') !== false, 'checkout.php: guest toggle gate');
 check(strpos((string) @file_get_contents($root . '/checkout.php'), 'shop.order') !== false, 'checkout.php: order permission');
 check(strpos((string) @file_get_contents($root . '/checkout.php'), 'notify_emit') !== false, 'checkout.php: confirmation notify');
@@ -338,7 +360,7 @@ check(strpos((string) @file_get_contents($root . '/database/seeds.sql'), 'featur
 check(strpos((string) @file_get_contents($root . '/database/seeds.sql'), 'RFL-125') !== false, 'seeds.sql: demo products');
 check(strpos((string) @file_get_contents($root . '/database/seeds.sql'), 'WELCOME10') !== false, 'seeds.sql: demo coupons');
 check(strpos((string) @file_get_contents($root . '/database/seeds.sql'), 'wallet_balance_cap_minor') !== false, 'seeds.sql: wallet limits');
-$manifest = json_decode((string) @file_get_contents($root . '/addons/_example/addon.json'), true);
+$manifest = json_decode((string) @file_get_contents($root . '/addons/example/addon.json'), true);
 check(is_array($manifest) && ($manifest['slug'] ?? '') === 'example', 'addon.json: valid manifest');
 
 // --- php -l over every PHP file ---
