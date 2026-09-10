@@ -23,10 +23,11 @@ function check($cond, $label) {
 $expected = [
     '.htaccess', '.env.example', '.gitignore', 'index.php',
     'about.php', 'contact.php', 'faq.php', 'terms.php', 'privacy.php',
+    'shop.php', 'product.php',
     'config/config.php', 'config/database.php', 'config/.htaccess',
     'includes/bootstrap.php', 'includes/functions.php', 'includes/auth.php',
     'includes/mailer.php', 'includes/rbac.php', 'includes/header.php',
-    'includes/footer.php',
+    'includes/catalog.php', 'includes/footer.php',
     'admin/index.php',
     'customer/index.php', 'customer/register.php', 'customer/login.php',
     'customer/logout.php', 'customer/forgot-password.php',
@@ -36,6 +37,7 @@ $expected = [
     'api/index.php', 'install/index.php', 'install/installer.php',
     'errors/404.php', 'errors/403.php', 'errors/500.php',
     'assets/css/style.css', 'assets/js/app.js', 'assets/images/logo.svg',
+    'assets/images/product-placeholder.svg',
     'assets/images/.gitkeep', 'assets/icons/.gitkeep',
     'uploads/index.php', 'uploads/.htaccess', 'uploads/.gitkeep',
     'database/schema.sql', 'database/seeds.sql', 'database/.htaccess',
@@ -61,6 +63,7 @@ $expected = [
     'docs/04-Phase-4-Verification-Report.md',
     'docs/05-Phase-5-Verification-Report.md',
     'docs/06-Phase-6-Verification-Report.md',
+    'docs/07-Phase-7-Verification-Report.md',
     'README.md',
 ];
 foreach ($expected as $f) {
@@ -89,17 +92,25 @@ check(strpos((string) @file_get_contents($root . '/includes/rbac.php'), 'access.
 check(strpos((string) @file_get_contents($root . '/includes/mailer.php'), 'mail.log') !== false, 'mailer.php: logged mailbox');
 check(strpos((string) @file_get_contents($root . '/contact.php'), 'company') !== false, 'contact.php: honeypot field');
 check(strpos((string) @file_get_contents($root . '/faq.php'), 'FROM `faqs`') !== false, 'faq.php: reads faqs table');
+check(strpos((string) @file_get_contents($root . '/shop.php'), 'LIKE ? ESCAPE') !== false, 'shop.php: escaped search filter');
+check(strpos((string) @file_get_contents($root . '/product.php'), '`p`.`slug` = ?') !== false, 'product.php: slug lookup');
+check(strpos((string) @file_get_contents($root . '/index.php'), 'promo_now') !== false, 'index.php: featured promo window');
+check(strpos((string) @file_get_contents($root . '/includes/catalog.php'), 'oyejo_promo_sql') !== false, 'catalog.php: promo-window SQL');
+check(strpos((string) @file_get_contents($root . '/includes/catalog.php'), 'oyejo_stock_badge') !== false, 'catalog.php: stock badges');
+check(strpos((string) @file_get_contents($root . '/includes/header.php'), 'shop.php') !== false, 'header.php: shop nav link');
 check(strpos((string) @file_get_contents($root . '/includes/footer.php'), 'terms.php') !== false, 'footer.php: legal links');
 check(strpos((string) @file_get_contents($root . '/.env.example'), 'WHATSAPP_API_KEY') !== false, '.env.example: whatsapp keys');
 check(strpos((string) @file_get_contents($root . '/.env.example'), 'APP_KEY') !== false, '.env.example: APP_KEY template');
 check(strpos((string) @file_get_contents($root . '/assets/css/style.css'), '.hero') !== false, 'style.css: hero styles');
 check(strpos((string) @file_get_contents($root . '/assets/css/style.css'), '@media (max-width: 420px)') !== false, 'style.css: phone breakpoint');
+check(strpos((string) @file_get_contents($root . '/assets/css/style.css'), '.product-detail') !== false, 'style.css: shop styles');
 check(strpos((string) @file_get_contents($root . '/assets/js/app.js'), 'window.Oyejo') !== false, 'app.js: Oyejo helper');
 check(strpos((string) @file_get_contents($root . '/index.php'), 'reject_path_info') !== false, 'index.php: PATH_INFO 404 guard');
 check(strpos((string) @file_get_contents($root . '/install/installer.php'), 'inst_split_sql') !== false, 'installer.php: DELIMITER-aware splitter');
 check(strpos((string) @file_get_contents($root . '/install/installer.php'), 'install.lock') !== false, 'installer.php: reinstall lock');
 check(strpos((string) @file_get_contents($root . '/database/seeds.sql'), 'super_admin') !== false, 'seeds.sql: roles seeded');
 check(strpos((string) @file_get_contents($root . '/database/seeds.sql'), 'feature_toggles') !== false, 'seeds.sql: toggles seeded');
+check(strpos((string) @file_get_contents($root . '/database/seeds.sql'), 'RFL-125') !== false, 'seeds.sql: demo products');
 $manifest = json_decode((string) @file_get_contents($root . '/addons/_example/addon.json'), true);
 check(is_array($manifest) && ($manifest['slug'] ?? '') === 'example', 'addon.json: valid manifest');
 

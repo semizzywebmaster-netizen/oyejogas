@@ -16,8 +16,13 @@ try {
          ORDER BY `id` DESC LIMIT 3"
     )->fetchAll();
     $featured = db()->query(
-        'SELECT `name`, `price_minor`, `promo_price_minor` FROM `products`
-         WHERE `is_active` = 1 AND `is_featured` = 1 ORDER BY `sort_order` LIMIT 4'
+        'SELECT `slug`, `name`, `price_minor`,'
+        . ' CASE WHEN `promo_price_minor` IS NOT NULL AND `promo_price_minor` < `price_minor`'
+        . ' AND (`promo_starts_at` IS NULL OR `promo_starts_at` <= NOW())'
+        . ' AND (`promo_ends_at` IS NULL OR `promo_ends_at` >= NOW())'
+        . ' THEN `promo_price_minor` END AS `promo_now`'
+        . ' FROM `products`'
+        . ' WHERE `is_active` = 1 AND `is_featured` = 1 ORDER BY `sort_order` LIMIT 4'
     )->fetchAll();
     $categories = db()->query(
         'SELECT `name`, `description` FROM `categories` WHERE `is_active` = 1 ORDER BY `sort_order` LIMIT 4'
@@ -95,16 +100,16 @@ require BASE_PATH . '/includes/header.php';
     <div class="grid">
       <?php foreach ($featured as $p) : ?>
         <article class="card">
-          <h3><?= e($p['name']) ?></h3>
+          <h3><a href="<?= e(url('product.php?slug=' . $p['slug'])) ?>"><?= e($p['name']) ?></a></h3>
           <p class="price">
-            <?php if ($p['promo_price_minor'] !== null) : ?>
+            <?php if ($p['promo_now'] !== null) : ?>
               <del><?= e(format_money($p['price_minor'])) ?></del>
-              <strong><?= e(format_money($p['promo_price_minor'])) ?></strong>
+              <strong><?= e(format_money($p['promo_now'])) ?></strong>
             <?php else : ?>
               <strong><?= e(format_money($p['price_minor'])) ?></strong>
             <?php endif; ?>
           </p>
-          <p><span class="badge">Online ordering opens in Phase 9</span></p>
+          <p><a class="btn ghost" href="<?= e(url('product.php?slug=' . $p['slug'])) ?>">View</a></p>
         </article>
       <?php endforeach; ?>
     </div>

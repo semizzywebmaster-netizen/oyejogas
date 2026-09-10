@@ -8,6 +8,7 @@ if (!defined('OYEJO_BOOT')) {
 }
 $mainNav = [
     ['Home', url('')],
+    ['Shop', url('shop.php')],
     ['About', url('about.php')],
     ['FAQ', url('faq.php')],
     ['Contact', url('contact.php')],

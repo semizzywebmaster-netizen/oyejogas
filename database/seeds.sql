@@ -266,3 +266,14 @@ INSERT INTO `homepage_sections` (`slug`, `title`, `content`, `sort_order`, `is_a
 
 -- ---------------------------------------------------------- schema baseline
 INSERT INTO `migrations` (`migration`, `batch`) VALUES ('0000_base_schema', 1);
+
+-- ---------------------------------------------------------- demo products
+-- Category ids 1-4 and size ids 1-5 are deterministic on a fresh install.
+INSERT INTO `products` (`category_id`, `size_id`, `sku`, `slug`, `name`, `description`, `type`, `price_minor`, `promo_price_minor`, `promo_starts_at`, `promo_ends_at`, `stock_qty`, `low_stock_at`, `track_inventory`, `is_active`, `is_featured`, `sort_order`) VALUES
+(2, 3, 'RFL-125', 'refill-12-5kg', '12.5kg Gas Refill', 'A full 12.5kg refill for your family-size cylinder. We collect, refill and return, or deliver a full cylinder to your door.', 'refill', 1250000, 1150000, NOW() - INTERVAL 1 DAY, NOW() + INTERVAL 30 DAY, 40, 5, 1, 1, 1, 1),
+(2, 2, 'RFL-6', 'refill-6kg', '6kg Gas Refill', 'A full 6kg refill, sized for small households and single burners.', 'refill', 650000, NULL, NULL, NULL, 30, 5, 1, 1, 1, 2),
+(1, 3, 'CYL-125-NEW', 'new-cylinder-12-5kg', 'New 12.5kg Cylinder (Full)', 'Brand-new 12.5kg cylinder supplied full and safety-checked, with receipt and warranty.', 'cylinder_new', 4500000, NULL, NULL, NULL, 12, 3, 1, 1, 1, 3),
+(3, 3, 'EXC-125', 'exchange-12-5kg', '12.5kg Cylinder Exchange', 'Swap your empty 12.5kg cylinder for a full one at your door. No waiting, no deposit queue.', 'exchange', 1300000, NULL, NULL, NULL, 0, 5, 0, 1, 0, 4),
+(4, NULL, 'ACC-REG', 'regulator-hose-set', 'Regulator + Hose Set', 'Safety regulator with 1.5m reinforced hose and clips. Fits all standard cylinders.', 'accessory', 850000, NULL, NULL, NULL, 3, 5, 1, 1, 0, 5),
+(4, NULL, 'ACC-BURN', 'table-top-burner', 'Table-top Gas Burner', 'Two-burner table-top cooker with auto ignition and windshield legs.', 'accessory', 550000, NULL, NULL, NULL, 0, 2, 1, 1, 0, 6),
+(4, NULL, 'ACC-OLD', 'old-valve', 'Old Valve (Retired)', 'Retired demo row used to verify inactive products stay hidden.', 'accessory', 100000, NULL, NULL, NULL, 0, 2, 1, 0, 0, 7);

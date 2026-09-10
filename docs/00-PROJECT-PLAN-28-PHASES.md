@@ -15,8 +15,8 @@ corrected, and approved before the next phase begins.
 | 4 | Installation and seed system | Installer, env setup, seed data, roles, permissions, default admin, categories, settings, validation; reinstall protection | 🟢 Approved | ☑ |
 | 5 | Authentication and account registration | Registration, login/logout, hashing, reset, email+phone verification, sessions, activation, suspension, throttling, secure redirects | 🟢 Approved | ☑ |
 | 6 | Roles, permissions, access control | 12 roles + permission-level controls (not role-name only) | 🟢 Approved | ☑ |
-| 7 | Public website and responsive design | Home, header/footer, hero, services, LPG/refill/pickup/delivery sections, about, contact, FAQ, terms, privacy, announcements, responsive | 🟡 In progress | ☐ |
-| 8 | Product catalog and pricing | Categories, cylinder sizes, refills, new cylinders, exchange, accessories, descriptions, images, prices, promo prices, stock visibility, search/filter, status | ⬜ | ☐ |
+| 7 | Public website and responsive design | Home, header/footer, hero, services, LPG/refill/pickup/delivery sections, about, contact, FAQ, terms, privacy, announcements, responsive | 🟢 Approved | ☑ |
+| 8 | Product catalog and pricing | Categories, cylinder sizes, refills, new cylinders, exchange, accessories, descriptions, images, prices, promo prices, stock visibility, search/filter, status | 🟢 Approved | ☑ |
 | 9 | Cart, checkout, delivery fees, orders | Cart ops, totals, address, zones, fees, slots, coupons, wallet/COD/transfer/online payment, confirmation, order numbers, cancellation rules | ⬜ | ☐ |
 | 10 | Customer dashboard | Profile, addresses, phones, order history/details/tracking, invoices, reorder, notifications, wallet, referrals, rewards, tickets, security | ⬜ | ☐ |
 | 11 | Customer wallet system | Account, balance, top-up, checkout payments, refunds-to-wallet, promo/referral/spin credits, history, statements, txn states, limits, admin adjustments; hardened ledger | ⬜ | ☐ |
