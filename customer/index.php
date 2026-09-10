@@ -76,7 +76,7 @@ require BASE_PATH . '/includes/header.php';
 
 <div class="grid dash-stats">
   <article class="card"><h3><?= $order_count ?></h3><p>Orders</p><p><a href="<?= e(url('customer/orders.php')) ?>">View orders</a></p></article>
-  <article class="card"><h3><?= $wallet ? e(format_money($wallet['balance_minor'])) : e(format_money(0)) ?></h3><p>Wallet balance</p><p class="result-meta">Top-up opens in Phase 11</p></article>
+  <article class="card"><h3><?= $wallet ? e(format_money($wallet['balance_minor'])) : e(format_money(0)) ?></h3><p>Wallet balance</p><p><a href="<?= e(url('customer/wallet.php')) ?>">Open wallet</a></p></article>
   <article class="card"><h3><?= $ref_count ?></h3><p>Referrals</p><p class="result-meta">Reward capture opens in Phase 21</p></article>
   <article class="card"><h3><?= $open_tickets ?></h3><p>Open tickets</p><p><a href="<?= e(url('customer/tickets.php')) ?>">Support</a></p></article>
 </div>

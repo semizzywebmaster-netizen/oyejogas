@@ -232,3 +232,8 @@ label.radio input { width: auto; }
   body { background: #fff; }
   .invoice { border: none; padding: 0; }
 }
+
+/* --- Wallet (Phase 11) --- */
+.filters { display: flex; gap: 12px; align-items: end; flex-wrap: wrap; margin-bottom: 16px; }
+.txn-credit { color: #0b5a30; font-weight: 700; }
+.txn-debit { color: #8f1d1d; font-weight: 700; }

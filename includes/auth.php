@@ -186,6 +186,10 @@ function auth_register_customer($name, $email, $phone, $password) {
                 }
             }
         }
+        // Phase 11: every customer gets a wallet at registration (WL-01).
+        $customer_id = (int) $pdo->lastInsertId();
+        $pdo->prepare("INSERT INTO `wallets` (`customer_id`, `balance_minor`, `status`) VALUES (?, 0, 'active')")
+            ->execute([$customer_id]);
         $pdo->commit();
         return [$uid, ''];
     } catch (PDOException $e) {

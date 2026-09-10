@@ -282,3 +282,10 @@ INSERT INTO `products` (`category_id`, `size_id`, `sku`, `slug`, `name`, `descri
 INSERT INTO `coupons` (`code`, `name`, `type`, `value`, `min_order_minor`, `max_discount_minor`, `usage_limit`, `used_count`, `starts_at`, `ends_at`, `is_active`) VALUES
 ('WELCOME10', 'Welcome 10% off', 'percent', 10, 500000, 200000, 100, 0, NOW() - INTERVAL 1 DAY, NOW() + INTERVAL 90 DAY, 1),
 ('FLAT500', 'Flat 500 off', 'fixed', 50000, 1000000, NULL, NULL, 0, NOW() - INTERVAL 1 DAY, NOW() + INTERVAL 90 DAY, 1);
+
+-- ------------------------------------------------------- wallet settings
+INSERT INTO `settings` (`key`, `value`, `group_name`) VALUES
+('wallet_topup_max_minor', '50000000', 'wallet'),
+('wallet_balance_cap_minor', '200000000', 'wallet'),
+('wallet_daily_topup_max_minor', '100000000', 'wallet'),
+('wallet_daily_topup_count', '5', 'wallet');
