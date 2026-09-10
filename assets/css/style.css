@@ -43,6 +43,7 @@ header.site {
 .links { margin-left: auto; display: flex; gap: 4px; }
 .links a { text-decoration: none; color: var(--ink); padding: 10px 14px; border-radius: 10px; font-weight: 600; }
 .links a:hover { background: #eef4ee; }
+.who { padding: 10px 6px; color: var(--muted); font-weight: 600; white-space: nowrap; }
 .hamburger { display: none; margin-left: auto; font-size: 24px; background: none; border: 1px solid var(--line); border-radius: 10px; padding: 4px 12px; cursor: pointer; }
 
 /* --- Maintenance / offline banners --- */

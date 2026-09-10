@@ -30,6 +30,7 @@ function inst_preflight() {
         ['PHP >= 7.4', version_compare(PHP_VERSION, '7.4.0', '>='), 'Running PHP ' . PHP_VERSION],
         ['PDO MySQL driver', extension_loaded('pdo_mysql'), extension_loaded('pdo_mysql') ? 'available' : 'enable the pdo_mysql extension'],
         ['JSON support', function_exists('json_encode'), function_exists('json_encode') ? 'available' : 'enable the json extension'],
+        ['Multibyte strings', function_exists('mb_substr'), function_exists('mb_substr') ? 'available' : 'enable the mbstring extension'],
         ['Password hashing', function_exists('password_hash'), function_exists('password_hash') ? 'available' : 'password_hash() missing'],
         ['storage/ writable', is_writable($base . '/storage'), $base . '/storage'],
         ['uploads/ writable', is_writable($base . '/uploads'), $base . '/uploads'],
@@ -57,6 +58,7 @@ function inst_write_env($data) {
     }
     $map = [
         'APP_NAME' => $data['site_name'],
+        'APP_KEY' => bin2hex(random_bytes(32)),
         'APP_URL' => $data['site_url'],
         'APP_DEBUG' => $data['debug'] ? 'true' : 'false',
         'APP_TIMEZONE' => 'Africa/Lagos',

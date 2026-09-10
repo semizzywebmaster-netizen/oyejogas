@@ -7,12 +7,15 @@ if (!defined('OYEJO_BOOT')) {
     http_response_code(403);
     exit('Forbidden');
 }
-$nav = [
-    ['Home', url('')],
-    ['My account', url('customer/')],
-    ['Driver', url('driver/')],
-    ['Admin', url('admin/')],
-];
+$mainNav = [['Home', url('')]];
+if (is_logged_in()) {
+    $mainNav[] = ['My account', url('customer/')];
+} else {
+    $mainNav[] = ['Login', url('customer/login.php')];
+    $mainNav[] = ['Register', url('customer/register.php')];
+}
+$mainNav[] = ['Driver', url('driver/')];
+$mainNav[] = ['Admin', url('admin/')];
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -36,9 +39,13 @@ $nav = [
     </a>
     <button class="hamburger" id="navToggle" aria-label="Menu" aria-expanded="false">&#9776;</button>
     <nav class="links" id="navLinks">
-      <?php foreach ($nav as $item) : ?>
+      <?php foreach ($mainNav as $item) : ?>
         <a href="<?= e($item[1]) ?>"><?= e($item[0]) ?></a>
       <?php endforeach; ?>
+      <?php if (is_logged_in()) : ?>
+        <span class="who">Hi, <?= e(current_user()['name']) ?></span>
+        <a href="<?= e(url('customer/logout.php')) ?>">Logout</a>
+      <?php endif; ?>
     </nav>
   </div>
 </header>

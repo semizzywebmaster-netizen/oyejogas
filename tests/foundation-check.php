@@ -23,9 +23,14 @@ function check($cond, $label) {
 $expected = [
     '.htaccess', '.env.example', '.gitignore', 'index.php',
     'config/config.php', 'config/database.php', 'config/.htaccess',
-    'includes/bootstrap.php', 'includes/functions.php',
-    'includes/header.php', 'includes/footer.php',
-    'admin/index.php', 'customer/index.php', 'driver/index.php',
+    'includes/bootstrap.php', 'includes/functions.php', 'includes/auth.php',
+    'includes/mailer.php', 'includes/header.php', 'includes/footer.php',
+    'admin/index.php',
+    'customer/index.php', 'customer/register.php', 'customer/login.php',
+    'customer/logout.php', 'customer/forgot-password.php',
+    'customer/reset-password.php', 'customer/verify-email.php',
+    'customer/verify-phone.php',
+    'driver/index.php',
     'api/index.php', 'install/index.php', 'install/installer.php',
     'errors/404.php', 'errors/403.php', 'errors/500.php',
     'assets/css/style.css', 'assets/js/app.js', 'assets/images/logo.svg',
@@ -50,6 +55,8 @@ $expected = [
     'docs/02-Phase-2-Verification-Report.md',
     'docs/03-DATABASE-DICTIONARY.md',
     'docs/03-Phase-3-Verification-Report.md',
+    'docs/04-INSTALLATION-GUIDE.md',
+    'docs/04-Phase-4-Verification-Report.md',
     'README.md',
 ];
 foreach ($expected as $f) {
@@ -64,10 +71,17 @@ check(strpos($rootHt, 'X-Content-Type-Options') !== false, '.htaccess: security 
 check(strpos((string) @file_get_contents($root . '/uploads/.htaccess'), 'php_flag engine off') !== false, 'uploads/.htaccess: php engine off');
 check(strpos((string) @file_get_contents($root . '/storage/.htaccess'), 'Require all denied') !== false, 'storage/.htaccess: denied');
 check(strpos((string) @file_get_contents($root . '/config/config.php'), 'OYEJO_BOOT') !== false, 'config.php: direct-access guard');
+check(strpos((string) @file_get_contents($root . '/config/config.php'), 'APP_KEY') !== false, 'config.php: APP_KEY signing secret');
 check(strpos((string) @file_get_contents($root . '/includes/bootstrap.php'), 'csrf_token') !== false, 'bootstrap.php: CSRF helpers');
 check(strpos((string) @file_get_contents($root . '/includes/bootstrap.php'), 'oyejo_feature') !== false, 'bootstrap.php: feature toggles');
 check(strpos((string) @file_get_contents($root . '/includes/bootstrap.php'), 'install.lock') !== false, 'bootstrap.php: installer redirect');
+check(strpos((string) @file_get_contents($root . '/includes/bootstrap.php'), 'auth_tick') !== false, 'bootstrap.php: session tick');
+check(strpos((string) @file_get_contents($root . '/includes/auth.php'), 'password_verify') !== false, 'auth.php: password_verify login');
+check(strpos((string) @file_get_contents($root . '/includes/auth.php'), 'safe_next') !== false, 'auth.php: safe redirects');
+check(strpos((string) @file_get_contents($root . '/includes/auth.php'), 'AUTH_IDLE_TIMEOUT') !== false, 'auth.php: session timeouts');
+check(strpos((string) @file_get_contents($root . '/includes/mailer.php'), 'mail.log') !== false, 'mailer.php: logged mailbox');
 check(strpos((string) @file_get_contents($root . '/.env.example'), 'WHATSAPP_API_KEY') !== false, '.env.example: whatsapp keys');
+check(strpos((string) @file_get_contents($root . '/.env.example'), 'APP_KEY') !== false, '.env.example: APP_KEY template');
 check(strpos((string) @file_get_contents($root . '/assets/css/style.css'), '.hero') !== false, 'style.css: hero styles');
 check(strpos((string) @file_get_contents($root . '/assets/js/app.js'), 'window.Oyejo') !== false, 'app.js: Oyejo helper');
 check(strpos((string) @file_get_contents($root . '/index.php'), 'reject_path_info') !== false, 'index.php: PATH_INFO 404 guard');

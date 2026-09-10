@@ -25,8 +25,9 @@ oyejo-gas/
 | 1 | Requirements and master feature checklist | ✅ Approved |
 | 2 | Single-folder project foundation | ✅ Approved |
 | 3 | Database architecture (60 tables, verified) | ✅ Approved |
-| 4 | Installation and seed system | ✅ READY FOR YOUR APPROVAL |
-| 5–28 | See `docs/00-PROJECT-PLAN-28-PHASES.md` | ⬜ Not started |
+| 4 | Installation and seed system | ✅ Approved |
+| 5 | Authentication and account registration | ✅ READY FOR YOUR APPROVAL |
+| 6–28 | See `docs/00-PROJECT-PLAN-28-PHASES.md` | ⬜ Not started |
 
 **New sites:** open the homepage once and the one-click installer
 (see `docs/04-INSTALLATION-GUIDE.md`) sets up database, seeds and admin.
@@ -69,4 +70,4 @@ php tests/foundation-check.php   # exit 0 = project files intact
 - `docs/02-FOUNDATION-STRUCTURE.md` — folder map, conventions, security model
 - `docs/03-DATABASE-DICTIONARY.md` — 60-table catalogue + conventions
 - `docs/04-INSTALLATION-GUIDE.md` — install, reinstall, troubleshooting
-- `docs/04-Phase-4-Verification-Report.md` — Phase 4 test evidence
+- `docs/05-Phase-5-Verification-Report.md` — Phase 5 test evidence

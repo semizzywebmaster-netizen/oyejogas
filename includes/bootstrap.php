@@ -12,11 +12,13 @@ if (isset($_SERVER['SCRIPT_FILENAME']) && basename($_SERVER['SCRIPT_FILENAME']) 
 }
 
 define('OYEJO_BOOT', true);
-define('OYEJO_VERSION', '0.2.0');
+define('OYEJO_VERSION', '0.5.0');
 
 require_once __DIR__ . '/../config/config.php';
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/functions.php';
+require_once __DIR__ . '/mailer.php';
+require_once __DIR__ . '/auth.php';
 
 // --- Uninstalled apps go to the installer (Phase 4) ---
 if (PHP_SAPI !== 'cli' && !defined('OYEJO_SKIP_INSTALL_CHECK')) {
@@ -41,6 +43,9 @@ if (session_status() === PHP_SESSION_NONE) {
     ]);
     session_start();
 }
+
+// --- Session tick: idle/absolute expiry + rotation (Phase 5) ---
+auth_tick();
 
 // --- Safety net for uncaught exceptions (full handler in Phase 25) ---
 set_exception_handler(function ($e) {
@@ -80,7 +85,7 @@ function csrf_verify($token) {
         && hash_equals((string) $_SESSION['csrf_token'], $token);
 }
 
-// --- Auth stubs (implemented in Phase 5; RBAC in Phase 6) ---
+// --- Auth helpers (backed by includes/auth.php since Phase 5) ---
 function current_user() {
     return $_SESSION['user'] ?? null;
 }
@@ -91,8 +96,8 @@ function is_logged_in() {
 
 function require_login() {
     if (!is_logged_in()) {
-        flash('error', 'Please log in to continue. (Accounts arrive in Phase 5.)');
-        redirect(url('customer/'));
+        flash('error', 'Please log in to continue.');
+        redirect(url('customer/login.php') . '?next=' . urlencode($_SERVER['REQUEST_URI'] ?? '/'));
     }
 }
 
@@ -102,7 +107,7 @@ function has_permission($permission) {
     if (!$u) {
         return false;
     }
-    if (!empty($u['is_super_admin'])) {
+    if (!empty($u['role']) && $u['role'] === 'super_admin') {
         return true;
     }
     return false;

@@ -1,0 +1,107 @@
+<?php
+/**
+ * Oyejo Gas - customer registration (Phase 5).
+ */
+require_once __DIR__ . '/../includes/bootstrap.php';
+reject_path_info();
+
+if (!oyejo_feature('customer_registration')) {
+    http_response_code(403);
+    $page_title = 'Registration disabled';
+    require BASE_PATH . '/includes/header.php';
+    echo '<section class="stub"><h1>Registration is currently disabled.</h1><p>Please check back later.</p></section>';
+    require BASE_PATH . '/includes/footer.php';
+    exit;
+}
+if (is_logged_in()) {
+    redirect(url('customer/'));
+}
+
+$errors = [];
+$done = false;
+$name = '';
+$email = '';
+$phone = '';
+
+if (request_method() === 'POST') {
+    if (!csrf_verify(post('csrf_token'))) {
+        $errors[] = 'Security token mismatch. Reload and try again.';
+    } else {
+        $name = trim((string) post('name', ''));
+        $email = trim((string) post('email', ''));
+        $phone = trim((string) post('phone', ''));
+        $pw = (string) post('password', '');
+        $pw2 = (string) post('password_confirm', '');
+        if (strlen($name) < 2 || strlen($name) > 100) {
+            $errors[] = 'Name must be 2–100 characters.';
+        }
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $errors[] = 'Enter a valid email address.';
+        }
+        if ($phone !== '' && !preg_match('/^[0-9+\s()\-]{7,20}$/', $phone)) {
+            $errors[] = 'Phone number looks invalid.';
+        }
+        if (strlen($pw) < 8) {
+            $errors[] = 'Password must be at least 8 characters.';
+        } elseif (!preg_match('/[A-Za-z]/', $pw) || !preg_match('/[0-9]/', $pw)) {
+            $errors[] = 'Password must include a letter and a number.';
+        } elseif ($pw !== $pw2) {
+            $errors[] = 'Passwords do not match.';
+        }
+        if (!$errors) {
+            $s = db()->prepare('SELECT `id` FROM `users` WHERE `email` = ? LIMIT 1');
+            $s->execute([$email]);
+            if ($s->fetch()) {
+                $errors[] = 'That email is already registered. Try logging in.';
+            }
+        }
+        if (!$errors && $phone !== '') {
+            $s = db()->prepare('SELECT `id` FROM `users` WHERE `phone` = ? LIMIT 1');
+            $s->execute([$phone]);
+            if ($s->fetch()) {
+                $errors[] = 'That phone number is already registered.';
+            }
+        }
+        if (!$errors) {
+            list($uid, $err) = auth_register_customer($name, $email, $phone, $pw);
+            if (!$uid) {
+                $errors[] = $err;
+            } else {
+                auth_send_verification(auth_db_user($uid));
+                $done = true;
+            }
+        }
+    }
+}
+
+$page_title = 'Create account';
+require BASE_PATH . '/includes/header.php';
+?>
+<section class="stub">
+  <p class="pill">Customer portal</p>
+  <h1>Create account</h1>
+  <?php if ($done) : ?>
+    <div class="card">
+      <h2 class="ok" style="color:#0b6b3a">Check your email</h2>
+      <p>Your account was created. We sent a verification link to
+        <strong><?= e($email) ?></strong> — open it within 24 hours to activate
+        your account, then log in.</p>
+      <p><a class="btn primary" href="<?= e(url('customer/login.php')) ?>">Go to login</a></p>
+    </div>
+  <?php else : ?>
+    <?php foreach ($errors as $e) : ?>
+      <div class="alert alert-error"><?= e($e) ?></div>
+    <?php endforeach; ?>
+    <form method="post" action="" class="stack">
+      <?= csrf_field() ?>
+      <label>Full name<input name="name" value="<?= e($name) ?>" required maxlength="100"></label>
+      <label>Email<input type="email" name="email" value="<?= e($email) ?>" required maxlength="190"></label>
+      <label>Phone (optional, needed for phone verification)<input name="phone" value="<?= e($phone) ?>" maxlength="30"></label>
+      <label>Password (min 8, letter + number)<input type="password" name="password" autocomplete="new-password" required></label>
+      <label>Confirm password<input type="password" name="password_confirm" autocomplete="new-password" required></label>
+      <p><button class="btn primary" type="submit">Create account</button></p>
+    </form>
+    <p>Already registered? <a href="<?= e(url('customer/login.php')) ?>">Log in</a></p>
+  <?php endif; ?>
+</section>
+<?php require BASE_PATH . '/includes/footer.php'; ?>

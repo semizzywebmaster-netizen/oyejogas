@@ -92,6 +92,15 @@ define('DB_NAME', env('DB_NAME', 'oyejo_gas'));
 define('DB_USER', env('DB_USER', 'root'));
 define('DB_PASS', env('DB_PASS', ''));
 
+// Secret for signing verification links (the installer generates a random
+// one; the fallback below only covers manual installs without APP_KEY).
+$__app_key = (string) env('APP_KEY', '');
+if ($__app_key === '') {
+    $__app_key = hash('sha256', DB_PASS . '|oyejo|' . BASE_PATH);
+}
+define('APP_KEY', $__app_key);
+unset($__app_key);
+
 // --- Filesystem paths ---
 define('UPLOAD_PATH', BASE_PATH . '/uploads');
 define('STORAGE_PATH', BASE_PATH . '/storage');
