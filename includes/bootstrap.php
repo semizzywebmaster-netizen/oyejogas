@@ -12,7 +12,7 @@ if (isset($_SERVER['SCRIPT_FILENAME']) && basename($_SERVER['SCRIPT_FILENAME']) 
 }
 
 define('OYEJO_BOOT', true);
-define('OYEJO_VERSION', '0.27.0'); // platform version add-ons declare against
+define('OYEJO_VERSION', '0.28.0'); // platform version add-ons declare against
 
 require_once __DIR__ . '/../config/config.php';
 require_once __DIR__ . '/../config/database.php';

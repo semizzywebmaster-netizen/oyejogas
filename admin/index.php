@@ -12,6 +12,7 @@ $desks = [
     ['Orders', 'admin/orders.php', 'orders.view'],
     ['Refills', 'admin/refills.php', 'refills.view'],
     ['Pickups', 'admin/pickups.php', 'pickups.view'],
+    ['Dispatch', 'admin/dispatch.php', 'deliveries.view'],
     ['Inventory', 'admin/inventory.php', 'inventory.view'],
     ['Purchases', 'admin/purchases.php', 'purchases.manage'],
     ['Wallet', 'admin/wallet.php', 'wallet.view'],
