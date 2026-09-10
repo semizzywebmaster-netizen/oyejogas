@@ -247,3 +247,8 @@ label.radio input { width: auto; }
 .inline-form input { width: 5.5rem; padding: 0.25rem 0.4rem; }
 .inline-form input[name="reason"], .inline-form input[name="note"] { width: 8rem; }
 .inline-form select { padding: 0.25rem 0.4rem; }
+
+/* Phase 15: admin desks */
+.perm-group { border: 1px solid #ddd; border-radius: 6px; padding: 0.6rem 0.8rem; margin-bottom: 0.6rem; }
+.perm-group legend { font-weight: 700; padding: 0 0.4rem; }
+.check { display: block; margin: 0.25rem 0; font-weight: 400; }
