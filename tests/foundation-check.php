@@ -32,6 +32,7 @@ $expected = [
     'includes/wallet.php', 'includes/refills.php', 'includes/pickups.php',
     'includes/inventory.php', 'includes/admin.php', 'includes/delivery.php',
     'includes/payments.php', 'includes/support.php', 'includes/marketing.php',
+    'includes/spin.php',
     'includes/footer.php',
     'admin/index.php', 'admin/wallet.php', 'admin/refills.php',
     'admin/pickups.php', 'admin/inventory.php', 'admin/purchases.php',
@@ -40,7 +41,7 @@ $expected = [
     'admin/coupons.php', 'admin/settings.php', 'admin/addons.php',
     'admin/dispatch.php', 'admin/finance.php', 'admin/tickets.php',
     'admin/reviews.php', 'admin/marketing.php', 'admin/faqs.php',
-    'admin/posts.php', 'admin/newsletter.php',
+    'admin/posts.php', 'admin/newsletter.php', 'admin/spin.php',
     'customer/index.php', 'customer/register.php', 'customer/login.php',
     'customer/logout.php', 'customer/forgot-password.php',
     'customer/reset-password.php', 'customer/verify-email.php',
@@ -49,7 +50,7 @@ $expected = [
     'customer/notifications.php', 'customer/invoice.php', 'customer/reorder.php',
     'customer/tickets.php', 'customer/wallet.php', 'customer/statement.php',
     'customer/refills.php', 'customer/pickups.php', 'customer/payments.php',
-    'customer/reviews.php',
+    'customer/reviews.php', 'customer/spin.php',
     'driver/index.php',
     'api/index.php', 'api/payments-callback.php',
     'install/index.php', 'install/installer.php',
@@ -94,6 +95,7 @@ $expected = [
     'docs/17-Phase-17-Verification-Report.md',
     'docs/18-Phase-18-Verification-Report.md',
     'docs/19-Phase-19-Verification-Report.md',
+    'docs/20-Phase-20-Verification-Report.md',
     'README.md',
 ];
 foreach ($expected as $f) {
@@ -197,6 +199,16 @@ check(strpos((string) @file_get_contents($root . '/blog.php'), 'mk_posts_publish
 check(strpos((string) @file_get_contents($root . '/post.php'), 'mk_post_by_slug') !== false, 'post.php: published single');
 check(strpos((string) @file_get_contents($root . '/newsletter.php'), 'mk_subscribe') !== false, 'newsletter.php: subscribe form');
 check(strpos((string) @file_get_contents($root . '/index.php'), 'mk_banners_live') !== false, 'index.php: live banners');
+check(strpos((string) @file_get_contents($root . '/includes/spin.php'), 'spin_play') !== false, 'spin lib: play');
+check(strpos((string) @file_get_contents($root . '/includes/spin.php'), 'random_int') !== false, 'spin lib: secure random');
+check(strpos((string) @file_get_contents($root . '/includes/spin.php'), 'spin_eligibility') !== false, 'spin lib: eligibility');
+check(strpos((string) @file_get_contents($root . '/includes/spin.php'), 'spin_reverse') !== false, 'spin lib: reversal');
+check(strpos((string) @file_get_contents($root . '/includes/spin.php'), 'spin_claim') !== false, 'spin lib: claim');
+check(strpos((string) @file_get_contents($root . '/includes/spin.php'), 'spin_expire_due') !== false, 'spin lib: expiry');
+check(strpos((string) @file_get_contents($root . '/database/schema.sql'), 'reward_code') !== false, 'schema: spin reward codes');
+check(strpos((string) @file_get_contents($root . '/admin/spin.php'), 'spin.manage') !== false, 'spin desk: manage permission');
+check(strpos((string) @file_get_contents($root . '/customer/spin.php'), 'spin_to_win') !== false, 'spin page: toggle gate');
+check(strpos((string) @file_get_contents($root . '/customer/index.php'), 'customer/spin.php') !== false, 'dashboard: spin link');
 check(strpos((string) @file_get_contents($root . '/checkout.php'), 'guest_checkout') !== false, 'checkout.php: guest toggle gate');
 check(strpos((string) @file_get_contents($root . '/checkout.php'), 'shop.order') !== false, 'checkout.php: order permission');
 check(strpos((string) @file_get_contents($root . '/checkout.php'), 'notify_emit') !== false, 'checkout.php: confirmation notify');

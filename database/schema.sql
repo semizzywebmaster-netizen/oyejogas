@@ -863,10 +863,13 @@ CREATE TABLE IF NOT EXISTS `spins` (
     `period_key` VARCHAR(20) NOT NULL COMMENT 'e.g. 2026-09-10, 2026-W37, or campaign',
     `reward_status` ENUM('pending','credited','expired','reversed') NOT NULL DEFAULT 'pending',
     `wallet_txn_ref` VARCHAR(40) NULL,
+    `reward_code` VARCHAR(40) NULL,
+    `expires_at` DATETIME NULL,
     `ip_address` VARCHAR(45) NULL,
     `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`),
     UNIQUE KEY `uq_spins_period` (`campaign_id`, `customer_id`, `period_key`),
+    KEY `idx_spins_expiry` (`reward_status`, `expires_at`),
     CONSTRAINT `fk_spins_camp` FOREIGN KEY (`campaign_id`) REFERENCES `spin_campaigns` (`id`) ON DELETE RESTRICT,
     CONSTRAINT `fk_spins_customer` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`id`) ON DELETE RESTRICT,
     CONSTRAINT `fk_spins_prize` FOREIGN KEY (`prize_id`) REFERENCES `spin_prizes` (`id`) ON DELETE SET NULL
