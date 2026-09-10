@@ -14,12 +14,15 @@ $banners_top = [];
 $banners_bottom = [];
 $sections = [];
 $campaigns = [];
+$mkt = oyejo_feature('marketing_campaigns');
 try {
+    if ($mkt) {
     $announcements = db()->query(
         "SELECT `title`, `body` FROM `announcements` WHERE `is_active` = 1 AND `audience` = 'all'
          AND (`starts_at` IS NULL OR `starts_at` <= NOW()) AND (`ends_at` IS NULL OR `ends_at` >= NOW())
          ORDER BY `id` DESC LIMIT 3"
     )->fetchAll();
+    }
     $featured = db()->query(
         'SELECT `slug`, `name`, `price_minor`,'
         . ' CASE WHEN `promo_price_minor` IS NOT NULL AND `promo_price_minor` < `price_minor`'

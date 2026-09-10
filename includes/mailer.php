@@ -28,7 +28,7 @@ function send_mail($to, $subject, $body) {
             $to,
             $subject,
             (string) $body,
-            'From: ' . env('MAIL_FROM_NAME', APP_NAME) . ' <' . env('MAIL_FROM', 'no-reply@localhost') . '>' . "\r\n"
+            'From: ' . env('MAIL_FROM_NAME', setting('notif_from_name', APP_NAME)) . ' <' . env('MAIL_FROM', setting('notif_from_email', 'no-reply@localhost')) . '>' . "\r\n"
             . 'Content-Type: text/plain; charset=UTF-8'
         );
     }

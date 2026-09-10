@@ -49,6 +49,9 @@ if (session_status() === PHP_SESSION_NONE) {
 // --- Session tick: idle/absolute expiry + rotation (Phase 5) ---
 auth_tick();
 
+// --- Maintenance mode (Phase 23): locked storefront, staff exempt ---
+oyejo_maintenance_gate();
+
 // --- Safety net for uncaught exceptions (full handler in Phase 25) ---
 set_exception_handler(function ($e) {
     error_log('[oyejo] Uncaught ' . get_class($e) . ': ' . $e->getMessage());
@@ -107,6 +110,42 @@ function require_login() {
 // (real permission-level enforcement since Phase 6).
 
 // --- Feature toggles (admin center arrives in Phase 23) ---
+function oyejo_maintenance_gate() {
+    if (PHP_SAPI === 'cli') {
+        return;
+    }
+    if (!oyejo_feature('maintenance_mode')) {
+        return;
+    }
+    $path = str_replace(chr(92), '/', (string) ($_SERVER['SCRIPT_NAME'] ?? ''));
+    if (stripos($path, '/install/') !== false || stripos($path, '/admin/') !== false) {
+        return;
+    }
+    if (preg_match('#/customer/login\.php$#i', $path)) {
+        return;
+    }
+    if (preg_match('#\.(css|js|png|jpg|jpeg|gif|svg|ico|woff2?|webmanifest)$#i', $path)) {
+        return;
+    }
+    try {
+        $u = current_user();
+        if ($u && has_permission('portal.admin')) {
+            return;
+        }
+    } catch (Throwable $t) {
+        // Fall through to the 503 page.
+    }
+    http_response_code(503);
+    header('Retry-After: 3600');
+    $p = BASE_PATH . '/errors/503.php';
+    if (is_readable($p)) {
+        include $p;
+    } else {
+        echo 'Scheduled maintenance is in progress. Please check back soon.';
+    }
+    exit;
+}
+
 function oyejo_default_features() {
     return [
         'customer_registration' => true,
@@ -161,7 +200,7 @@ function oyejo_feature($key) {
     return $defaults[$key] ?? false;
 }
 
-/** Block access when a feature is switched OFF (refined in Phase 23). */
+/** Block access when a feature is switched OFF (404: hidden as if absent). */
 function require_feature($key) {
     if (!oyejo_feature($key)) {
         http_response_code(404);

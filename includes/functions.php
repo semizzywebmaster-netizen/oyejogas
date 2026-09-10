@@ -43,8 +43,30 @@ function flashes() {
  * Format integer minor units (kobo) as Naira. Money is ALWAYS stored and
  * calculated as integers - never floats (see checklist D-34).
  */
-function format_money($minor, $symbol = '₦') {
+function format_money($minor, $symbol = null) {
+    if ($symbol === null) {
+        $symbol = setting('currency_symbol', '₦');
+    }
     return $symbol . number_format(((int) $minor) / 100, 2);
+}
+
+/**
+ * Runtime settings reader (Phase 23). Per-request cached, fail-soft:
+ * returns $default when the settings table is unreachable (installer).
+ */
+function setting($key, $default = '') {
+    static $cache = null;
+    if ($cache === null) {
+        $cache = [];
+        try {
+            foreach (db()->query('SELECT `key`, `value` FROM `settings`')->fetchAll() as $r) {
+                $cache[$r['key']] = $r['value'];
+            }
+        } catch (Throwable $t) {
+            // Table not installed yet: defaults stand in.
+        }
+    }
+    return array_key_exists($key, $cache) ? $cache[$key] : $default;
 }
 
 function request_method() {

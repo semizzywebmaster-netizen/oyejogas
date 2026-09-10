@@ -31,7 +31,7 @@ $mainNav[] = ['Admin', url('admin/')];
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="csrf-token" content="<?= e(csrf_token()) ?>">
-<title><?= e($page_title ?? APP_NAME) ?> — <?= e(APP_NAME) ?></title>
+<title><?= e($page_title ?? setting('site_name', APP_NAME)) ?> — <?= e(setting('site_name', APP_NAME)) ?></title>
 <link rel="stylesheet" href="<?= e(asset('assets/css/style.css')) ?>">
 <link rel="icon" href="<?= e(asset('assets/images/logo.svg')) ?>" type="image/svg+xml">
 </head>
@@ -43,7 +43,7 @@ $mainNav[] = ['Admin', url('admin/')];
   <div class="wrap nav">
     <a class="brand" href="<?= e(url('')) ?>">
       <img src="<?= e(asset('assets/images/logo.svg')) ?>" alt="" width="36" height="36">
-      <span><?= e(APP_NAME) ?></span>
+      <span><?= e(setting('site_name', APP_NAME)) ?></span>
     </a>
     <button class="hamburger" id="navToggle" aria-label="Menu" aria-expanded="false">&#9776;</button>
     <nav class="links" id="navLinks">

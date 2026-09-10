@@ -55,7 +55,7 @@ $expected = [
     'driver/index.php',
     'api/index.php', 'api/payments-callback.php',
     'install/index.php', 'install/installer.php',
-    'errors/404.php', 'errors/403.php', 'errors/500.php',
+    'errors/404.php', 'errors/403.php', 'errors/500.php', 'errors/503.php',
     'assets/css/style.css', 'assets/js/app.js', 'assets/images/logo.svg',
     'assets/images/product-placeholder.svg',
     'assets/images/.gitkeep', 'assets/icons/.gitkeep',
@@ -100,6 +100,7 @@ $expected = [
     'docs/20-Phase-20-Verification-Report.md',
     'docs/21-Phase-21-Verification-Report.md',
     'docs/22-Phase-22-Verification-Report.md',
+    'docs/23-Phase-23-Verification-Report.md',
     'README.md',
 ];
 foreach ($expected as $f) {
@@ -234,6 +235,16 @@ check(strpos((string) @file_get_contents($root . '/includes/notify.php'), 'notif
 check(strpos((string) @file_get_contents($root . '/includes/mailer.php'), 'whatsapp_send') !== false, 'mailer: whatsapp sender');
 check(strpos((string) @file_get_contents($root . '/admin/notifications.php'), 'notifications.send') !== false, 'notif desk: send permission');
 check(strpos((string) @file_get_contents($root . '/cron/send-notifications.php'), 'notify_process_queue') !== false, 'cron: queue worker');
+check(strpos((string) @file_get_contents($root . '/includes/bootstrap.php'), 'oyejo_maintenance_gate') !== false, 'maintenance: gate in bootstrap');
+check(strpos((string) @file_get_contents($root . '/errors/503.php'), 'Retry-After') !== false, 'maintenance: 503 page');
+check(strpos((string) @file_get_contents($root . '/includes/functions.php'), 'function setting(') !== false, 'settings: runtime reader');
+check(strpos((string) @file_get_contents($root . '/includes/functions.php'), 'currency_symbol') !== false, 'settings: currency symbol wired');
+check(strpos((string) @file_get_contents($root . '/includes/cart.php'), 'orders_prefix') !== false, 'settings: order prefix wired');
+check(strpos((string) @file_get_contents($root . '/includes/mailer.php'), 'notif_from_email') !== false, 'settings: mail from fallback');
+check(strpos((string) @file_get_contents($root . '/includes/header.php'), "setting('site_name'") !== false, 'settings: site name in header');
+check(strpos((string) @file_get_contents($root . '/index.php'), 'marketing_campaigns') !== false, 'toggles: marketing gated');
+check(strpos((string) @file_get_contents($root . '/admin/addons.php'), "oyejo_feature('addons')") !== false, 'toggles: addons gated');
+check(strpos((string) @file_get_contents($root . '/includes/notify.php'), "'push' => 'push_notifications'") !== false, 'toggles: push wired');
 check(strpos((string) @file_get_contents($root . '/checkout.php'), 'guest_checkout') !== false, 'checkout.php: guest toggle gate');
 check(strpos((string) @file_get_contents($root . '/checkout.php'), 'shop.order') !== false, 'checkout.php: order permission');
 check(strpos((string) @file_get_contents($root . '/checkout.php'), 'notify_emit') !== false, 'checkout.php: confirmation notify');

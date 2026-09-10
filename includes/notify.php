@@ -70,7 +70,7 @@ function notify_channel_toggles() {
         'email' => 'email_notifications',
         'sms' => 'sms_notifications',
         'whatsapp' => 'whatsapp_notifications',
-        'push' => null, // inbox delivery always available
+        'push' => 'push_notifications',
     ];
 }
 

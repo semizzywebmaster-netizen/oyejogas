@@ -11,8 +11,8 @@ if (!defined('OYEJO_BOOT')) {
 <footer class="site">
   <div class="wrap foot">
     <div>
-      <strong><?= e(APP_NAME) ?></strong>
-      <p>LPG e-commerce, gas refills, cylinder exchange, pickup &amp; delivery across Lagos.</p>
+      <strong><?= e(setting('site_name', APP_NAME)) ?></strong>
+      <p><?= e(setting('tagline', 'LPG e-commerce, gas refills, cylinder exchange, pickup &amp; delivery across Lagos.')) ?></p>
     </div>
     <div>
       <strong>Company</strong>
@@ -33,7 +33,7 @@ if (!defined('OYEJO_BOOT')) {
       <p>Platform v<?= e(OYEJO_VERSION) ?></p>
     </div>
   </div>
-  <div class="wrap tiny">&copy; <?= e(date('Y')) ?> <?= e(APP_NAME) ?>. All rights reserved.</div>
+  <div class="wrap tiny">&copy; <?= e(date('Y')) ?> <?= e(setting('site_name', APP_NAME)) ?>. All rights reserved.</div>
 </footer>
 <script src="<?= e(asset('assets/js/app.js')) ?>"></script>
 </body>

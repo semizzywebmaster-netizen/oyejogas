@@ -12,12 +12,17 @@ $me = current_user();
 $can_manage = has_permission('addons.manage');
 $message = '';
 $errors = [];
+if (!oyejo_feature('addons')) {
+    $errors[] = 'The add-on system is currently disabled (Settings → Feature toggles).';
+}
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!csrf_verify($_POST['csrf_token'] ?? '')) {
         $errors[] = 'Your session expired. Please try again.';
     } elseif (!$can_manage) {
         $errors[] = 'You do not have permission to manage add-ons.';
+    } elseif (!oyejo_feature('addons')) {
+        $errors[] = 'The add-on system is disabled. Enable it in Settings first.';
     } else {
         [$ok, $msg] = adm_addon_status($_POST['slug'] ?? '', $_POST['to_status'] ?? '', (int) $me['id']);
         $ok ? $message = $msg : $errors[] = $msg;

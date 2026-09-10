@@ -240,7 +240,11 @@ function cart_order_number() {
     for ($i = 0; $i < 5; $i++) {
         $rand .= $alphabet[random_int(0, strlen($alphabet) - 1)];
     }
-    return 'OY-' . date('Ymd') . '-' . $rand;
+    $prefix = strtoupper((string) setting('orders_prefix', 'OY-'));
+    if (!preg_match('/^[A-Z0-9-]{1,8}$/', $prefix)) {
+        $prefix = 'OY-';
+    }
+    return $prefix . date('Ymd') . '-' . $rand;
 }
 
 /**
