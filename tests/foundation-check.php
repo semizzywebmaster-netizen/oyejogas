@@ -29,9 +29,10 @@ $expected = [
     'includes/mailer.php', 'includes/rbac.php', 'includes/header.php',
     'includes/catalog.php', 'includes/cart.php', 'includes/notify.php',
     'includes/wallet.php', 'includes/refills.php', 'includes/pickups.php',
+    'includes/inventory.php',
     'includes/footer.php',
     'admin/index.php', 'admin/wallet.php', 'admin/refills.php',
-    'admin/pickups.php',
+    'admin/pickups.php', 'admin/inventory.php', 'admin/purchases.php',
     'customer/index.php', 'customer/register.php', 'customer/login.php',
     'customer/logout.php', 'customer/forgot-password.php',
     'customer/reset-password.php', 'customer/verify-email.php',
@@ -76,6 +77,7 @@ $expected = [
     'docs/10-Phase-10-Verification-Report.md',
     'docs/11-Phase-11-Verification-Report.md',
     'docs/12-Phase-12-Verification-Report.md',
+    'docs/13-Phase-13-Verification-Report.md',
     'README.md',
 ];
 foreach ($expected as $f) {
@@ -121,7 +123,7 @@ check(strpos((string) @file_get_contents($root . '/includes/wallet.php'), 'walle
 check(strpos((string) @file_get_contents($root . '/includes/wallet.php'), 'wallet_decide_topup') !== false, 'wallet lib: top-up decisions');
 check(strpos((string) @file_get_contents($root . '/includes/wallet.php'), 'wallet_credit') !== false, 'wallet lib: credit primitive');
 check(strpos((string) @file_get_contents($root . '/includes/wallet.php'), 'wallet_adjust') !== false, 'wallet lib: adjustments');
-check(strpos((string) @file_get_contents($root . '/includes/wallet.php'), 'wallet_reverse') !== false, 'wallet lib: compensating reversals');
+check(strpos((string) @file_get_contents($root . '/includes/wallet.php'), 'wallet_reverse') !== false, 'wallet lib: reversals');
 check(strpos((string) @file_get_contents($root . '/includes/wallet.php'), 'wallet_freeze') !== false, 'wallet lib: freeze control');
 check(strpos((string) @file_get_contents($root . '/includes/wallet.php'), 'wallet_audit') !== false, 'wallet lib: audit trail');
 check(strpos((string) @file_get_contents($root . '/includes/refills.php'), 'refill_request') !== false, 'refill lib: requests');
@@ -130,6 +132,10 @@ check(strpos((string) @file_get_contents($root . '/includes/refills.php'), 'refi
 check(strpos((string) @file_get_contents($root . '/includes/pickups.php'), 'pickup_request') !== false, 'pickup lib: requests');
 check(strpos((string) @file_get_contents($root . '/includes/pickups.php'), 'pickup_collect') !== false, 'pickup lib: collection');
 check(strpos((string) @file_get_contents($root . '/includes/pickups.php'), 'pickup_serial_ok') !== false, 'pickup lib: serial validation');
+check(strpos((string) @file_get_contents($root . '/includes/inventory.php'), 'inv_adjust') !== false, 'inventory lib: adjustments');
+check(strpos((string) @file_get_contents($root . '/includes/inventory.php'), 'inv_move') !== false, 'inventory lib: movements');
+check(strpos((string) @file_get_contents($root . '/includes/inventory.php'), 'inv_search_cylinders') !== false, 'inventory lib: serial search');
+check(strpos((string) @file_get_contents($root . '/includes/inventory.php'), 'inv_purchase_receive') !== false, 'inventory lib: purchase receiving');
 check(strpos((string) @file_get_contents($root . '/checkout.php'), 'guest_checkout') !== false, 'checkout.php: guest toggle gate');
 check(strpos((string) @file_get_contents($root . '/checkout.php'), 'shop.order') !== false, 'checkout.php: order permission');
 check(strpos((string) @file_get_contents($root . '/checkout.php'), 'notify_emit') !== false, 'checkout.php: confirmation notify');
@@ -159,6 +165,10 @@ check(strpos((string) @file_get_contents($root . '/admin/wallet.php'), 'payments
 check(strpos((string) @file_get_contents($root . '/admin/wallet.php'), 'wallet.adjust') !== false, 'wallet desk: adjustment permission');
 check(strpos((string) @file_get_contents($root . '/admin/refills.php'), 'refills.manage') !== false, 'refill desk: manage permission');
 check(strpos((string) @file_get_contents($root . '/admin/pickups.php'), 'pickups.manage') !== false, 'pickup desk: manage permission');
+check(strpos((string) @file_get_contents($root . '/admin/inventory.php'), 'inventory.adjust') !== false, 'inventory desk: adjust permission');
+check(strpos((string) @file_get_contents($root . '/admin/inventory.php'), 'cylinders.manage') !== false, 'inventory desk: cylinder permission');
+check(strpos((string) @file_get_contents($root . '/admin/purchases.php'), 'purchases.manage') !== false, 'purchases desk: manage permission');
+check(strpos((string) @file_get_contents($root . '/admin/purchases.php'), 'suppliers.manage') !== false, 'purchases desk: supplier permission');
 check(strpos((string) @file_get_contents($root . '/includes/header.php'), 'shop.php') !== false, 'header.php: shop nav link');
 check(strpos((string) @file_get_contents($root . '/includes/header.php'), 'oyejo_cart') !== false, 'header.php: cart link');
 check(strpos((string) @file_get_contents($root . '/includes/header.php'), 'customer/refills.php') !== false, 'header.php: refill link');
@@ -172,6 +182,7 @@ check(strpos((string) @file_get_contents($root . '/assets/css/style.css'), '.pro
 check(strpos((string) @file_get_contents($root . '/assets/css/style.css'), '.checkout-grid') !== false, 'style.css: checkout styles');
 check(strpos((string) @file_get_contents($root . '/assets/css/style.css'), '.dash-grid') !== false, 'style.css: dashboard styles');
 check(strpos((string) @file_get_contents($root . '/assets/css/style.css'), '.txn-credit') !== false, 'style.css: wallet styles');
+check(strpos((string) @file_get_contents($root . '/assets/css/style.css'), '.stat-grid') !== false, 'style.css: stat-grid styles');
 check(strpos((string) @file_get_contents($root . '/assets/js/app.js'), 'window.Oyejo') !== false, 'app.js: Oyejo helper');
 check(strpos((string) @file_get_contents($root . '/index.php'), 'reject_path_info') !== false, 'index.php: PATH_INFO 404 guard');
 check(strpos((string) @file_get_contents($root . '/install/installer.php'), 'inst_split_sql') !== false, 'installer.php: DELIMITER-aware splitter');

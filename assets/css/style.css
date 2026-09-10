@@ -237,3 +237,13 @@ label.radio input { width: auto; }
 .filters { display: flex; gap: 12px; align-items: end; flex-wrap: wrap; margin-bottom: 16px; }
 .txn-credit { color: #0b5a30; font-weight: 700; }
 .txn-debit { color: #8f1d1d; font-weight: 700; }
+
+/* Phase 14: inventory desk */
+.stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0.75rem; margin-bottom: 1rem; }
+.card.stat { text-align: center; padding: 0.9rem 0.5rem; }
+.stat-num { display: block; font-size: 1.6rem; font-weight: 700; }
+.stat-label { font-size: 0.85rem; color: #555; }
+.inline-form { display: inline-flex; flex-wrap: wrap; gap: 0.3rem; align-items: center; }
+.inline-form input { width: 5.5rem; padding: 0.25rem 0.4rem; }
+.inline-form input[name="reason"], .inline-form input[name="note"] { width: 8rem; }
+.inline-form select { padding: 0.25rem 0.4rem; }
