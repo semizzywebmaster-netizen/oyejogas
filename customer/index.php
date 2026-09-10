@@ -157,6 +157,7 @@ require BASE_PATH . '/includes/header.php';
       <li><a href="<?= e(url('customer/profile.php')) ?>">Profile</a></li>
       <li><a href="<?= e(url('customer/addresses.php')) ?>">Addresses (<?= $addr_count ?>)</a></li>
       <li><a href="<?= e(url('customer/phones.php')) ?>">Phones</a></li>
+      <li><a href="<?= e(url('customer/refills.php')) ?>">Refills</a></li>
       <li><a href="<?= e(url('customer/security.php')) ?>">Security</a></li>
       <li><a href="<?= e(url('customer/logout.php')) ?>">Log out</a></li>
     </ul>

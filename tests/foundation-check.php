@@ -28,8 +28,8 @@ $expected = [
     'includes/bootstrap.php', 'includes/functions.php', 'includes/auth.php',
     'includes/mailer.php', 'includes/rbac.php', 'includes/header.php',
     'includes/catalog.php', 'includes/cart.php', 'includes/notify.php',
-    'includes/wallet.php', 'includes/footer.php',
-    'admin/index.php', 'admin/wallet.php',
+    'includes/wallet.php', 'includes/refills.php', 'includes/footer.php',
+    'admin/index.php', 'admin/wallet.php', 'admin/refills.php',
     'customer/index.php', 'customer/register.php', 'customer/login.php',
     'customer/logout.php', 'customer/forgot-password.php',
     'customer/reset-password.php', 'customer/verify-email.php',
@@ -37,6 +37,7 @@ $expected = [
     'customer/addresses.php', 'customer/phones.php', 'customer/security.php',
     'customer/notifications.php', 'customer/invoice.php', 'customer/reorder.php',
     'customer/tickets.php', 'customer/wallet.php', 'customer/statement.php',
+    'customer/refills.php',
     'driver/index.php',
     'api/index.php', 'install/index.php', 'install/installer.php',
     'errors/404.php', 'errors/403.php', 'errors/500.php',
@@ -71,6 +72,7 @@ $expected = [
     'docs/08-Phase-8-Verification-Report.md',
     'docs/09-Phase-9-Verification-Report.md',
     'docs/10-Phase-10-Verification-Report.md',
+    'docs/11-Phase-11-Verification-Report.md',
     'README.md',
 ];
 foreach ($expected as $f) {
@@ -119,6 +121,9 @@ check(strpos((string) @file_get_contents($root . '/includes/wallet.php'), 'walle
 check(strpos((string) @file_get_contents($root . '/includes/wallet.php'), 'wallet_reverse') !== false, 'wallet lib: compensating reversals');
 check(strpos((string) @file_get_contents($root . '/includes/wallet.php'), 'wallet_freeze') !== false, 'wallet lib: freeze control');
 check(strpos((string) @file_get_contents($root . '/includes/wallet.php'), 'wallet_audit') !== false, 'wallet lib: audit trail');
+check(strpos((string) @file_get_contents($root . '/includes/refills.php'), 'refill_request') !== false, 'refill lib: requests');
+check(strpos((string) @file_get_contents($root . '/includes/refills.php'), 'refill_set_status') !== false, 'refill lib: lifecycle');
+check(strpos((string) @file_get_contents($root . '/includes/refills.php'), 'refill_flow') !== false, 'refill lib: flow map');
 check(strpos((string) @file_get_contents($root . '/checkout.php'), 'guest_checkout') !== false, 'checkout.php: guest toggle gate');
 check(strpos((string) @file_get_contents($root . '/checkout.php'), 'shop.order') !== false, 'checkout.php: order permission');
 check(strpos((string) @file_get_contents($root . '/checkout.php'), 'notify_emit') !== false, 'checkout.php: confirmation notify');
@@ -127,6 +132,7 @@ check(strpos((string) @file_get_contents($root . '/customer/orders.php'), 'reord
 check(strpos((string) @file_get_contents($root . '/customer/orders.php'), 'Tracking') !== false, 'orders.php: tracking timeline');
 check(strpos((string) @file_get_contents($root . '/customer/index.php'), 'My referral link') !== false, 'dashboard: referral section');
 check(strpos((string) @file_get_contents($root . '/customer/index.php'), 'customer/wallet.php') !== false, 'dashboard: wallet link');
+check(strpos((string) @file_get_contents($root . '/customer/index.php'), 'customer/refills.php') !== false, 'dashboard: refill link');
 check(strpos((string) @file_get_contents($root . '/customer/profile.php'), 'phone_verified_at') !== false, 'profile.php: verification reset');
 check(strpos((string) @file_get_contents($root . '/customer/addresses.php'), 'is_default') !== false, 'addresses.php: default handling');
 check(strpos((string) @file_get_contents($root . '/customer/phones.php'), 'customer_phones') !== false, 'phones.php: phone book');
@@ -138,10 +144,14 @@ check(strpos((string) @file_get_contents($root . '/customer/tickets.php'), 'tick
 check(strpos((string) @file_get_contents($root . '/customer/tickets.php'), 'tickets.own') !== false, 'tickets.php: own-tickets permission');
 check(strpos((string) @file_get_contents($root . '/customer/wallet.php'), 'wallet_request_topup') !== false, 'wallet page: top-up form');
 check(strpos((string) @file_get_contents($root . '/customer/statement.php'), 'Opening balance') !== false, 'statement.php: derived statement');
+check(strpos((string) @file_get_contents($root . '/customer/refills.php'), 'gas_refills') !== false, 'refills page: toggle gate');
+check(strpos((string) @file_get_contents($root . '/customer/refills.php'), 'refill_request') !== false, 'refills page: booking form');
 check(strpos((string) @file_get_contents($root . '/admin/wallet.php'), 'payments.verify') !== false, 'wallet desk: approval permission');
 check(strpos((string) @file_get_contents($root . '/admin/wallet.php'), 'wallet.adjust') !== false, 'wallet desk: adjustment permission');
+check(strpos((string) @file_get_contents($root . '/admin/refills.php'), 'refills.manage') !== false, 'refill desk: manage permission');
 check(strpos((string) @file_get_contents($root . '/includes/header.php'), 'shop.php') !== false, 'header.php: shop nav link');
 check(strpos((string) @file_get_contents($root . '/includes/header.php'), 'oyejo_cart') !== false, 'header.php: cart link');
+check(strpos((string) @file_get_contents($root . '/includes/header.php'), 'customer/refills.php') !== false, 'header.php: refill link');
 check(strpos((string) @file_get_contents($root . '/includes/footer.php'), 'terms.php') !== false, 'footer.php: legal links');
 check(strpos((string) @file_get_contents($root . '/.env.example'), 'WHATSAPP_API_KEY') !== false, '.env.example: whatsapp keys');
 check(strpos((string) @file_get_contents($root . '/.env.example'), 'APP_KEY') !== false, '.env.example: APP_KEY template');
