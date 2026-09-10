@@ -47,6 +47,9 @@ $mainNav[] = ['Admin', url('admin/')];
       <?php foreach ($mainNav as $item) : ?>
         <a href="<?= e($item[1]) ?>"><?= e($item[0]) ?></a>
       <?php endforeach; ?>
+      <?php $cartN = array_sum($_SESSION['oyejo_cart'] ?? []); if ($cartN > 0) : ?>
+        <a href="<?= e(url('cart.php')) ?>">Cart (<?= (int) $cartN ?>)</a>
+      <?php endif; ?>
       <?php if (is_logged_in()) : ?>
         <span class="who">Hi, <?= e(current_user()['name']) ?></span>
         <a href="<?= e(url('customer/logout.php')) ?>">Logout</a>

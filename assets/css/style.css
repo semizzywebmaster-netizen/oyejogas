@@ -211,3 +211,13 @@ footer.site { background: #10241a; color: #cfe0d4; margin-top: 24px; }
 @media (max-width: 900px) {
   .shop-layout, .product-detail { grid-template-columns: 1fr; }
 }
+
+/* --- Cart + checkout (Phase 9) --- */
+.cart-table input[type="number"] { width: 80px; }
+.checkout-grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 24px; align-items: start; }
+.checkout-grid aside ul { padding-left: 20px; }
+label.radio { display: flex; gap: 8px; align-items: center; font-weight: 600; margin: 8px 0; }
+label.radio input { width: auto; }
+@media (max-width: 900px) {
+  .checkout-grid { grid-template-columns: 1fr; }
+}

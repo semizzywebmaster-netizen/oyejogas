@@ -81,7 +81,19 @@ require BASE_PATH . '/includes/header.php';
     <?php if ($p['description'] !== null && $p['description'] !== '') : ?>
       <p><?= nl2br(e($p['description'])) ?></p>
     <?php endif; ?>
-    <p><span class="badge">Cart and checkout open in Phase 9</span></p>
+    <?php if (!oyejo_feature('product_ordering')) : ?>
+      <p><span class="badge">Ordering is currently disabled</span></p>
+    <?php elseif (oyejo_stock_state($p)[0] === 'Out of stock') : ?>
+      <p><span class="badge">Out of stock — check back soon</span></p>
+    <?php else : ?>
+      <form method="post" action="<?= e(url('cart.php')) ?>" class="stack">
+        <?= csrf_field() ?>
+        <input type="hidden" name="action" value="add">
+        <input type="hidden" name="product_id" value="<?= (int) $p['id'] ?>">
+        <label>Quantity<input type="number" name="qty" value="1" min="1" max="99"></label>
+        <p><button class="btn primary" type="submit">Add to cart</button></p>
+      </form>
+    <?php endif; ?>
     <div class="table-scroll">
       <table class="data">
         <tbody>

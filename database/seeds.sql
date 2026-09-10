@@ -277,3 +277,8 @@ INSERT INTO `products` (`category_id`, `size_id`, `sku`, `slug`, `name`, `descri
 (4, NULL, 'ACC-REG', 'regulator-hose-set', 'Regulator + Hose Set', 'Safety regulator with 1.5m reinforced hose and clips. Fits all standard cylinders.', 'accessory', 850000, NULL, NULL, NULL, 3, 5, 1, 1, 0, 5),
 (4, NULL, 'ACC-BURN', 'table-top-burner', 'Table-top Gas Burner', 'Two-burner table-top cooker with auto ignition and windshield legs.', 'accessory', 550000, NULL, NULL, NULL, 0, 2, 1, 1, 0, 6),
 (4, NULL, 'ACC-OLD', 'old-valve', 'Old Valve (Retired)', 'Retired demo row used to verify inactive products stay hidden.', 'accessory', 100000, NULL, NULL, NULL, 0, 2, 1, 0, 0, 7);
+
+-- ---------------------------------------------------------- demo coupons
+INSERT INTO `coupons` (`code`, `name`, `type`, `value`, `min_order_minor`, `max_discount_minor`, `usage_limit`, `used_count`, `starts_at`, `ends_at`, `is_active`) VALUES
+('WELCOME10', 'Welcome 10% off', 'percent', 10, 500000, 200000, 100, 0, NOW() - INTERVAL 1 DAY, NOW() + INTERVAL 90 DAY, 1),
+('FLAT500', 'Flat 500 off', 'fixed', 50000, 1000000, NULL, NULL, 0, NOW() - INTERVAL 1 DAY, NOW() + INTERVAL 90 DAY, 1);
