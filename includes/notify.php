@@ -320,6 +320,16 @@ function notify_deliver_row(array $row) {
     if ($ch === 'push') {
         $pdo->prepare("UPDATE `notifications` SET `status` = 'delivered', `provider` = 'inbox', `sent_at` = NOW() WHERE `id` = ?")
             ->execute([$id]);
+        // Best-effort Web Push fan-out to the customer's devices (PW-09).
+        // Inbox delivery already succeeded; device failures never fail the row.
+        try {
+            $uid = (int) $pdo->query('SELECT `user_id` FROM `customers` WHERE `id` = ' . (int) $row['customer_id'])->fetchColumn();
+            if ($uid > 0 && function_exists('push_web_send')) {
+                push_web_send($uid, (string) ($row['subject'] ?: 'Oyejo Gas'), (string) $row['body']);
+            }
+        } catch (Throwable $t) {
+            // Device push is advisory only.
+        }
         return 'sent';
     }
     if ($ch === 'whatsapp' && (int) $row['customer_id'] > 0 && !notify_wa_subscribed((int) $row['customer_id'])) {

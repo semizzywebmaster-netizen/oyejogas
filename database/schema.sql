@@ -1135,7 +1135,21 @@ CREATE TABLE IF NOT EXISTS `rate_limits` (
     KEY `idx_ratelimit_window` (`window_start`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- ------------------------------------------------------- push_subscriptions
+CREATE TABLE IF NOT EXISTS `push_subscriptions` (
+    `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `user_id` INT UNSIGNED NOT NULL,
+    `endpoint` VARCHAR(500) NOT NULL,
+    `p256dh` VARCHAR(200) NOT NULL,
+    `auth` VARCHAR(100) NOT NULL,
+    `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uq_push_endpoint` (`endpoint`(255)),
+    KEY `idx_push_user` (`user_id`),
+    CONSTRAINT `fk_push_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- =====================================================================
 SET FOREIGN_KEY_CHECKS = 1;
--- End of schema: 64 tables + 2 triggers.
+-- End of schema: 65 tables + 2 triggers.
 -- =====================================================================

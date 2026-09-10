@@ -54,5 +54,77 @@
     }
   };
 
+  // Service worker (offline shell + push). Scope-safe: served from root.
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function () {
+      var base = (document.querySelector('link[rel="manifest"]') || {}).href || '';
+      var root = base ? base.replace(/manifest\.webmanifest.*$/, '') : './';
+      navigator.serviceWorker.register(root + 'service-worker.js').catch(function () {});
+    });
+  }
+
+  // Install prompt (PW-03): reveal the footer button when offered.
+  var deferredPrompt = null;
+  var installWrap = document.getElementById('installWrap');
+  var installBtn = document.getElementById('installApp');
+  window.addEventListener('beforeinstallprompt', function (e) {
+    e.preventDefault();
+    deferredPrompt = e;
+    if (installWrap) {
+      installWrap.hidden = false;
+    }
+  });
+  if (installBtn) {
+    installBtn.addEventListener('click', function () {
+      if (!deferredPrompt) {
+        return;
+      }
+      deferredPrompt.prompt();
+      deferredPrompt.userChoice.then(function () {
+        deferredPrompt = null;
+        if (installWrap) {
+          installWrap.hidden = true;
+        }
+      });
+    });
+  }
+
+  // Web Push subscribe helper (used by the notifications page).
+  function b64ToBytes(s) {
+    var pad = '='.repeat((4 - (s.length % 4)) % 4);
+    var bin = window.atob(s.replace(/-/g, '+').replace(/_/g, '/') + pad);
+    var out = new Uint8Array(bin.length);
+    for (var i = 0; i < bin.length; i++) {
+      out[i] = bin.charCodeAt(i);
+    }
+    return out;
+  }
+  window.OyejoPush = {
+    supported: function () {
+      return 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
+    },
+    subscribe: function (vapidKey, saveUrl) {
+      return navigator.serviceWorker.ready.then(function (reg) {
+        return reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: b64ToBytes(vapidKey) });
+      }).then(function (sub) {
+        var raw = sub.toJSON();
+        return window.Oyejo.post(saveUrl, {
+          action: 'save', endpoint: raw.endpoint, keys: raw.keys
+        }).then(function (r) { return r.json(); });
+      });
+    },
+    unsubscribeAll: function (removeUrl) {
+      return navigator.serviceWorker.ready.then(function (reg) {
+        return reg.pushManager.getSubscription();
+      }).then(function (sub) {
+        var ep = sub ? sub.endpoint : '';
+        var done = sub ? sub.unsubscribe() : Promise.resolve(true);
+        return done.then(function () {
+          return window.Oyejo.post(removeUrl, { action: 'remove', endpoint: ep });
+        }).then(function (r) { return r.json(); });
+      });
+    }
+  };
+
   console.info('Oyejo Gas foundation ready.');
 })();

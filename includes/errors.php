@@ -229,7 +229,7 @@ function logs_rotate_settings() {
 }
 
 function logs_bases() {
-    return ['app', 'mail', 'sms', 'whatsapp', 'ops'];
+    return ['app', 'mail', 'sms', 'whatsapp', 'ops', 'push'];
 }
 
 /**
@@ -292,7 +292,7 @@ function logs_list() {
 /** Last $lines lines of a whitelisted log. Returns [lines] or [false, error]. */
 function log_tail($name, $lines = 200) {
     $name = (string) $name;
-    if (!preg_match('/^(app|mail|sms|whatsapp|ops)\.log(\.[0-9]+)?$/', $name)) {
+    if (!preg_match('/^(app|mail|sms|whatsapp|ops|push)\.log(\.[0-9]+)?$/', $name)) {
         return [false, 'Unknown log file.'];
     }
     $f = LOG_PATH . '/' . $name;

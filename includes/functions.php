@@ -17,10 +17,14 @@ function url($path = '') {
     return rtrim(APP_URL, '/') . '/' . ltrim($path, '/');
 }
 
-/** Base-aware relative URL for local assets/links (subdir-safe). */
+/** Base-aware relative URL for local assets/links (subdir-safe). Versioned for cache-busting. */
 function asset($path) {
     $b = rtrim(APP_BASE, '/');
-    return ($b === '' ? '' : $b) . '/' . ltrim($path, '/');
+    $u = ($b === '' ? '' : $b) . '/' . ltrim($path, '/');
+    if (strpos($path, 'assets/') === 0 && defined('OYEJO_VERSION')) {
+        $u .= '?v=' . OYEJO_VERSION;
+    }
+    return $u;
 }
 
 function redirect($to, $code = 302) {

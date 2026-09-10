@@ -252,3 +252,9 @@ label.radio input { width: auto; }
 .perm-group { border: 1px solid #ddd; border-radius: 6px; padding: 0.6rem 0.8rem; margin-bottom: 0.6rem; }
 .perm-group legend { font-weight: 700; padding: 0 0.4rem; }
 .check { display: block; margin: 0.25rem 0; font-weight: 400; }
+
+/* Phase 27: PWA */
+.linklike { background: none; border: none; padding: 0; color: #fff; text-decoration: underline; cursor: pointer; font: inherit; }
+.tiny .linklike { color: inherit; }
+#installWrap[hidden] { display: none; }
+.push-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }

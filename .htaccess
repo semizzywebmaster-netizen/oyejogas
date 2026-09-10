@@ -36,6 +36,13 @@ RedirectMatch 403 ^/addons(/.*)?$
     Header always set Referrer-Policy "strict-origin-when-cross-origin"
 </IfModule>
 
+# --- PWA: manifest MIME type (Phase 27) ---
+<IfModule mod_mime.c>
+    AddType application/manifest+json .webmanifest
+</IfModule>
+
+
+
 # --- PHP defaults (honored on mod_php; harmless on php-fpm) ---
 <IfModule mod_php.c>
     php_flag display_errors off

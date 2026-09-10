@@ -25,6 +25,7 @@ $expected = [
     'about.php', 'contact.php', 'faq.php', 'terms.php', 'privacy.php',
     'shop.php', 'product.php', 'cart.php', 'checkout.php',
     'blog.php', 'post.php', 'newsletter.php',
+    'manifest.webmanifest', 'service-worker.js', 'offline.php',
     'config/config.php', 'config/database.php', 'config/.htaccess',
     'includes/bootstrap.php', 'includes/functions.php', 'includes/auth.php',
     'includes/mailer.php', 'includes/rbac.php', 'includes/header.php',
@@ -33,7 +34,7 @@ $expected = [
     'includes/inventory.php', 'includes/admin.php', 'includes/delivery.php',
     'includes/payments.php', 'includes/support.php', 'includes/marketing.php',
     'includes/spin.php', 'includes/referrals.php', 'includes/ops.php', 'includes/errors.php',
-    'includes/addons.php',
+    'includes/addons.php', 'includes/push.php',
     'includes/footer.php',
     'admin/index.php', 'admin/wallet.php', 'admin/refills.php',
     'admin/pickups.php', 'admin/inventory.php', 'admin/purchases.php',
@@ -55,12 +56,15 @@ $expected = [
     'customer/refills.php', 'customer/pickups.php', 'customer/payments.php',
     'customer/reviews.php', 'customer/spin.php', 'customer/referrals.php',
     'driver/index.php',
-    'api/index.php', 'api/payments-callback.php',
+    'api/index.php', 'api/payments-callback.php', 'api/push-subscribe.php',
     'install/index.php', 'install/installer.php',
     'errors/404.php', 'errors/403.php', 'errors/500.php', 'errors/503.php', 'errors/419.php', 'errors/429.php',
     'assets/css/style.css', 'assets/js/app.js', 'assets/images/logo.svg',
     'assets/images/product-placeholder.svg',
     'assets/images/.gitkeep', 'assets/icons/.gitkeep',
+    'assets/icons/icon-192.png', 'assets/icons/icon-512.png',
+    'assets/icons/maskable-192.png', 'assets/icons/maskable-512.png',
+    'assets/.htaccess',
     'uploads/index.php', 'uploads/.htaccess', 'uploads/.gitkeep',
     'database/schema.sql', 'database/seeds.sql', 'database/.htaccess',
     'database/index.php', 'database/migrations/README.md',
@@ -113,6 +117,7 @@ $expected = [
     'docs/24-Phase-24-Verification-Report.md',
     'docs/25-Phase-25-Verification-Report.md',
     'docs/26-Phase-26-Verification-Report.md',
+    'docs/27-Phase-27-Verification-Report.md',
     'docs/ADDON-DEVELOPMENT.md',
     'README.md',
 ];
@@ -287,6 +292,23 @@ check(strpos((string) @file_get_contents($root . '/includes/admin.php'), 'addon_
 check(strpos((string) @file_get_contents($root . '/admin/addon.php'), 'addon_page_file') !== false, 'addon router: manifest gating');
 check(strpos((string) @file_get_contents($root . '/database/schema.sql'), 'CREATE TABLE IF NOT EXISTS `addon_migrations`') !== false, 'schema: addon migrations');
 check(strpos((string) @file_get_contents($root . '/.htaccess'), 'RedirectMatch 403 ^/addons') !== false, 'htaccess: addons blocked');
+check(strpos((string) @file_get_contents($root . '/includes/header.php'), 'manifest.webmanifest') !== false, 'header: PWA manifest link');
+check(strpos((string) @file_get_contents($root . '/assets/js/app.js'), 'serviceWorker') !== false, 'app.js: SW registration');
+check(strpos((string) @file_get_contents($root . '/service-worker.js'), 'admin|customer|driver|api|install|cron') !== false, 'SW: private areas bypass cache');
+check(strpos((string) @file_get_contents($root . '/service-worker.js'), 'showNotification') !== false, 'SW: push display');
+check(strpos((string) @file_get_contents($root . '/includes/push.php'), 'function push_encrypt') !== false, 'push lib: payload encryption');
+check(strpos((string) @file_get_contents($root . '/api/push-subscribe.php'), 'csrf_verify') !== false, 'push api: CSRF gate');
+check(strpos((string) @file_get_contents($root . '/database/schema.sql'), 'CREATE TABLE IF NOT EXISTS `push_subscriptions`') !== false, 'schema: push subscriptions');
+check(strpos((string) @file_get_contents($root . '/includes/functions.php'), '?v=') !== false, 'assets: versioned URLs');
+$sw_ver = '';
+if (preg_match("/VERSION = '([0-9.]+)'/", (string) @file_get_contents($root . '/service-worker.js'), $mm)) {
+    $sw_ver = $mm[1];
+}
+$boot_ver = '';
+if (preg_match("/OYEJO_VERSION', '([0-9.]+)'/", (string) @file_get_contents($root . '/includes/bootstrap.php'), $mm2)) {
+    $boot_ver = $mm2[1];
+}
+check($sw_ver !== '' && $sw_ver === $boot_ver, 'SW: cache version matches platform (' . $sw_ver . ')');
 check(strpos((string) @file_get_contents($root . '/checkout.php'), 'guest_checkout') !== false, 'checkout.php: guest toggle gate');
 check(strpos((string) @file_get_contents($root . '/checkout.php'), 'shop.order') !== false, 'checkout.php: order permission');
 check(strpos((string) @file_get_contents($root . '/checkout.php'), 'notify_emit') !== false, 'checkout.php: confirmation notify');

@@ -34,6 +34,12 @@ $mainNav[] = ['Admin', url('admin/')];
 <title><?= e($page_title ?? setting('site_name', APP_NAME)) ?> — <?= e(setting('site_name', APP_NAME)) ?></title>
 <link rel="stylesheet" href="<?= e(asset('assets/css/style.css')) ?>">
 <link rel="icon" href="<?= e(asset('assets/images/logo.svg')) ?>" type="image/svg+xml">
+<link rel="manifest" href="<?= e(url('manifest.webmanifest')) ?>">
+<meta name="theme-color" content="#0b6b3a">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="apple-touch-icon" href="<?= e(asset('assets/icons/icon-192.png')) ?>">
 </head>
 <body>
 <?php if (oyejo_feature('maintenance_mode')) : ?>

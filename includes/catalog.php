@@ -67,5 +67,5 @@ function oyejo_product_image(array $p) {
     if (!empty($p['image'])) {
         return url(ltrim((string) $p['image'], '/'));
     }
-    return url('assets/images/product-placeholder.svg');
+    return asset('assets/images/product-placeholder.svg');
 }

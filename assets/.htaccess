@@ -1,0 +1,10 @@
+# Oyejo Gas - versioned assets cache far-future (Phase 27).
+# Every asset URL carries ?v=<platform version>, so a new release busts
+# caches automatically. Never reference unversioned changing files here.
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresDefault "access plus 1 year"
+</IfModule>
+<IfModule mod_headers.c>
+    Header always set Cache-Control "public, max-age=31536000, immutable"
+</IfModule>

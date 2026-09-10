@@ -42,6 +42,68 @@ require BASE_PATH . '/includes/header.php';
 </div>
 <?php endif; ?>
 
+<?php if (oyejo_feature('push_notifications')) : ?>
+<div class="card">
+  <h2>Push notifications</h2>
+  <p class="result-meta">Get order and delivery alerts on this device, even when the site is closed.</p>
+  <p class="push-row">
+    <button class="btn small primary" type="button" id="pushEnable" hidden>Enable push on this device</button>
+    <button class="btn small ghost" type="button" id="pushDisable" hidden>Disable push on this device</button>
+    <span class="result-meta" id="pushState">Checking…</span>
+  </p>
+</div>
+<script>
+(function () {
+  if (!window.OyejoPush || !window.OyejoPush.supported()) {
+    document.getElementById('pushState').textContent = 'Push is not supported by this browser.';
+    return;
+  }
+  var on = document.getElementById('pushEnable');
+  var off = document.getElementById('pushDisable');
+  var st = document.getElementById('pushState');
+  var saveUrl = <?= json_encode(url('api/push-subscribe.php')) ?>;
+  var vapid = <?= json_encode((string) env('VAPID_PUBLIC_KEY', '')) ?>;
+  function refresh() {
+    navigator.serviceWorker.ready.then(function (reg) {
+      return reg.pushManager.getSubscription();
+    }).then(function (sub) {
+      on.hidden = !!sub;
+      off.hidden = !sub;
+      st.textContent = sub ? 'Enabled on this device.' : 'Not enabled on this device.';
+    });
+  }
+  on.addEventListener('click', function () {
+    if (vapid === '') {
+      st.textContent = 'Push is not configured yet. Please try again later.';
+      return;
+    }
+    Notification.requestPermission().then(function (perm) {
+      if (perm !== 'granted') {
+        st.textContent = 'Permission denied in the browser.';
+        return;
+      }
+      st.textContent = 'Enabling…';
+      window.OyejoPush.subscribe(vapid, saveUrl).then(function (r) {
+        st.textContent = r && r.message ? r.message : 'Done.';
+        refresh();
+      }).catch(function () {
+        st.textContent = 'Could not enable push. Please try again.';
+      });
+    });
+  });
+  off.addEventListener('click', function () {
+    st.textContent = 'Disabling…';
+    window.OyejoPush.unsubscribeAll(saveUrl).then(function () {
+      refresh();
+    }).catch(function () {
+      st.textContent = 'Could not disable push. Please try again.';
+    });
+  });
+  refresh();
+})();
+</script>
+<?php endif; ?>
+
 <?php if (!$list) : ?>
   <div class="card"><p>No notifications yet. Order updates will appear here.</p></div>
 <?php else : ?>
