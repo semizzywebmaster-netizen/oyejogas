@@ -221,3 +221,14 @@ label.radio input { width: auto; }
 @media (max-width: 900px) {
   .checkout-grid { grid-template-columns: 1fr; }
 }
+
+/* --- Dashboard + invoice (Phase 10) --- */
+.dash-stats h3 { font-size: 28px; margin: 0; }
+.dash-grid { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+.dash-grid ul { padding-left: 20px; }
+.invoice { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 28px; }
+@media print {
+  header.site, footer.site, .no-print, .crumbs { display: none; }
+  body { background: #fff; }
+  .invoice { border: none; padding: 0; }
+}

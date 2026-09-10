@@ -1,7 +1,7 @@
 <?php
 /**
- * Oyejo Gas - customer orders: list, detail/confirmation, cancellation (Phase 9).
- * Full history/tracking UI lands in Phase 10; this is the working core.
+ * Oyejo Gas - customer orders: list, detail/confirmation/tracking, invoice,
+ * reorder, cancellation (Phases 9–10).
  */
 require_once __DIR__ . '/../includes/bootstrap.php';
 reject_path_info();
@@ -75,6 +75,15 @@ if (request_method() === 'POST' && $order) {
             $s = db()->prepare('SELECT * FROM `orders` WHERE `id` = ? LIMIT 1');
             $s->execute([$order['id']]);
             $order = array_merge($order, $s->fetch());
+            $s = db()->prepare('SELECT * FROM `order_status_history` WHERE `order_id` = ? ORDER BY `id`');
+            $s->execute([$order['id']]);
+            $history = $s->fetchAll();
+            $em = db()->prepare('SELECT `u`.`email` FROM `users` `u` JOIN `customers` `c` ON `c`.`user_id` = `u`.`id` WHERE `c`.`id` = ? LIMIT 1');
+            $em->execute([$order['customer_id']]);
+            $email = $em->fetchColumn();
+            if ($email) {
+                notify_emit((int) $order['customer_id'], 'order_cancelled', $email, 'Order ' . $order['order_number'] . ' cancelled', 'Your order ' . $order['order_number'] . ' was cancelled.' . ($order['payment_status'] === 'refunded' ? ' The refund is back in your wallet.' : ''));
+            }
         } else {
             $error = $msg;
         }
@@ -110,6 +119,16 @@ require BASE_PATH . '/includes/header.php';
     <span class="badge"><?= e($methods[$order['payment_method']]['label'] ?? $order['payment_method']) ?></span>
     <span class="badge"><?= e(ucfirst($order['payment_status'])) ?></span>
   </p>
+  <p class="cta">
+    <a class="btn ghost" href="<?= e(url('customer/invoice.php?id=' . $order['id'])) ?>">View invoice</a>
+    <?php if ($logged) : ?>
+      <form method="post" action="<?= e(url('customer/reorder.php')) ?>" style="display:inline">
+        <?= csrf_field() ?>
+        <input type="hidden" name="order_id" value="<?= (int) $order['id'] ?>">
+        <button class="btn ghost" type="submit">Reorder these items</button>
+      </form>
+    <?php endif; ?>
+  </p>
   <div class="table-scroll">
     <table class="data">
       <thead><tr><th>Item</th><th>Qty</th><th>Unit</th><th>Total</th></tr></thead>
@@ -133,6 +152,17 @@ require BASE_PATH . '/includes/header.php';
         <tr><th>Deliver to</th><td><?= e((string) $order['address_text']) ?><br><?= e((string) $order['delivery_phone']) ?><?php if ($order['slot_name']) : ?><br>Slot: <?= e($order['slot_name']) ?><?php endif; ?></td></tr>
       </tbody>
     </table>
+  </div>
+  <div class="card">
+    <h2>Tracking</h2>
+    <?php if (!$history) : ?><p class="result-meta">No tracking events yet.</p>
+    <?php else : ?>
+      <ol class="ticks">
+        <?php foreach ($history as $h) : ?>
+          <li><strong><?= e(ucfirst($h['to_status'])) ?></strong> — <?= e($h['created_at']) ?><?php if ($h['note']) : ?><br><span class="result-meta"><?= e($h['note']) ?></span><?php endif; ?></li>
+        <?php endforeach; ?>
+      </ol>
+    <?php endif; ?>
   </div>
   <?php if (in_array($order['status'], ['pending', 'confirmed'], true)) : ?>
     <div class="card">

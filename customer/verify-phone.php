@@ -12,7 +12,7 @@ $errors = [];
 $info = '';
 
 if ($u && empty($u['phone'])) {
-    $errors[] = 'No phone number on your account yet. Phone management arrives in Phase 10.';
+    $errors[] = 'No phone number on your account yet. Add one under My account → Phones.';
 } elseif ($u && empty($u['phone_verified_at']) && request_method() === 'POST') {
     if (!csrf_verify(post('csrf_token'))) {
         $errors[] = 'Security token mismatch. Reload and try again.';

@@ -18,8 +18,8 @@ corrected, and approved before the next phase begins.
 | 7 | Public website and responsive design | Home, header/footer, hero, services, LPG/refill/pickup/delivery sections, about, contact, FAQ, terms, privacy, announcements, responsive | 🟢 Approved | ☑ |
 | 8 | Product catalog and pricing | Categories, cylinder sizes, refills, new cylinders, exchange, accessories, descriptions, images, prices, promo prices, stock visibility, search/filter, status | 🟢 Approved | ☑ |
 | 9 | Cart, checkout, delivery fees, orders | Cart ops, totals, address, zones, fees, slots, coupons, wallet/COD/transfer/online payment, confirmation, order numbers, cancellation rules | 🟢 Approved | ☑ |
-| 10 | Customer dashboard | Profile, addresses, phones, order history/details/tracking, invoices, reorder, notifications, wallet, referrals, rewards, tickets, security | 🟡 In progress | ☐ |
-| 11 | Customer wallet system | Account, balance, top-up, checkout payments, refunds-to-wallet, promo/referral/spin credits, history, statements, txn states, limits, admin adjustments; hardened ledger | ⬜ | ☐ |
+| 10 | Customer dashboard | Profile, addresses, phones, order history/details/tracking, invoices, reorder, notifications, wallet, referrals, rewards, tickets, security | 🟢 Approved | ☑ |
+| 11 | Customer wallet system | Account, balance, top-up, checkout payments, refunds-to-wallet, promo/referral/spin credits, history, statements, txn states, limits, admin adjustments; hardened ledger | 🟡 In progress | ☐ |
 | 12 | Gas refill management | Refill form, size/qty, cylinder details, pickup-or-delivery, pricing, status flow, assignment, processing, completion, history, notifications | ⬜ | ☐ |
 | 13 | Cylinder pickup, return, exchange | Pickup requests, empty collection, exchange, condition, serials, customer- vs company-owned tracking, damage, deposits, scheduling, confirmation, returns, history | ⬜ | ☐ |
 | 14 | Inventory and cylinder tracking | Full/empty/awaiting-refill/damaged stock, serials, accessories, adjustments, transfers, deductions, additions, low-stock alerts, movements, suppliers, purchases, reports | ⬜ | ☐ |

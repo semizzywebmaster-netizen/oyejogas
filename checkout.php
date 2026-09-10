@@ -120,6 +120,7 @@ if (request_method() === 'POST') {
                 ]);
                 if ($order) {
                     $_SESSION[OYEJO_LAST_ORDER_KEY] = $order['id'];
+                    notify_emit($cid, 'order_confirmation', $logged ? $cu['email'] : $f['email'], 'Order ' . $order['number'] . ' confirmed', 'Your order ' . $order['number'] . ' (' . format_money($order['total']) . ') is confirmed. Track it in My account.');
                     redirect(url('customer/orders.php?view=' . $order['id'] . '&placed=1'));
                 }
                 $errors = array_merge($errors, $place_errs);

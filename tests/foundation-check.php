@@ -27,12 +27,16 @@ $expected = [
     'config/config.php', 'config/database.php', 'config/.htaccess',
     'includes/bootstrap.php', 'includes/functions.php', 'includes/auth.php',
     'includes/mailer.php', 'includes/rbac.php', 'includes/header.php',
-    'includes/catalog.php', 'includes/cart.php', 'includes/footer.php',
+    'includes/catalog.php', 'includes/cart.php', 'includes/notify.php',
+    'includes/footer.php',
     'admin/index.php',
     'customer/index.php', 'customer/register.php', 'customer/login.php',
     'customer/logout.php', 'customer/forgot-password.php',
     'customer/reset-password.php', 'customer/verify-email.php',
-    'customer/verify-phone.php', 'customer/orders.php',
+    'customer/verify-phone.php', 'customer/orders.php', 'customer/profile.php',
+    'customer/addresses.php', 'customer/phones.php', 'customer/security.php',
+    'customer/notifications.php', 'customer/invoice.php', 'customer/reorder.php',
+    'customer/tickets.php',
     'driver/index.php',
     'api/index.php', 'install/index.php', 'install/installer.php',
     'errors/404.php', 'errors/403.php', 'errors/500.php',
@@ -65,6 +69,7 @@ $expected = [
     'docs/06-Phase-6-Verification-Report.md',
     'docs/07-Phase-7-Verification-Report.md',
     'docs/08-Phase-8-Verification-Report.md',
+    'docs/09-Phase-9-Verification-Report.md',
     'README.md',
 ];
 foreach ($expected as $f) {
@@ -85,6 +90,7 @@ check(strpos((string) @file_get_contents($root . '/includes/bootstrap.php'), 'oy
 check(strpos((string) @file_get_contents($root . '/includes/bootstrap.php'), 'install.lock') !== false, 'bootstrap.php: installer redirect');
 check(strpos((string) @file_get_contents($root . '/includes/bootstrap.php'), 'auth_tick') !== false, 'bootstrap.php: session tick');
 check(strpos((string) @file_get_contents($root . '/includes/bootstrap.php'), '/rbac.php') !== false, 'bootstrap.php: loads RBAC');
+check(strpos((string) @file_get_contents($root . '/includes/bootstrap.php'), '/notify.php') !== false, 'bootstrap.php: loads notify');
 check(strpos((string) @file_get_contents($root . '/includes/auth.php'), 'password_verify') !== false, 'auth.php: password_verify login');
 check(strpos((string) @file_get_contents($root . '/includes/auth.php'), 'safe_next') !== false, 'auth.php: safe redirects');
 check(strpos((string) @file_get_contents($root . '/includes/auth.php'), 'AUTH_IDLE_TIMEOUT') !== false, 'auth.php: session timeouts');
@@ -103,9 +109,23 @@ check(strpos((string) @file_get_contents($root . '/includes/cart.php'), 'cart_pl
 check(strpos((string) @file_get_contents($root . '/includes/cart.php'), 'FOR UPDATE') !== false, 'cart engine: locked stock/wallet');
 check(strpos((string) @file_get_contents($root . '/includes/cart.php'), 'uq_orders_number') !== false, 'cart engine: order-number retry');
 check(strpos((string) @file_get_contents($root . '/includes/cart.php'), 'order_cancel') !== false, 'cart engine: cancellation rules');
+check(strpos((string) @file_get_contents($root . '/includes/notify.php'), 'notify_emit') !== false, 'notify.php: emitter');
 check(strpos((string) @file_get_contents($root . '/checkout.php'), 'guest_checkout') !== false, 'checkout.php: guest toggle gate');
 check(strpos((string) @file_get_contents($root . '/checkout.php'), 'shop.order') !== false, 'checkout.php: order permission');
+check(strpos((string) @file_get_contents($root . '/checkout.php'), 'notify_emit') !== false, 'checkout.php: confirmation notify');
 check(strpos((string) @file_get_contents($root . '/customer/orders.php'), 'cancelled_reason') !== false, 'orders.php: cancellation UI');
+check(strpos((string) @file_get_contents($root . '/customer/orders.php'), 'reorder.php') !== false, 'orders.php: reorder link');
+check(strpos((string) @file_get_contents($root . '/customer/orders.php'), 'Tracking') !== false, 'orders.php: tracking timeline');
+check(strpos((string) @file_get_contents($root . '/customer/index.php'), 'My referral link') !== false, 'dashboard: referral section');
+check(strpos((string) @file_get_contents($root . '/customer/profile.php'), 'phone_verified_at') !== false, 'profile.php: verification reset');
+check(strpos((string) @file_get_contents($root . '/customer/addresses.php'), 'is_default') !== false, 'addresses.php: default handling');
+check(strpos((string) @file_get_contents($root . '/customer/phones.php'), 'customer_phones') !== false, 'phones.php: phone book');
+check(strpos((string) @file_get_contents($root . '/customer/security.php'), 'login_attempts') !== false, 'security.php: login history');
+check(strpos((string) @file_get_contents($root . '/customer/notifications.php'), 'notify_for_customer') !== false, 'notifications.php: inbox reader');
+check(strpos((string) @file_get_contents($root . '/customer/invoice.php'), 'INV-') !== false, 'invoice.php: invoice numbers');
+check(strpos((string) @file_get_contents($root . '/customer/reorder.php'), 'cart_add') !== false, 'reorder.php: re-add lines');
+check(strpos((string) @file_get_contents($root . '/customer/tickets.php'), 'ticket_replies') !== false, 'tickets.php: replies');
+check(strpos((string) @file_get_contents($root . '/customer/tickets.php'), 'tickets.own') !== false, 'tickets.php: own-tickets permission');
 check(strpos((string) @file_get_contents($root . '/includes/header.php'), 'shop.php') !== false, 'header.php: shop nav link');
 check(strpos((string) @file_get_contents($root . '/includes/header.php'), 'oyejo_cart') !== false, 'header.php: cart link');
 check(strpos((string) @file_get_contents($root . '/includes/footer.php'), 'terms.php') !== false, 'footer.php: legal links');
@@ -115,6 +135,7 @@ check(strpos((string) @file_get_contents($root . '/assets/css/style.css'), '.her
 check(strpos((string) @file_get_contents($root . '/assets/css/style.css'), '@media (max-width: 420px)') !== false, 'style.css: phone breakpoint');
 check(strpos((string) @file_get_contents($root . '/assets/css/style.css'), '.product-detail') !== false, 'style.css: shop styles');
 check(strpos((string) @file_get_contents($root . '/assets/css/style.css'), '.checkout-grid') !== false, 'style.css: checkout styles');
+check(strpos((string) @file_get_contents($root . '/assets/css/style.css'), '.dash-grid') !== false, 'style.css: dashboard styles');
 check(strpos((string) @file_get_contents($root . '/assets/js/app.js'), 'window.Oyejo') !== false, 'app.js: Oyejo helper');
 check(strpos((string) @file_get_contents($root . '/index.php'), 'reject_path_info') !== false, 'index.php: PATH_INFO 404 guard');
 check(strpos((string) @file_get_contents($root . '/install/installer.php'), 'inst_split_sql') !== false, 'installer.php: DELIMITER-aware splitter');
