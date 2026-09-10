@@ -29,13 +29,14 @@ $expected = [
     'includes/mailer.php', 'includes/rbac.php', 'includes/header.php',
     'includes/catalog.php', 'includes/cart.php', 'includes/notify.php',
     'includes/wallet.php', 'includes/refills.php', 'includes/pickups.php',
-    'includes/inventory.php', 'includes/admin.php',
+    'includes/inventory.php', 'includes/admin.php', 'includes/delivery.php',
     'includes/footer.php',
     'admin/index.php', 'admin/wallet.php', 'admin/refills.php',
     'admin/pickups.php', 'admin/inventory.php', 'admin/purchases.php',
     'admin/customers.php', 'admin/staff.php', 'admin/drivers.php',
     'admin/roles.php', 'admin/products.php', 'admin/orders.php',
     'admin/coupons.php', 'admin/settings.php', 'admin/addons.php',
+    'admin/dispatch.php',
     'customer/index.php', 'customer/register.php', 'customer/login.php',
     'customer/logout.php', 'customer/forgot-password.php',
     'customer/reset-password.php', 'customer/verify-email.php',
@@ -82,6 +83,7 @@ $expected = [
     'docs/12-Phase-12-Verification-Report.md',
     'docs/13-Phase-13-Verification-Report.md',
     'docs/14-Phase-14-Verification-Report.md',
+    'docs/15-Phase-15-Verification-Report.md',
     'README.md',
 ];
 foreach ($expected as $f) {
@@ -145,6 +147,9 @@ check(strpos((string) @file_get_contents($root . '/includes/admin.php'), 'adm_ro
 check(strpos((string) @file_get_contents($root . '/includes/admin.php'), 'adm_order_status') !== false, 'admin lib: order lifecycle');
 check(strpos((string) @file_get_contents($root . '/includes/admin.php'), 'adm_settings_save') !== false, 'admin lib: settings');
 check(strpos((string) @file_get_contents($root . '/includes/admin.php'), 'adm_toggle_set') !== false, 'admin lib: toggles');
+check(strpos((string) @file_get_contents($root . '/includes/delivery.php'), 'del_assign') !== false, 'delivery lib: assignments');
+check(strpos((string) @file_get_contents($root . '/includes/delivery.php'), 'del_collect_cash') !== false, 'delivery lib: cash collection');
+check(strpos((string) @file_get_contents($root . '/includes/delivery.php'), 'del_pod_photo') !== false, 'delivery lib: POD photos');
 check(strpos((string) @file_get_contents($root . '/checkout.php'), 'guest_checkout') !== false, 'checkout.php: guest toggle gate');
 check(strpos((string) @file_get_contents($root . '/checkout.php'), 'shop.order') !== false, 'checkout.php: order permission');
 check(strpos((string) @file_get_contents($root . '/checkout.php'), 'notify_emit') !== false, 'checkout.php: confirmation notify');
@@ -183,6 +188,10 @@ check(strpos((string) @file_get_contents($root . '/admin/roles.php'), 'roles.man
 check(strpos((string) @file_get_contents($root . '/admin/orders.php'), 'orders.cancel') !== false, 'orders desk: cancel permission');
 check(strpos((string) @file_get_contents($root . '/admin/settings.php'), 'toggles.manage') !== false, 'settings desk: toggle permission');
 check(strpos((string) @file_get_contents($root . '/admin/addons.php'), 'addons.manage') !== false, 'addons desk: manage permission');
+check(strpos((string) @file_get_contents($root . '/admin/dispatch.php'), 'deliveries.assign') !== false, 'dispatch desk: assign permission');
+check(strpos((string) @file_get_contents($root . '/admin/dispatch.php'), 'zones.manage') !== false, 'dispatch desk: zone permission');
+check(strpos((string) @file_get_contents($root . '/driver/index.php'), 'del_collect_cash') !== false, 'driver portal: cash action');
+check(strpos((string) @file_get_contents($root . '/driver/index.php'), 'driver_portal') !== false, 'driver portal: toggle gate');
 check(strpos((string) @file_get_contents($root . '/includes/header.php'), 'shop.php') !== false, 'header.php: shop nav link');
 check(strpos((string) @file_get_contents($root . '/includes/header.php'), 'oyejo_cart') !== false, 'header.php: cart link');
 check(strpos((string) @file_get_contents($root . '/includes/header.php'), 'customer/refills.php') !== false, 'header.php: refill link');
