@@ -118,6 +118,10 @@ $expected = [
     'docs/25-Phase-25-Verification-Report.md',
     'docs/26-Phase-26-Verification-Report.md',
     'docs/27-Phase-27-Verification-Report.md',
+    'docs/28-Phase-28-Verification-Report.md',
+    'docs/05-CPANEL-DEPLOYMENT.md',
+    'docs/06-BACKUP-RESTORE-GUIDE.md',
+    'docs/07-ADMINISTRATOR-GUIDE.md',
     'docs/ADDON-DEVELOPMENT.md',
     'README.md',
 ];

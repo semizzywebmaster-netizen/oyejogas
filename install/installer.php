@@ -275,8 +275,10 @@ function inst_validate($pdo, $dbName) {
     $perms = $count('permissions');
     $settings = $count('settings');
     $base = inst_base_path();
+    $schema_sql = (string) @file_get_contents($base . '/database/schema.sql');
+    $expected_tables = max(1, preg_match_all('/CREATE TABLE IF NOT EXISTS/i', $schema_sql));
     return [
-        ['Tables created', '60', (string) $tables, $tables === 60],
+        ['Tables created', (string) $expected_tables, (string) $tables, $tables === $expected_tables],
         ['Roles seeded', '12', (string) $count('roles'), $count('roles') === 12],
         ['Permissions seeded', '>= 70', (string) $perms, $perms >= 70],
         ['Feature toggles seeded', '25', (string) $count('feature_toggles'), $count('feature_toggles') === 25],
