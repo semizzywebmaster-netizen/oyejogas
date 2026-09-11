@@ -96,11 +96,21 @@ require BASE_PATH . '/includes/header.php';
     <p><strong>Phone:</strong> <?= e($u['phone']) ?>
       <?= !empty($u['phone_verified_at']) ? '<span class="stock ok">Verified</span>' : '<a href="' . e(url('customer/verify-phone.php')) . '">Verify now</a>' ?></p>
   <?php endif; ?>
+  <?php if (!empty($u['username'])) : ?>
+    <p><strong>Username:</strong> <?= e($u['username']) ?></p>
+  <?php endif; ?>
+  <?php if (!empty($u['whatsapp'])) : ?>
+    <p><strong>WhatsApp:</strong> <?= e($u['whatsapp']) ?>
+      <?= !empty($u['whatsapp_verified_at']) ? '<span class="stock ok">Verified</span>' : '<a href="' . e(url('customer/verify-phone.php')) . '">Verify now</a>' ?></p>
+  <?php endif; ?>
 </div>
 <form method="post" action="" class="stack">
   <?= csrf_field() ?>
   <label>Full name<input name="name" value="<?= e($u['name']) ?>" required maxlength="100"></label>
+  <label>Username (3–30 letters, optional)<input name="username" value="<?= e((string) ($u['username'] ?? '')) ?>" maxlength="30" placeholder="e.g. semizzy"></label>
+  <label>WhatsApp number<input name="whatsapp" value="<?= e((string) ($u['whatsapp'] ?? '')) ?>" maxlength="30" placeholder="+2348012345678"></label>
   <label>Phone (optional)<input name="phone" value="<?= e((string) ($u['phone'] ?? '')) ?>" maxlength="30"></label>
   <p><button class="btn primary" type="submit">Save changes</button></p>
 </form>
+<p class="result-meta">Your WhatsApp number is used for OTP codes, order updates and abandoned-cart reminders. Verify it to log in with WhatsApp.</p>
 <?php require BASE_PATH . '/includes/footer.php'; ?>

@@ -447,12 +447,43 @@ function adm_categories() {
     )->fetchAll();
 }
 
+function adm_upload_image($file, $prefix, $subdir) {
+    if (!is_array($file) || ($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
+        return [false, 'Choose an image to upload.'];
+    }
+    if ((int) $file['size'] > 2 * 1024 * 1024) {
+        return [false, 'Image must be 2 MB or smaller.'];
+    }
+    $info = @getimagesize($file['tmp_name']);
+    $map = [IMAGETYPE_JPEG => 'jpg', IMAGETYPE_PNG => 'png', IMAGETYPE_WEBP => 'webp'];
+    if (!$info || !isset($map[$info[2]])) {
+        return [false, 'Only JPG, PNG or WebP images are accepted.'];
+    }
+    $dir = BASE_PATH . '/uploads/' . trim($subdir, '/');
+    if (!is_dir($dir) && !mkdir($dir, 0755, true)) {
+        return [false, 'Could not store the image.'];
+    }
+    $name = $prefix . '-' . bin2hex(random_bytes(6)) . '.' . $map[$info[2]];
+    if (!move_uploaded_file($file['tmp_name'], $dir . '/' . $name)) {
+        report_error('files', 'error', 'Image upload failed (' . $prefix . ')');
+        return [false, 'Could not store the image.'];
+    }
+    return [true, 'uploads/' . trim($subdir, '/') . '/' . $name];
+}
+
 function adm_category_save($id, $data, $actor_id) {
     $name = trim((string) ($data['name'] ?? ''));
     $slug = adm_slug($data['slug'] ?? $name);
     $desc = mb_substr(trim((string) ($data['description'] ?? '')), 0, 2000);
     $sort = max(0, min(9999, (int) ($data['sort_order'] ?? 0)));
     $active = isset($data['is_active']) ? 1 : 0;
+    $image = trim((string) ($data['image'] ?? ''));
+    if ($image !== '' && !preg_match('#^uploads/(products|categories|banners|branding)/#', $image)) {
+        return [false, 'Image path looks invalid.'];
+    }
+    if (mb_strlen($image) > 255) {
+        return [false, 'Image path is too long.'];
+    }
     if ($name === '' || mb_strlen($name) > 150) {
         return [false, 'Category name is required (max 150 characters).'];
     }
@@ -463,18 +494,20 @@ function adm_category_save($id, $data, $actor_id) {
         return [false, 'That category slug is already in use.'];
     }
     if ($id > 0) {
-        $stmt = $pdo->prepare('SELECT 1 FROM `categories` WHERE `id` = ?');
+        $stmt = $pdo->prepare('SELECT `image` FROM `categories` WHERE `id` = ?');
         $stmt->execute([(int) $id]);
-        if (!$stmt->fetchColumn()) {
+        $old = $stmt->fetch();
+        if (!$old) {
             return [false, 'Category not found.'];
         }
-        $pdo->prepare('UPDATE `categories` SET `name` = ?, `slug` = ?, `description` = ?, `sort_order` = ?, `is_active` = ? WHERE `id` = ?')
-            ->execute([$name, $slug, $desc ?: null, $sort, $active, (int) $id]);
+        $img = $image !== '' ? $image : ($old['image'] ?? null);
+        $pdo->prepare('UPDATE `categories` SET `name` = ?, `slug` = ?, `description` = ?, `image` = ?, `sort_order` = ?, `is_active` = ? WHERE `id` = ?')
+            ->execute([$name, $slug, $desc ?: null, $img, $sort, $active, (int) $id]);
         adm_audit('admin.category_update', $actor_id, (int) $id, null, ['slug' => $slug]);
         return [true, 'Category saved.'];
     }
-    $pdo->prepare('INSERT INTO `categories` (`slug`, `name`, `description`, `sort_order`, `is_active`) VALUES (?, ?, ?, ?, ?)')
-        ->execute([$slug, $name, $desc ?: null, $sort, $active]);
+    $pdo->prepare('INSERT INTO `categories` (`slug`, `name`, `description`, `image`, `sort_order`, `is_active`) VALUES (?, ?, ?, ?, ?, ?)')
+        ->execute([$slug, $name, $desc ?: null, $image ?: null, $sort, $active]);
     adm_audit('admin.category_create', $actor_id, (int) $pdo->lastInsertId(), null, ['slug' => $slug]);
     return [true, 'Category created.'];
 }
@@ -511,6 +544,13 @@ function adm_product_save($id, $data, $actor_id) {
     $stock = (int) ($data['stock_qty'] ?? 0);
     $low = (int) ($data['low_stock_at'] ?? 5);
     $desc = mb_substr(trim((string) ($data['description'] ?? '')), 0, 5000);
+    $image = trim((string) ($data['image'] ?? ''));
+    if ($image !== '' && !preg_match('#^uploads/(products|categories|banners|branding)/#', $image)) {
+        return [false, 'Image path looks invalid.'];
+    }
+    if (mb_strlen($image) > 255) {
+        return [false, 'Image path is too long.'];
+    }
     if ($name === '' || mb_strlen($name) > 190) {
         return [false, 'Product name is required (max 190 characters).'];
     }
@@ -559,30 +599,34 @@ function adm_product_save($id, $data, $actor_id) {
     if ($stmt->fetchColumn()) {
         return [false, 'That product slug is already in use.'];
     }
-    $fields = [$category_id, $size_id ?: null, $sku, $slug, $name, $desc ?: null, $type, $price,
+    $fields_core = [$category_id, $size_id ?: null, $sku, $slug, $name, $desc ?: null, $type, $price,
         $promo, $promo_start, $promo_end, $stock, $low,
         isset($data['track_inventory']) ? 1 : 0, isset($data['is_active']) ? 1 : 0,
         isset($data['is_featured']) ? 1 : 0, max(0, min(9999, (int) ($data['sort_order'] ?? 0)))];
     if ($id > 0) {
-        $stmt = $pdo->prepare('SELECT 1 FROM `products` WHERE `id` = ?');
+        $stmt = $pdo->prepare('SELECT `image` FROM `products` WHERE `id` = ?');
         $stmt->execute([(int) $id]);
-        if (!$stmt->fetchColumn()) {
+        $old = $stmt->fetch();
+        if (!$old) {
             return [false, 'Product not found.'];
         }
+        $img = $image !== '' ? $image : ($old['image'] ?? null);
+        $fields = array_merge($fields_core, [$img]);
         $pdo->prepare(
             'UPDATE `products` SET `category_id` = ?, `size_id` = ?, `sku` = ?, `slug` = ?, `name` = ?, `description` = ?,
              `type` = ?, `price_minor` = ?, `promo_price_minor` = ?, `promo_starts_at` = ?, `promo_ends_at` = ?,
-             `stock_qty` = ?, `low_stock_at` = ?, `track_inventory` = ?, `is_active` = ?, `is_featured` = ?, `sort_order` = ?
+             `stock_qty` = ?, `low_stock_at` = ?, `track_inventory` = ?, `is_active` = ?, `is_featured` = ?, `sort_order` = ?, `image` = ?
              WHERE `id` = ?'
         )->execute(array_merge($fields, [(int) $id]));
         adm_audit('admin.product_update', $actor_id, (int) $id, null, ['sku' => $sku]);
         return [true, 'Product saved.'];
     }
+    $fields = array_merge($fields_core, [$image ?: null]);
     $pdo->prepare(
         'INSERT INTO `products` (`category_id`, `size_id`, `sku`, `slug`, `name`, `description`, `type`, `price_minor`,
          `promo_price_minor`, `promo_starts_at`, `promo_ends_at`, `stock_qty`, `low_stock_at`, `track_inventory`,
-         `is_active`, `is_featured`, `sort_order`)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+         `is_active`, `is_featured`, `sort_order`, `image`)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
     )->execute($fields);
     adm_audit('admin.product_create', $actor_id, (int) $pdo->lastInsertId(), null, ['sku' => $sku]);
     return [true, 'Product created.'];

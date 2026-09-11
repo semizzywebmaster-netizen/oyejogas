@@ -1,11 +1,13 @@
 <?php
 /**
- * Oyejo Gas - location management: delivery zones/fees and time slots.
+ * Oyejo Gas - location management: delivery zones/fees, time slots and customer suggestions.
+ * Admin approves suggestions before they go live as delivery zones.
  */
 require_once __DIR__ . '/../includes/bootstrap.php';
 reject_path_info();
 require_permission('portal.admin');
 require_once BASE_PATH . '/includes/delivery.php';
+require_once BASE_PATH . '/includes/growth.php';
 
 $me = current_user();
 $can_zones = has_permission('zones.manage');
@@ -33,6 +35,10 @@ if ($tab === 'slots' && !$can_slots) {
 }
 $message = '';
 $errors = [];
+$suggest_filter = (string) ($_GET['status'] ?? 'pending');
+if (!in_array($suggest_filter, ['pending', 'approved', 'rejected', 'all'], true)) {
+    $suggest_filter = 'pending';
+}
 
 if (request_method() === 'POST') {
     if (!csrf_verify(post('csrf_token'))) {
@@ -74,6 +80,25 @@ if ($edit_id > 0 && in_array($tab, ['zones', 'slots'], true)) {
 }
 $zones = $can_zones ? del_zones(false) : [];
 $slots = $can_slots ? del_slots(false) : [];
+$suggestions = [];
+if ($tab === 'suggestions' && $can_zones) {
+    try {
+        $status = $suggest_filter === 'all' ? '' : $suggest_filter;
+        $suggestions = loc_suggestions($status !== '' ? $status : 'pending', 200);
+        if ($status === '' ) {
+            // fetch all statuses when filter is all
+            $suggestions = array_merge(
+                loc_suggestions('pending', 200),
+                loc_suggestions('approved', 200),
+                loc_suggestions('rejected', 200)
+            );
+            usort($suggestions, function($a,$b){ return $b['id'] <=> $a['id']; });
+        }
+    } catch (Throwable $t) {
+        $errors[] = 'Could not load suggestions: ' . $t->getMessage();
+        $suggestions = [];
+    }
+}
 
 $page_title = 'Locations';
 require BASE_PATH . '/includes/header.php';
@@ -83,7 +108,9 @@ require BASE_PATH . '/includes/header.php';
 <p>
   <?php if ($can_zones) : ?><a class="btn<?= $tab === 'zones' ? ' primary' : ' ghost' ?>" href="<?= e(url('admin/locations.php?tab=zones')) ?>">Zones</a><?php endif; ?>
   <?php if ($can_slots) : ?><a class="btn<?= $tab === 'slots' ? ' primary' : ' ghost' ?>" href="<?= e(url('admin/locations.php?tab=slots')) ?>">Time slots</a><?php endif; ?>
-  <?php if ($can_zones) : ?><a class="btn<?= $tab === 'suggestions' ? ' primary' : ' ghost' ?>" href="<?= e(url('admin/locations.php?tab=suggestions')) ?>">Suggestions</a><?php endif; ?>
+  <?php if ($can_zones) : ?><a class="btn<?= $tab === 'suggestions' ? ' primary' : ' ghost' ?>" href="<?= e(url('admin/locations.php?tab=suggestions')) ?>">Suggestions<?php
+    try { $pc = count(loc_suggestions('pending', 200)); if ($pc>0) echo ' ('.$pc.')'; } catch(Throwable $t) {}
+  ?></a><?php endif; ?>
 </p>
 <?php if ($message !== '') : ?><div class="alert alert-success"><?= e($message) ?></div><?php endif; ?>
 <?php foreach ($errors as $e) : ?><div class="alert alert-error"><?= e($e) ?></div><?php endforeach; ?>
@@ -128,7 +155,7 @@ require BASE_PATH . '/includes/header.php';
   </form>
 </div>
 
-<?php else : ?>
+<?php elseif ($tab === 'slots') : ?>
 <div class="card">
   <div class="table-scroll"><table class="data">
     <thead><tr><th>Slot</th><th>Window</th><th>Active</th><th></th></tr></thead>
@@ -164,6 +191,59 @@ require BASE_PATH . '/includes/header.php';
     <p><button class="btn primary" type="submit"><?= $edit ? 'Save changes' : 'Add slot' ?></button>
     <?php if ($edit) : ?><a class="btn ghost" href="<?= e(url('admin/locations.php?tab=slots')) ?>">Cancel</a><?php endif; ?></p>
   </form>
+</div>
+
+<?php elseif ($tab === 'suggestions') : ?>
+<div class="card">
+  <h2>Location suggestions</h2>
+  <p class="result-meta">Customers can suggest new delivery areas. Approve to create a live zone, or reject.</p>
+  <p>
+    <a class="btn<?= $suggest_filter === 'pending' ? ' primary' : ' ghost' ?> small" href="<?= e(url('admin/locations.php?tab=suggestions&status=pending')) ?>">Pending</a>
+    <a class="btn<?= $suggest_filter === 'approved' ? ' primary' : ' ghost' ?> small" href="<?= e(url('admin/locations.php?tab=suggestions&status=approved')) ?>">Approved</a>
+    <a class="btn<?= $suggest_filter === 'rejected' ? ' primary' : ' ghost' ?> small" href="<?= e(url('admin/locations.php?tab=suggestions&status=rejected')) ?>">Rejected</a>
+    <a class="btn<?= $suggest_filter === 'all' ? ' primary' : ' ghost' ?> small" href="<?= e(url('admin/locations.php?tab=suggestions&status=all')) ?>">All</a>
+  </p>
+  <?php if (!$suggestions) : ?>
+    <p class="result-meta">No <?= e($suggest_filter) ?> suggestions.</p>
+  <?php else : ?>
+  <div class="table-scroll"><table class="data">
+    <thead><tr><th>Location</th><th>Customer</th><th>City</th><th>Status</th><th>Submitted</th><th>Actions</th></tr></thead>
+    <tbody>
+      <?php foreach ($suggestions as $sg) : ?>
+        <tr>
+          <td><strong><?= e($sg['name']) ?></strong><?php if (!empty($sg['description'])) : ?><br><span class="result-meta"><?= e($sg['description']) ?></span><?php endif; ?></td>
+          <td><?= e($sg['customer_name'] ?? '') ?><br><span class="result-meta"><?= e($sg['email'] ?? '') ?></span></td>
+          <td><?= e($sg['city']) ?></td>
+          <td><?= e(ucfirst($sg['status'])) ?><?php if (!empty($sg['zone_id'])) : ?><br><span class="result-meta">Zone #<?= (int) $sg['zone_id'] ?></span><?php endif; ?></td>
+          <td><?= e(substr((string) $sg['created_at'], 0, 16)) ?><?php if (!empty($sg['review_note'])) : ?><br><span class="result-meta"><?= e($sg['review_note']) ?></span><?php endif; ?></td>
+          <td>
+            <?php if ($sg['status'] === 'pending') : ?>
+              <form method="post" action="" class="stack" style="min-width:220px">
+                <?= csrf_field() ?>
+                <input type="hidden" name="tab" value="suggestions">
+                <input type="hidden" name="action" value="loc_approve">
+                <input type="hidden" name="item_id" value="<?= (int) $sg['id'] ?>">
+                <label>Fee (₦)<input type="number" step="0.01" min="0" name="fee" value="1200" required></label>
+                <label>Note (optional)<input name="note" maxlength="255" placeholder="e.g. Approved for trial"></label>
+                <p><button class="btn small primary" type="submit">Approve & go live</button></p>
+              </form>
+              <form method="post" action="" class="stack" style="margin-top:8px">
+                <?= csrf_field() ?>
+                <input type="hidden" name="tab" value="suggestions">
+                <input type="hidden" name="action" value="loc_reject">
+                <input type="hidden" name="item_id" value="<?= (int) $sg['id'] ?>">
+                <label>Reason (optional)<input name="note" maxlength="255" placeholder="e.g. Out of coverage"></label>
+                <p><button class="btn small ghost" type="submit" onclick="return confirm('Reject this suggestion?')">Reject</button></p>
+              </form>
+            <?php else : ?>
+              <span class="result-meta"><?= $sg['status'] === 'approved' ? 'Live as zone' : 'Rejected' ?></span>
+            <?php endif; ?>
+          </td>
+        </tr>
+      <?php endforeach; ?>
+    </tbody>
+  </table></div>
+  <?php endif; ?>
 </div>
 <?php endif; ?>
 <?php require BASE_PATH . '/includes/footer.php'; ?>

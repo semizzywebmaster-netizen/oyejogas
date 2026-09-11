@@ -1,6 +1,7 @@
 <?php
 /**
- * Oyejo Gas - products & categories desk (Phase 15, AD-07/AD-08).
+ * Oyejo Gas - products & categories desk with image uploads (Phase 15, AD-07/AD-08).
+ * Supports JPG/PNG/WebP for both products and categories.
  */
 require_once __DIR__ . '/../includes/bootstrap.php';
 reject_path_info();
@@ -26,8 +27,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (($is_new && !$can_create) || (!$is_new && !$can_edit)) {
                 $errors[] = 'You do not have permission to manage products.';
             } else {
-                [$ok, $msg] = adm_product_save((int) ($_POST['product_id'] ?? 0), $_POST, (int) $me['id']);
-                $ok ? $message = $msg : $errors[] = $msg;
+                if (isset($_FILES['product_image']) && ($_FILES['product_image']['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE) {
+                    [$uok, $umsg] = adm_upload_image($_FILES['product_image'], 'PRD', 'products');
+                    if (!$uok) {
+                        $errors[] = $umsg;
+                    } else {
+                        $_POST['image'] = $umsg;
+                    }
+                }
+                if (!$errors) {
+                    [$ok, $msg] = adm_product_save((int) ($_POST['product_id'] ?? 0), $_POST, (int) $me['id']);
+                    $ok ? $message = $msg : $errors[] = $msg;
+                }
             }
         } elseif ($action === 'product_delete') {
             if (!$can_delete) {
@@ -40,8 +51,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (!$can_cats) {
                 $errors[] = 'You do not have permission to manage categories.';
             } else {
-                [$ok, $msg] = adm_category_save((int) ($_POST['category_id'] ?? 0), $_POST, (int) $me['id']);
-                $ok ? $message = $msg : $errors[] = $msg;
+                if (isset($_FILES['category_image']) && ($_FILES['category_image']['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE) {
+                    [$uok, $umsg] = adm_upload_image($_FILES['category_image'], 'CAT', 'categories');
+                    if (!$uok) {
+                        $errors[] = $umsg;
+                    } else {
+                        $_POST['image'] = $umsg;
+                    }
+                }
+                if (!$errors) {
+                    [$ok, $msg] = adm_category_save((int) ($_POST['category_id'] ?? 0), $_POST, (int) $me['id']);
+                    $ok ? $message = $msg : $errors[] = $msg;
+                }
             }
         } elseif ($action === 'category_delete') {
             if (!$can_cats) {
@@ -100,10 +121,11 @@ require BASE_PATH . '/includes/header.php';
     </select>
   </form>
   <div class="table-scroll"><table class="data">
-    <thead><tr><th>SKU</th><th>Name</th><th>Type</th><th>Price</th><th>Stock</th><th>Active</th><th></th></tr></thead>
+    <thead><tr><th>Image</th><th>SKU</th><th>Name</th><th>Type</th><th>Price</th><th>Stock</th><th>Active</th><th></th></tr></thead>
     <tbody>
       <?php foreach ($products as $p) : ?>
-        <tr><td><?= e($p['sku']) ?></td><td><?= e($p['name']) ?></td><td><?= e($p['type']) ?></td>
+        <tr><td><?php if (!empty($p['image'])) : ?><img src="<?= e(url($p['image'])) ?>" alt="" style="width:48px;height:48px;object-fit:cover"><?php else : ?><span class="result-meta">—</span><?php endif; ?></td>
+          <td><?= e($p['sku']) ?></td><td><?= e($p['name']) ?></td><td><?= e($p['type']) ?></td>
           <td>₦<?= number_format((int) $p['price_minor'] / 100, 2) ?></td><td><?= number_format((int) $p['stock_qty']) ?></td>
           <td><?= (int) $p['is_active'] ? 'Yes' : 'No' ?></td>
           <td>
@@ -125,7 +147,8 @@ require BASE_PATH . '/includes/header.php';
 <?php if ($can_create || ($edit && $can_edit)) : ?>
 <div class="card">
   <h2><?= $edit ? 'Edit product' : 'Add product' ?></h2>
-  <form method="post" action="" class="stack">
+  <?php if ($edit && !empty($edit['image'])) : ?><p><img src="<?= e(url($edit['image'])) ?>" alt="" style="max-width:120px"></p><?php endif; ?>
+  <form method="post" action="" class="stack" enctype="multipart/form-data">
     <?= csrf_field() ?>
     <input type="hidden" name="action" value="product_save">
     <input type="hidden" name="product_id" value="<?= (int) ($edit['id'] ?? 0) ?>">
@@ -154,6 +177,7 @@ require BASE_PATH . '/includes/header.php';
         <?php endforeach; ?>
       </select>
     </label>
+    <label>Product image (JPG/PNG/WebP, max 2 MB)<input type="file" name="product_image" accept=".jpg,.jpeg,.png,.webp"></label>
     <label>Price (₦)<input name="price" inputmode="decimal" value="<?= e((string) (($edit['price_minor'] ?? 0) / 100)) ?>" required></label>
     <label>Promo price (₦, optional)<input name="promo_price" inputmode="decimal" value="<?= $edit && $edit['promo_price_minor'] !== null ? e((string) ($edit['promo_price_minor'] / 100)) : '' ?>"></label>
     <label>Promo starts<input name="promo_starts_at" value="<?= e((string) ($edit['promo_starts_at'] ?? '')) ?>" placeholder="YYYY-MM-DD HH:MM:SS"></label>
@@ -174,10 +198,11 @@ require BASE_PATH . '/includes/header.php';
 <div class="card">
   <h2>Categories (<?= count($cats) ?>)</h2>
   <div class="table-scroll"><table class="data">
-    <thead><tr><th>Name</th><th>Slug</th><th>Products</th><th>Active</th><?php if ($can_cats) : ?><th></th><?php endif; ?></tr></thead>
+    <thead><tr><th>Image</th><th>Name</th><th>Slug</th><th>Products</th><th>Active</th><?php if ($can_cats) : ?><th></th><?php endif; ?></tr></thead>
     <tbody>
       <?php foreach ($cats as $c) : ?>
-        <tr><td><?= e($c['name']) ?></td><td><?= e($c['slug']) ?></td><td><?= number_format((int) $c['product_count']) ?></td>
+        <tr><td><?php if (!empty($c['image'])) : ?><img src="<?= e(url($c['image'])) ?>" alt="" style="width:40px;height:40px;object-fit:cover"><?php else : ?>—<?php endif; ?></td>
+          <td><?= e($c['name']) ?></td><td><?= e($c['slug']) ?></td><td><?= number_format((int) $c['product_count']) ?></td>
           <td><?= (int) $c['is_active'] ? 'Yes' : 'No' ?></td>
           <?php if ($can_cats) : ?><td>
             <a href="<?= e(url('admin/products.php?edit_cat=' . (int) $c['id'])) ?>">Edit</a>
@@ -199,12 +224,14 @@ require BASE_PATH . '/includes/header.php';
 <?php if ($can_cats) : ?>
 <div class="card">
   <h2><?= $edit_cat ? 'Edit category' : 'Add category' ?></h2>
-  <form method="post" action="" class="stack">
+  <?php if ($edit_cat && !empty($edit_cat['image'])) : ?><p><img src="<?= e(url($edit_cat['image'])) ?>" alt="" style="max-width:100px"></p><?php endif; ?>
+  <form method="post" action="" class="stack" enctype="multipart/form-data">
     <?= csrf_field() ?>
     <input type="hidden" name="action" value="category_save">
     <input type="hidden" name="category_id" value="<?= (int) ($edit_cat['id'] ?? 0) ?>">
     <label>Name<input name="name" value="<?= e((string) ($edit_cat['name'] ?? '')) ?>" maxlength="150" required></label>
     <label>Slug (optional)<input name="slug" value="<?= e((string) ($edit_cat['slug'] ?? '')) ?>" maxlength="100"></label>
+    <label>Category image (JPG/PNG/WebP, max 2 MB)<input type="file" name="category_image" accept=".jpg,.jpeg,.png,.webp"></label>
     <label>Sort order<input type="number" name="sort_order" value="<?= (int) ($edit_cat['sort_order'] ?? 0) ?>" min="0" max="9999"></label>
     <label>Description<textarea name="description" rows="2"><?= e((string) ($edit_cat['description'] ?? '')) ?></textarea></label>
     <label class="check"><input type="checkbox" name="is_active" value="1"<?= !$edit_cat || (int) $edit_cat['is_active'] ? ' checked' : '' ?>> Active</label>
