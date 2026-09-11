@@ -128,3 +128,29 @@
 
   console.info('Oyejo Gas foundation ready.');
 })();
+
+/* Day/night switch: persists in localStorage, applied pre-paint by header. */
+(function () {
+  function paint(btn) {
+    var dark = document.documentElement.getAttribute('data-theme') === 'dark';
+    if (btn) btn.innerHTML = dark ? '&#9789;' : '&#9788;';
+  }
+  document.addEventListener('DOMContentLoaded', function () {
+    var btn = document.getElementById('themeToggle');
+    paint(btn);
+    if (!btn) return;
+    btn.addEventListener('click', function () {
+      var dark = document.documentElement.getAttribute('data-theme') === 'dark';
+      try {
+        if (dark) {
+          document.documentElement.removeAttribute('data-theme');
+          localStorage.setItem('oyejo-theme', 'light');
+        } else {
+          document.documentElement.setAttribute('data-theme', 'dark');
+          localStorage.setItem('oyejo-theme', 'dark');
+        }
+      } catch (e) {}
+      paint(btn);
+    });
+  });
+})();

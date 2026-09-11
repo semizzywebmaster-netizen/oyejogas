@@ -258,3 +258,31 @@ label.radio input { width: auto; }
 .tiny .linklike { color: inherit; }
 #installWrap[hidden] { display: none; }
 .push-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+
+/* --- Portal sidebars + day/night (growth pack) --- */
+.layout { display: flex; gap: 24px; align-items: flex-start; }
+.layout > .content { flex: 1; min-width: 0; }
+.side { width: 210px; flex-shrink: 0; position: sticky; top: 16px; background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 10px; max-height: calc(100vh - 32px); overflow: auto; }
+.side nav { display: flex; flex-direction: column; }
+.side a { text-decoration: none; color: var(--ink); font-weight: 600; padding: 8px 10px; border-radius: 8px; font-size: 14px; }
+.side a:hover { background: #eef4ee; }
+.side a[aria-current="page"] { background: var(--green); color: #fff; }
+.side .side-home { font-weight: 800; margin-bottom: 4px; }
+.links #themeToggle { color: var(--ink); text-decoration: none; font-size: 20px; line-height: 1; padding: 10px 12px; border-radius: 10px; }
+.links #themeToggle:hover { background: #eef4ee; }
+html[data-theme="dark"] { --bg: #101613; --card: #1a221e; --line: #2b3630; --ink: #e8efe9; --muted: #9fb0a4; }
+html[data-theme="dark"] body { background: var(--bg); color: var(--ink); }
+html[data-theme="dark"] header.site { background: var(--card); border-bottom: 1px solid var(--line); }
+html[data-theme="dark"] .links a:hover, html[data-theme="dark"] .links #themeToggle:hover, html[data-theme="dark"] .side a:hover { background: #243029; }
+html[data-theme="dark"] .card, html[data-theme="dark"] .side { background: var(--card); border-color: var(--line); }
+html[data-theme="dark"] input, html[data-theme="dark"] select, html[data-theme="dark"] textarea { background: #141b17; color: var(--ink); border-color: var(--line); }
+html[data-theme="dark"] table.data th, html[data-theme="dark"] table.data td { border-color: var(--line); }
+html[data-theme="dark"] .product-card img { background: #243029; }
+html[data-theme="dark"] .maint { background: #3a2c10; color: #ffd98a; }
+@media (max-width: 760px) {
+  .layout { flex-direction: column; }
+  .side { width: 100%; position: static; max-height: none; }
+  .side nav { flex-direction: row; overflow-x: auto; gap: 4px; }
+  .side a { white-space: nowrap; }
+  .side .side-home { margin-bottom: 0; }
+}

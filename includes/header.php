@@ -22,8 +22,28 @@ if (is_logged_in()) {
     $mainNav[] = ['Login', url('customer/login.php')];
     $mainNav[] = ['Register', url('customer/register.php')];
 }
-$mainNav[] = ['Driver', url('driver/')];
-$mainNav[] = ['Admin', url('admin/')];
+// Staff portals stay out of the public menu: drivers use the footer link,
+// admins use the direct /admin/ URL. Keeps the header uncluttered.
+$__logo = (string) setting('site_logo', '');
+if ($__logo === '' || !str_starts_with($__logo, 'uploads/branding/')) {
+    $__logo = 'assets/images/logo.svg';
+}
+$__favicon = (string) setting('site_favicon', '');
+if ($__favicon === '' || !str_starts_with($__favicon, 'uploads/branding/')) {
+    $__favicon = 'assets/images/logo.svg';
+}
+$__primary = (string) setting('site_color_primary', '#0b6b3a');
+if (!preg_match('/^#[0-9a-fA-F]{6}$/', $__primary)) {
+    $__primary = '#0b6b3a';
+}
+$__accent = (string) setting('site_color_accent', '#ff9d2e');
+if (!preg_match('/^#[0-9a-fA-F]{6}$/', $__accent)) {
+    $__accent = '#ff9d2e';
+}
+require_once BASE_PATH . '/includes/sidebar.php';
+$GLOBALS['oyejo_sidebar'] = sidebar_portal();
+$__logo_url = str_starts_with($__logo, 'assets/') ? asset($__logo) : url($__logo);
+$__favicon_url = str_starts_with($__favicon, 'assets/') ? asset($__favicon) : url($__favicon);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -33,9 +53,11 @@ $mainNav[] = ['Admin', url('admin/')];
 <meta name="csrf-token" content="<?= e(csrf_token()) ?>">
 <title><?= e($page_title ?? setting('site_name', APP_NAME)) ?> — <?= e(setting('site_name', APP_NAME)) ?></title>
 <link rel="stylesheet" href="<?= e(asset('assets/css/style.css')) ?>">
-<link rel="icon" href="<?= e(asset('assets/images/logo.svg')) ?>" type="image/svg+xml">
+<style>:root{--green:<?= e($__primary) ?>;--green-dark:<?= e($__primary) ?>;--orange:<?= e($__accent) ?>;}</style>
+<script>(function(){try{if(localStorage.getItem('oyejo-theme')==='dark'){document.documentElement.setAttribute('data-theme','dark');}}catch(e){}})();</script>
+<link rel="icon" href="<?= e($__favicon_url) ?>" type="<?= str_ends_with($__favicon, '.svg') ? 'image/svg+xml' : 'image/png' ?>">
 <link rel="manifest" href="<?= e(url('manifest.webmanifest')) ?>">
-<meta name="theme-color" content="#0b6b3a">
+<meta name="theme-color" content="<?= e($__primary) ?>">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -48,7 +70,7 @@ $mainNav[] = ['Admin', url('admin/')];
 <header class="site">
   <div class="wrap nav">
     <a class="brand" href="<?= e(url('')) ?>">
-      <img src="<?= e(asset('assets/images/logo.svg')) ?>" alt="" width="36" height="36">
+      <img src="<?= e($__logo_url) ?>" alt="" width="36" height="36">
       <span><?= e(setting('site_name', APP_NAME)) ?></span>
     </a>
     <button class="hamburger" id="navToggle" aria-label="Menu" aria-expanded="false">&#9776;</button>
@@ -63,10 +85,12 @@ $mainNav[] = ['Admin', url('admin/')];
         <span class="who">Hi, <?= e(current_user()['name']) ?></span>
         <a href="<?= e(url('customer/logout.php')) ?>">Logout</a>
       <?php endif; ?>
+      <button type="button" id="themeToggle" class="linklike" aria-label="Toggle day/night mode">&#9788;</button>
     </nav>
   </div>
 </header>
 <main class="wrap">
+<?php if ($GLOBALS['oyejo_sidebar'] !== '') : ?><div class="layout"><?php sidebar_render($GLOBALS['oyejo_sidebar']); ?><div class="content"><?php endif; ?>
 <?php foreach (flashes() as $f) : ?>
   <div class="alert alert-<?= e($f['type']) ?>"><?= e($f['msg']) ?></div>
 <?php endforeach; ?>

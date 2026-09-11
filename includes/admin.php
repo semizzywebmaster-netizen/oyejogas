@@ -883,6 +883,7 @@ function adm_setting_groups() {
         'payment' => ['bank_name', 'bank_account_name', 'bank_account_number', 'bank_instructions',
             'online_gateway_label'],
         'notifications' => ['notif_from_name', 'notif_from_email', 'admin_alert_email'],
+        'appearance' => ['site_logo', 'site_favicon', 'site_color_primary', 'site_color_accent'],
     ];
     // Installed add-ons contribute one group each (AO-03).
     if (function_exists('addon_setting_groups')) {
@@ -933,6 +934,14 @@ function adm_settings_save($group, $data, $actor_id) {
         }
         if ($key === 'currency' && !preg_match('/^[A-Z]{3}$/', strtoupper($v))) {
             return [false, 'Currency must be a 3-letter code (e.g. NGN).'];
+        }
+        if (in_array($key, ['site_color_primary', 'site_color_accent'], true) && $v !== ''
+            && !preg_match('/^#[0-9a-fA-F]{6}$/', $v)) {
+            return [false, 'Colour for ' . $key . ' must be hex like #0b6b3a.'];
+        }
+        if (in_array($key, ['site_logo', 'site_favicon'], true) && $v !== ''
+            && !str_starts_with($v, 'uploads/branding/')) {
+            return [false, 'Logo and favicon must be uploaded via Appearance.'];
         }
         if ($key === 'timezone' && !in_array($v, timezone_identifiers_list(), true)) {
             return [false, 'Unknown timezone.'];

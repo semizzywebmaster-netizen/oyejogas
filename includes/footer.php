@@ -7,6 +7,7 @@ if (!defined('OYEJO_BOOT')) {
     exit('Forbidden');
 }
 ?>
+<?php if (!empty($GLOBALS['oyejo_sidebar'])) : ?></div></div><?php endif; ?>
 </main>
 <footer class="site">
   <div class="wrap foot">
@@ -29,7 +30,7 @@ if (!defined('OYEJO_BOOT')) {
     </div>
     <div>
       <strong>Portals</strong>
-      <p><a href="<?= e(url('customer/')) ?>">Customer</a> &middot; <a href="<?= e(url('driver/')) ?>">Driver</a> &middot; <a href="<?= e(url('admin/')) ?>">Admin</a></p>
+      <p><a href="<?= e(url('customer/')) ?>">Customer</a> &middot; <a href="<?= e(url('driver/')) ?>">Driver</a></p>
       <p>Platform v<?= e(OYEJO_VERSION) ?></p>
     </div>
   </div>

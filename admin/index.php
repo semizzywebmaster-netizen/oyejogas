@@ -8,35 +8,8 @@ require_permission('portal.admin');
 require_once BASE_PATH . '/includes/admin.php';
 
 $d = adm_dashboard();
-$desks = [
-    ['Orders', 'admin/orders.php', 'orders.view'],
-    ['Refills', 'admin/refills.php', 'refills.view'],
-    ['Pickups', 'admin/pickups.php', 'pickups.view'],
-    ['Dispatch', 'admin/dispatch.php', 'deliveries.view'],
-    ['Inventory', 'admin/inventory.php', 'inventory.view'],
-    ['Purchases', 'admin/purchases.php', 'purchases.manage'],
-    ['Wallet', 'admin/wallet.php', 'wallet.view'],
-    ['Customers', 'admin/customers.php', 'customers.view'],
-    ['Staff', 'admin/staff.php', 'users.view'],
-    ['Drivers', 'admin/drivers.php', 'drivers.view'],
-    ['Roles', 'admin/roles.php', 'roles.view'],
-    ['Products', 'admin/products.php', 'products.view'],
-    ['Coupons', 'admin/coupons.php', 'coupons.manage'],
-    ['Finance', 'admin/finance.php', 'payments.view'],
-    ['Support', 'admin/tickets.php', 'tickets.manage'],
-    ['Reviews', 'admin/reviews.php', 'reviews.moderate'],
-    ['Marketing', 'admin/marketing.php', 'marketing.campaigns'],
-    ['FAQs', 'admin/faqs.php', 'marketing.faqs'],
-    ['Posts', 'admin/posts.php', 'marketing.posts'],
-    ['Newsletter', 'admin/newsletter.php', 'marketing.newsletter'],
-    ['Spin-to-win', 'admin/spin.php', 'spin.manage'],
-    ['Referrals', 'admin/referrals.php', 'referrals.manage'],
-    ['Notifications', 'admin/notifications.php', 'notifications.view'],
-    ['Backups', 'admin/backups.php', 'backups.create'],
-    ['Error logs', 'admin/logs.php', 'logs.view'],
-    ['Settings', 'admin/settings.php', 'settings.view'],
-    ['Add-ons', 'admin/addons.php', 'addons.view'],
-];
+require_once BASE_PATH . '/includes/sidebar.php';
+$desks = sidebar_admin_desks();
 $page_title = 'Admin console';
 require BASE_PATH . '/includes/header.php';
 ?>

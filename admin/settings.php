@@ -44,7 +44,7 @@ $toggles = adm_toggles();
 $group_labels = [
     'site' => 'Website', 'contact' => 'Contact', 'locale' => 'Locale & currency',
     'orders' => 'Orders', 'wallet' => 'Wallet limits', 'payment' => 'Payments (no secrets here)',
-    'notifications' => 'Notifications',
+    'notifications' => 'Notifications', 'appearance' => 'Appearance',
 ];
 $naira_minor = ['min_order_minor', 'wallet_topup_min_minor', 'wallet_topup_max_minor',
     'wallet_balance_cap_minor', 'wallet_daily_topup_max_minor'];

@@ -190,6 +190,10 @@ INSERT INTO `feature_toggles` (`key`, `label`, `description`, `enabled`) VALUES
 INSERT INTO `settings` (`key`, `value`, `group_name`) VALUES
 ('site_name', 'Oyejo Gas', 'site'),
 ('tagline', 'Cooking gas, delivered.', 'site'),
+('site_logo', '', 'appearance'),
+('site_favicon', '', 'appearance'),
+('site_color_primary', '#0b6b3a', 'appearance'),
+('site_color_accent', '#ff9d2e', 'appearance'),
 ('contact_email', 'support@example.com', 'contact'),
 ('contact_phone', '+234 800 000 0000', 'contact'),
 ('contact_address', 'Lagos, Nigeria', 'contact'),
