@@ -60,6 +60,14 @@ if (!$p) {
     exit;
 }
 
+$wish_saved = false;
+if (is_logged_in() && function_exists('wish_has')) {
+    try {
+        $wish_saved = wish_has(wish_customer_id((int) current_user()['id']), (int) $p['id']);
+    } catch (Throwable $t) {
+        $wish_saved = false;
+    }
+}
 $page_title = $p['name'];
 require BASE_PATH . '/includes/header.php';
 ?>
@@ -95,6 +103,7 @@ require BASE_PATH . '/includes/header.php';
         <p><button class="btn primary" type="submit">Add to cart</button></p>
       </form>
     <?php endif; ?>
+    <?= wish_button((int) $p['id'], $wish_saved) ?>
     <div class="table-scroll">
       <table class="data">
         <tbody>

@@ -14,6 +14,11 @@
   the `backups` table and alerted via `admin_alert_email`/ops.log).
 - Live jobs (Phase 25): `rotate-logs.php` (daily 03:00 — size-based
   rotation of app/mail/sms/whatsapp/ops logs, keeps 5 files each).
+- Live jobs (daily earn): `daily-reminders.php` (daily 10:00 — queues
+  “streak at risk” messages for customers who checked in yesterday but
+  not yet today).
+- Live jobs (growth): `abandoned-carts.php` (hourly — queues WhatsApp/email
+  reminders for carts idle past the admin start date and idle-hours setting).
 
 Example cPanel cron (hourly backup check, Phase 24):
 

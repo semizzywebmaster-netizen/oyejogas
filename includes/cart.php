@@ -24,6 +24,9 @@ function cart_count() {
 
 function cart_clear() {
     unset($_SESSION[OYEJO_CART_KEY]);
+    if (function_exists('cart_persist')) {
+        cart_persist();
+    }
 }
 
 /** Live promo minor units for a product id, or NULL. SQL-side window. */
@@ -61,6 +64,9 @@ function cart_add($product_id, $qty) {
     }
     $cart[$id] = $new;
     $_SESSION[OYEJO_CART_KEY] = $cart;
+    if (function_exists('cart_persist')) {
+        cart_persist();
+    }
     return [true, 'Added to cart.'];
 }
 
@@ -71,6 +77,9 @@ function cart_set_qty($product_id, $qty) {
     if ($qty === 0 || !isset($cart[$id])) {
         unset($cart[$id]);
         $_SESSION[OYEJO_CART_KEY] = $cart;
+        if (function_exists('cart_persist')) {
+            cart_persist();
+        }
         return [true, 'Removed from cart.'];
     }
     $s = db()->prepare('SELECT `stock_qty`, `track_inventory`, `is_active` FROM `products` WHERE `id` = ? LIMIT 1');
@@ -86,6 +95,9 @@ function cart_set_qty($product_id, $qty) {
     }
     $cart[$id] = $qty;
     $_SESSION[OYEJO_CART_KEY] = $cart;
+    if (function_exists('cart_persist')) {
+        cart_persist();
+    }
     return [true, 'Cart updated.'];
 }
 

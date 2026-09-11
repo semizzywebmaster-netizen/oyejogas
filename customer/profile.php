@@ -19,11 +19,19 @@ if (request_method() === 'POST') {
     } else {
         $name = trim((string) post('name', ''));
         $phone = trim((string) post('phone', ''));
+        $username = trim((string) post('username', ''));
+        $whatsapp = function_exists('growth_norm_phone') ? growth_norm_phone(post('whatsapp', '')) : trim((string) post('whatsapp', ''));
         if (strlen($name) < 2 || strlen($name) > 100) {
             $errors[] = 'Name must be 2–100 characters.';
         }
         if ($phone !== '' && !preg_match('/^[0-9+\s()\-]{7,20}$/', $phone)) {
             $errors[] = 'Phone number looks invalid.';
+        }
+        if ($username !== '' && (!function_exists('growth_valid_username') || !growth_valid_username($username))) {
+            $errors[] = 'Username must start with a letter and be 3–30 letters, numbers or underscores.';
+        }
+        if ($whatsapp !== '' && (!function_exists('growth_valid_phone') || !growth_valid_phone($whatsapp))) {
+            $errors[] = 'WhatsApp number looks invalid.';
         }
         if (!$errors && $phone !== '' && $phone !== (string) ($u['phone'] ?? '')) {
             $s = db()->prepare('SELECT `id` FROM `users` WHERE `phone` = ? AND `id` <> ? LIMIT 1');
@@ -32,13 +40,44 @@ if (request_method() === 'POST') {
                 $errors[] = 'That phone number is already in use.';
             }
         }
+        if (!$errors && $username !== '' && function_exists('growth_has_column') && growth_has_column('users', 'username')) {
+            $s = db()->prepare('SELECT `id` FROM `users` WHERE `username` = ? AND `id` <> ? LIMIT 1');
+            $s->execute([$username, $uid]);
+            if ($s->fetch()) {
+                $errors[] = 'That username is already taken.';
+            }
+        }
+        if (!$errors && $whatsapp !== '' && function_exists('growth_has_column') && growth_has_column('users', 'whatsapp')) {
+            $s = db()->prepare('SELECT `id` FROM `users` WHERE `whatsapp` = ? AND `id` <> ? LIMIT 1');
+            $s->execute([$whatsapp, $uid]);
+            if ($s->fetch()) {
+                $errors[] = 'That WhatsApp number is already in use.';
+            }
+        }
         if (!$errors) {
             $phone_changed = $phone !== (string) ($u['phone'] ?? '');
-            db()->prepare('UPDATE `users` SET `name` = ?, `phone` = ?, `phone_verified_at` = ? WHERE `id` = ?')
-                ->execute([$name, $phone !== '' ? $phone : null, $phone_changed ? null : $u['phone_verified_at'], $uid]);
+            $wa_changed = $whatsapp !== (string) ($u['whatsapp'] ?? '');
+            $sql = 'UPDATE `users` SET `name` = ?, `phone` = ?, `phone_verified_at` = ?';
+            $args = [$name, $phone !== '' ? $phone : null, $phone_changed ? null : $u['phone_verified_at']];
+            if (function_exists('growth_has_column') && growth_has_column('users', 'username')) {
+                $sql .= ', `username` = ?';
+                $args[] = $username !== '' ? $username : null;
+            }
+            if (function_exists('growth_has_column') && growth_has_column('users', 'whatsapp')) {
+                $sql .= ', `whatsapp` = ?';
+                $args[] = $whatsapp !== '' ? $whatsapp : null;
+            }
+            if (function_exists('growth_has_column') && growth_has_column('users', 'whatsapp_verified_at')) {
+                $sql .= ', `whatsapp_verified_at` = ?';
+                $args[] = $wa_changed ? null : ($u['whatsapp_verified_at'] ?? null);
+            }
+            $sql .= ' WHERE `id` = ?';
+            $args[] = $uid;
+            db()->prepare($sql)->execute($args);
             $_SESSION['user']['name'] = $name;
             $u = auth_db_user($uid);
-            $message = 'Profile updated.' . ($phone_changed && $phone !== '' ? ' Please verify your new phone number.' : '');
+            $need = ($phone_changed && $phone !== '') || ($wa_changed && $whatsapp !== '');
+            $message = 'Profile updated.' . ($need ? ' Please verify your number.' : '');
         }
     }
 }

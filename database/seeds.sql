@@ -87,6 +87,7 @@ INSERT INTO `permissions` (`slug`, `name`, `group_name`) VALUES
 ('marketing.faqs', 'Manage FAQs', 'marketing'),
 ('marketing.newsletter', 'Manage newsletter', 'marketing'),
 ('spin.manage', 'Manage spin campaigns', 'engagement'),
+('daily.manage', 'Manage daily rewards', 'engagement'),
 ('referrals.view', 'View referrals', 'engagement'),
 ('referrals.manage', 'Manage referrals', 'engagement'),
 ('notifications.view', 'View notifications', 'notifications'),
@@ -137,7 +138,7 @@ INSERT INTO `role_permissions` (`role_id`, `permission_id`)
 SELECT (SELECT `id` FROM `roles` WHERE `slug` = 'marketing_manager'), `id` FROM `permissions`
 WHERE `slug` IN ('portal.admin','dashboard.view','marketing.campaigns','marketing.banners',
 'marketing.posts','marketing.faqs','marketing.newsletter','coupons.manage','spin.manage',
-'referrals.view','notifications.view','notifications.send');
+'daily.manage','referrals.view','notifications.view','notifications.send');
 
 INSERT INTO `role_permissions` (`role_id`, `permission_id`)
 SELECT (SELECT `id` FROM `roles` WHERE `slug` = 'inventory_manager'), `id` FROM `permissions`
@@ -177,6 +178,7 @@ INSERT INTO `feature_toggles` (`key`, `label`, `description`, `enabled`) VALUES
 ('support_tickets', 'Support tickets', 'Enable the helpdesk', 1),
 ('referrals', 'Referrals', 'Enable referral rewards', 1),
 ('spin_to_win', 'Spin-to-win', 'Enable spin campaigns', 1),
+('daily_rewards', 'Daily rewards', 'Daily check-in, streaks and missions that credit the wallet', 1),
 ('email_notifications', 'Email notifications', 'Send emails', 1),
 ('sms_notifications', 'SMS notifications', 'Send SMS messages', 1),
 ('whatsapp_notifications', 'WhatsApp notifications', 'Send WhatsApp messages', 1),
@@ -218,7 +220,21 @@ INSERT INTO `settings` (`key`, `value`, `group_name`) VALUES
 ('backup_keep_min', '3', 'ops'),
 ('backup_max_age_hours', '24', 'ops'),
 ('log_max_mb', '5', 'ops'),
-('log_keep_files', '5', 'ops');
+('log_keep_files', '5', 'ops'),
+('daily_base_reward_minor', '5000', 'daily'),
+('daily_streak_step_minor', '1500', 'daily'),
+('daily_streak_step_cap', '6', 'daily'),
+('daily_week_bonus_minor', '25000', 'daily'),
+('daily_meter_target_minor', '650000', 'daily'),
+('daily_mission_shop_minor', '2000', 'daily'),
+('daily_mission_refer_minor', '2000', 'daily'),
+('daily_mission_profile_minor', '10000', 'daily'),
+('daily_mission_order_minor', '20000', 'daily'),
+('daily_mystery_chance', '10', 'daily'),
+('daily_mystery_min_minor', '5000', 'daily'),
+('daily_mystery_max_minor', '20000', 'daily'),
+('abandoned_cart_start_at', NOW(), 'cart'),
+('abandoned_cart_idle_hours', '2', 'cart');
 
 -- ------------------------------------------------------- product categories
 INSERT INTO `categories` (`slug`, `name`, `description`, `sort_order`, `is_active`) VALUES
@@ -277,7 +293,11 @@ INSERT INTO `notification_templates` (`slug`, `channel`, `event`, `subject`, `bo
 ('promo-email', 'email', 'promo', '{{subject}}',
 '{{message}}', 1),
 ('promo-whatsapp', 'whatsapp', 'promo', NULL,
-'*{{subject}}*\n{{message}}', 1);
+'*{{subject}}*\n{{message}}', 1),
+('abandoned-cart-whatsapp', 'whatsapp', 'abandoned_cart', NULL,
+'Hello {{name}}, you left items in your {{site}} cart. Complete checkout here: {{link}}', 1),
+('abandoned-cart-email', 'email', 'abandoned_cart', 'You left items in your cart',
+'Hello {{name}}, you still have items in your {{site}} cart. Finish checkout: {{link}}', 1);
 
 -- ------------------------------------------------------------ starter FAQs
 INSERT INTO `faqs` (`question`, `answer`, `category`, `sort_order`, `is_active`) VALUES
@@ -305,6 +325,7 @@ INSERT INTO `homepage_sections` (`slug`, `title`, `content`, `sort_order`, `is_a
 
 -- ---------------------------------------------------------- schema baseline
 INSERT INTO `migrations` (`migration`, `batch`) VALUES ('0000_base_schema', 1);
+INSERT INTO `migrations` (`migration`, `batch`) VALUES ('20260911_growth_extras', 1);
 
 -- ---------------------------------------------------------- demo products
 -- Category ids 1-4 and size ids 1-5 are deterministic on a fresh install.

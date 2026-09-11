@@ -76,8 +76,9 @@ require BASE_PATH . '/includes/header.php';
         </form>
       <?php endif; ?>
       <?php if ($p['method'] === 'online' && $p['status'] === 'pending') : ?>
-        <p class="result-meta">Gateway: <?= e($gw['name']) ?><?= $gw['configured'] ? '' : ' (not configured yet — staff will confirm manually)' ?>.
-          <?= $p['gateway_ref'] ? 'Your ref: ' . e($p['gateway_ref']) : 'Complete the payment, then paste the gateway reference.' ?></p>
+        <p class="result-meta">Gateway: <?= e((string) ($p['gateway'] ?: $gw['name'])) ?><?= $gw['configured'] ? '' : ' (not configured yet — staff will confirm manually)' ?>.
+          <?= $p['gateway_ref'] ? 'Your ref: ' . e($p['gateway_ref']) : 'Complete Paystack or Opay, or paste a gateway reference.' ?></p>
+        <p><a class="btn small primary" href="<?= e(url('customer/pay.php?payment=' . (int) $p['id'])) ?>">Pay with Paystack / Opay</a></p>
         <form method="post" action="" class="filter-row">
           <?= csrf_field() ?>
           <input type="hidden" name="action" value="online_paid">

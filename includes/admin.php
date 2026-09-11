@@ -885,6 +885,14 @@ function adm_setting_groups() {
         'notifications' => ['notif_from_name', 'notif_from_email', 'admin_alert_email'],
         'appearance' => ['site_logo', 'site_favicon', 'site_color_primary', 'site_color_accent'],
         'pwa' => ['pwa_name', 'pwa_short_name', 'pwa_theme_color', 'pwa_bg_color'],
+        'daily' => [
+            'daily_base_reward_minor', 'daily_streak_step_minor', 'daily_streak_step_cap',
+            'daily_week_bonus_minor', 'daily_meter_target_minor',
+            'daily_mission_shop_minor', 'daily_mission_refer_minor',
+            'daily_mission_profile_minor', 'daily_mission_order_minor',
+            'daily_mystery_chance', 'daily_mystery_min_minor', 'daily_mystery_max_minor',
+        ],
+        'cart' => ['abandoned_cart_start_at', 'abandoned_cart_idle_hours'],
     ];
     // Installed add-ons contribute one group each (AO-03).
     if (function_exists('addon_setting_groups')) {
@@ -925,7 +933,11 @@ function adm_settings_save($group, $data, $actor_id) {
         return [false, 'Unknown settings group.'];
     }
     $minor_naira = ['min_order_minor', 'wallet_topup_min_minor', 'wallet_topup_max_minor',
-        'wallet_balance_cap_minor', 'wallet_daily_topup_max_minor'];
+        'wallet_balance_cap_minor', 'wallet_daily_topup_max_minor',
+        'daily_base_reward_minor', 'daily_streak_step_minor', 'daily_week_bonus_minor',
+        'daily_meter_target_minor', 'daily_mission_shop_minor', 'daily_mission_refer_minor',
+        'daily_mission_profile_minor', 'daily_mission_order_minor',
+        'daily_mystery_min_minor', 'daily_mystery_max_minor'];
     $clean = [];
     foreach ($groups[$group] as $key) {
         $v = trim((string) ($data[$key] ?? ''));
@@ -965,6 +977,12 @@ function adm_settings_save($group, $data, $actor_id) {
         }
         if ($key === 'wallet_daily_topup_count' && (!ctype_digit($v) || (int) $v < 1 || (int) $v > 100)) {
             return [false, 'Daily top-up count must be between 1 and 100.'];
+        }
+        if ($key === 'abandoned_cart_idle_hours' && (!ctype_digit($v) || (int) $v < 1 || (int) $v > 168)) {
+            return [false, 'Idle hours must be between 1 and 168.'];
+        }
+        if ($key === 'abandoned_cart_start_at' && $v !== '' && strtotime($v) === false) {
+            return [false, 'Abandoned-cart start must look like YYYY-MM-DD HH:MM:SS.'];
         }
         if (mb_strlen($v) > 2000) {
             return [false, 'Value for ' . $key . ' is too long.'];

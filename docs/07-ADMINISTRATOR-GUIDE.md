@@ -48,6 +48,9 @@ allows, and every money/status change is validated and logged.
   list, blog posts, help articles.
 - **Spin** (`spin.php`): prize campaigns — results are drawn on the
   server; one play per customer per campaign.
+- **Daily rewards** (`daily.php`): check-in / streak / mission credits
+  paid into the wallet. Amounts live under Settings → Daily rewards.
+  Cron `daily-reminders.php` nags customers whose streak is at risk.
 - **Referrals** (`referrals.php`) and **Notifications**
   (`notifications.php`): referral ledger/flags and the outbound
   message queue (queued → sent/failed with retries).

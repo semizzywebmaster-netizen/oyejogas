@@ -21,7 +21,12 @@ if (request_method() === 'POST') {
         $identifier = trim((string) post('identifier', ''));
         list($ok, $msg, $u) = auth_attempt_login($identifier, (string) post('password', ''));
         if ($ok) {
-            redirect(safe_next($next, landing_for_role($u['role'])));
+            $dest = safe_next($next, landing_for_role($u['role']));
+            if ($next === '' && ($u['role'] ?? '') === 'customer'
+                && function_exists('daily_should_nudge') && daily_should_nudge((int) $u['id'])) {
+                $dest = url('customer/daily.php');
+            }
+            redirect($dest);
         }
         $errors[] = $msg;
     }
@@ -39,7 +44,7 @@ require BASE_PATH . '/includes/header.php';
   <form method="post" action="" class="stack">
     <?= csrf_field() ?>
     <input type="hidden" name="next" value="<?= e($next) ?>">
-    <label>Email or phone<input name="identifier" value="<?= e($identifier) ?>" required maxlength="190" autocomplete="username"></label>
+    <label>Email, username or WhatsApp<input name="identifier" value="<?= e($identifier) ?>" required maxlength="190" autocomplete="username"></label>
     <label>Password<input type="password" name="password" required autocomplete="current-password"></label>
     <p><button class="btn primary" type="submit">Log in</button></p>
   </form>

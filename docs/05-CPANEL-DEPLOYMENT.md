@@ -47,6 +47,7 @@ Use PHP-CLI (not `wget` on URLs — `cron/` is blocked over HTTP):
     0 8 * * * /usr/bin/php /home/cpuser/public_html/cron/pickup-reminders.php >> /dev/null 2>&1
     0 2 * * * /usr/bin/php /home/cpuser/public_html/cron/backup.php >> /dev/null 2>&1
     0 3 * * * /usr/bin/php /home/cpuser/public_html/cron/rotate-logs.php >> /dev/null 2>&1
+    0 10 * * * /usr/bin/php /home/cpuser/public_html/cron/daily-reminders.php >> /dev/null 2>&1
 
 Replace `/home/cpuser/public_html` with your real document root and
 confirm the PHP binary path with your host (`/usr/bin/php`,

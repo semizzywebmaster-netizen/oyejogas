@@ -186,6 +186,7 @@ require BASE_PATH . '/includes/header.php';
     <input type="hidden" name="action" value="banner_save">
     <input type="hidden" name="item_id" value="<?= (int) ($edit['id'] ?? 0) ?>">
     <label>Title<input name="title" value="<?= e((string) ($edit['title'] ?? '')) ?>" maxlength="190" required></label>
+    <label>Caption / text<textarea name="body" rows="3" maxlength="2000"><?= e((string) ($edit['body'] ?? '')) ?></textarea></label>
     <?php if (!empty($edit['image'])) : ?><p><img src="<?= e(preg_match('#^https?://#i', (string) $edit['image']) ? $edit['image'] : url((string) $edit['image'])) ?>" alt="" style="max-height:90px"></p><?php endif; ?>
     <label>Upload image (JPG/PNG/WebP, max 1 MB)<input type="file" name="banner_image" accept=".jpg,.jpeg,.png,.webp"></label>
     <label>…or image URL (optional)<input name="image" value="<?= e((string) ($edit['image'] ?? '')) ?>" maxlength="255" placeholder="/assets/images/..."></label>

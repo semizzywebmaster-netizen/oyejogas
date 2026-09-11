@@ -124,6 +124,9 @@ if (request_method() === 'POST') {
                     if (($order['method'] ?? '') === 'wallet') {
                         redirect(url('customer/orders.php?view=' . $order['id'] . '&placed=1'));
                     }
+                    if (($order['method'] ?? '') === 'online') {
+                        redirect(url('customer/pay.php?order=' . $order['id']));
+                    }
                     redirect(url('customer/payments.php?placed=' . $order['id']));
                 }
                 $errors = array_merge($errors, $place_errs);
@@ -215,7 +218,7 @@ require BASE_PATH . '/includes/header.php';
           <label class="radio"><input type="radio" name="method" value="<?= $key ?>"<?= $f['method'] === $key ? ' checked' : '' ?>> <?= e($m['label']) ?></label>
         <?php endif; ?>
       <?php endforeach; ?>
-      <p class="result-meta">Wallet pays instantly. Bank transfer and online payments are verified after checkout under My payments; cash is collected on delivery.</p>
+      <p class="result-meta">Wallet pays instantly. Online checkout opens Paystack or Opay next. Bank transfer is verified after you upload a receipt; cash is collected on delivery.</p>
     </div>
     <p><button class="btn primary" type="submit">Place order</button></p>
   </form>

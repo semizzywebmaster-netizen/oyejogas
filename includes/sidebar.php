@@ -36,6 +36,7 @@ function sidebar_admin_desks() {
         ['Posts', 'admin/posts.php', 'marketing.posts'],
         ['Newsletter', 'admin/newsletter.php', 'marketing.newsletter'],
         ['Spin-to-win', 'admin/spin.php', 'spin.manage'],
+        ['Daily rewards', 'admin/daily.php', 'daily.manage'],
         ['Referrals', 'admin/referrals.php', 'referrals.manage'],
         ['Notifications', 'admin/notifications.php', 'notifications.view'],
         ['Backups', 'admin/backups.php', 'backups.create'],
@@ -52,6 +53,7 @@ function sidebar_customer_links() {
     $links = [
         ['Dashboard', 'customer/'],
         ['Orders', 'customer/orders.php'],
+        ['Wishlist', 'customer/wishlist.php'],
         ['Wallet', 'customer/wallet.php'],
         ['Refills', 'customer/refills.php'],
         ['Pickups', 'customer/pickups.php'],
@@ -66,7 +68,11 @@ function sidebar_customer_links() {
     if (function_exists('oyejo_feature') && oyejo_feature('spin_to_win')) {
         $links[] = ['Spin-to-win', 'customer/spin.php'];
     }
+    if (function_exists('daily_enabled') && daily_enabled()) {
+        array_splice($links, 3, 0, [['Daily earn', 'customer/daily.php']]);
+    }
     $links[] = ['Profile', 'customer/profile.php'];
+    $links[] = ['Suggest a location', 'customer/suggest-location.php'];
     $links[] = ['Addresses', 'customer/addresses.php'];
     $links[] = ['Phones', 'customer/phones.php'];
     $links[] = ['Security', 'customer/security.php'];

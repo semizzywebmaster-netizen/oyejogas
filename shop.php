@@ -94,7 +94,18 @@ function shop_url(array $over = []) {
 }
 
 $types = oyejo_product_types();
+$wish_ids = [];
+if (is_logged_in() && function_exists('wish_id_set')) {
+    try {
+        $wish_ids = wish_id_set(wish_customer_id((int) current_user()['id']));
+    } catch (Throwable $t) {
+        $wish_ids = [];
+    }
+}
 $page_title = $cat ? ('Shop ' . $cat['name']) : 'Shop';
+if (function_exists('daily_mark_seen') && is_logged_in()) {
+    daily_mark_seen('shop');
+}
 require BASE_PATH . '/includes/header.php';
 ?>
 <div class="page-hero">
@@ -164,6 +175,7 @@ require BASE_PATH . '/includes/header.php';
             <h3><a href="<?= e(url('product.php?slug=' . $p['slug'])) ?>"><?= e($p['name']) ?></a></h3>
             <p class="price"><?= oyejo_price_html($p['price_minor'], $p['promo_now']) ?></p>
             <p><?= oyejo_stock_badge($p) ?></p>
+            <?= wish_button((int) $p['id'], isset($wish_ids[(int) $p['id']])) ?>
           </article>
         <?php endforeach; ?>
       </div>
