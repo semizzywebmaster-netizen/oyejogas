@@ -49,7 +49,7 @@ require BASE_PATH . '/includes/header.php';
 <?php foreach ($banners_top as $b) : ?>
 <section class="banner">
   <?php if (!empty($b['link_url'])) : ?><a href="<?= e($b['link_url']) ?>"><?php endif; ?>
-  <?php if (!empty($b['image'])) : ?><img src="<?= e($b['image']) ?>" alt="<?= e($b['title']) ?>"><?php else : ?><strong><?= e($b['title']) ?></strong><?php endif; ?>
+  <?php if (!empty($b['image'])) : ?><img src="<?= e(preg_match('#^https?://#i', (string) $b['image']) ? $b['image'] : url((string) $b['image'])) ?>" alt="<?= e($b['title']) ?>"><?php else : ?><strong><?= e($b['title']) ?></strong><?php endif; ?>
   <?php if (!empty($b['link_url'])) : ?></a><?php endif; ?>
 </section>
 <?php endforeach; ?>
@@ -225,7 +225,7 @@ require BASE_PATH . '/includes/header.php';
 <?php foreach ($banners_bottom as $b) : ?>
 <section class="banner">
   <?php if (!empty($b['link_url'])) : ?><a href="<?= e($b['link_url']) ?>"><?php endif; ?>
-  <?php if (!empty($b['image'])) : ?><img src="<?= e($b['image']) ?>" alt="<?= e($b['title']) ?>"><?php else : ?><strong><?= e($b['title']) ?></strong><?php endif; ?>
+  <?php if (!empty($b['image'])) : ?><img src="<?= e(preg_match('#^https?://#i', (string) $b['image']) ? $b['image'] : url((string) $b['image'])) ?>" alt="<?= e($b['title']) ?>"><?php else : ?><strong><?= e($b['title']) ?></strong><?php endif; ?>
   <?php if (!empty($b['link_url'])) : ?></a><?php endif; ?>
 </section>
 <?php endforeach; ?>

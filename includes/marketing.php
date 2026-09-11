@@ -130,6 +130,31 @@ function mk_banner_delete($id, $actor_id) {
     return [true, 'Banner deleted.'];
 }
 
+/** Validate + store an uploaded banner image. Returns [ok, path-or-error]. */
+function mk_banner_upload($file) {
+    if (!is_array($file) || ($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
+        return [false, 'Choose a banner image to upload.'];
+    }
+    if ((int) $file['size'] > 1024 * 1024) {
+        return [false, 'Banner image must be 1 MB or smaller.'];
+    }
+    $info = @getimagesize($file['tmp_name']);
+    $map = [IMAGETYPE_JPEG => 'jpg', IMAGETYPE_PNG => 'png', IMAGETYPE_WEBP => 'webp'];
+    if (!$info || !isset($map[$info[2]])) {
+        return [false, 'Only JPG, PNG or WebP banner images are accepted.'];
+    }
+    $dir = BASE_PATH . '/uploads/banners';
+    if (!is_dir($dir) && !mkdir($dir, 0755, true)) {
+        return [false, 'Could not store the banner image.'];
+    }
+    $name = 'BNR-' . bin2hex(random_bytes(6)) . '.' . $map[$info[2]];
+    if (!move_uploaded_file($file['tmp_name'], $dir . '/' . $name)) {
+        report_error('files', 'error', 'Banner upload failed');
+        return [false, 'Could not store the banner image.'];
+    }
+    return [true, 'uploads/banners/' . $name];
+}
+
 /* ---------------- campaigns (MK-02) ---------------- */
 
 function mk_campaigns_all() {

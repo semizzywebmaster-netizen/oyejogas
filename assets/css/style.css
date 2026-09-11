@@ -286,3 +286,8 @@ html[data-theme="dark"] .maint { background: #3a2c10; color: #ffd98a; }
   .side a { white-space: nowrap; }
   .side .side-home { margin-bottom: 0; }
 }
+
+/* --- Homepage banners --- */
+section.banner { margin-bottom: 20px; }
+section.banner img { width: 100%; max-height: 340px; object-fit: cover; border-radius: var(--radius); display: block; }
+section.banner a { display: block; }

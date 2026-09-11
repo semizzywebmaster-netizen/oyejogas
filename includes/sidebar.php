@@ -18,6 +18,7 @@ function sidebar_admin_desks() {
         ['Refills', 'admin/refills.php', 'refills.view'],
         ['Pickups', 'admin/pickups.php', 'pickups.view'],
         ['Dispatch', 'admin/dispatch.php', 'deliveries.view'],
+        ['Locations', 'admin/locations.php', 'zones.manage'],
         ['Inventory', 'admin/inventory.php', 'inventory.view'],
         ['Purchases', 'admin/purchases.php', 'purchases.manage'],
         ['Wallet', 'admin/wallet.php', 'wallet.view'],
@@ -40,6 +41,7 @@ function sidebar_admin_desks() {
         ['Backups', 'admin/backups.php', 'backups.create'],
         ['Error logs', 'admin/logs.php', 'logs.view'],
         ['Appearance', 'admin/appearance.php', 'settings.view'],
+        ['PWA', 'admin/pwa.php', 'settings.view'],
         ['Settings', 'admin/settings.php', 'settings.view'],
         ['Add-ons', 'admin/addons.php', 'addons.view'],
     ];

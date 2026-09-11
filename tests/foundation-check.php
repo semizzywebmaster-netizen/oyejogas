@@ -45,7 +45,7 @@ $expected = [
     'admin/reviews.php', 'admin/marketing.php', 'admin/faqs.php',
     'admin/posts.php', 'admin/newsletter.php', 'admin/spin.php',
     'admin/referrals.php', 'admin/notifications.php', 'admin/backups.php', 'admin/logs.php',
-    'admin/addon.php', 'admin/appearance.php',
+    'admin/addon.php', 'admin/appearance.php', 'admin/pwa.php', 'admin/locations.php',
     'customer/index.php', 'customer/register.php', 'customer/login.php',
     'customer/logout.php', 'customer/forgot-password.php',
     'customer/reset-password.php', 'customer/verify-email.php',
@@ -66,6 +66,8 @@ $expected = [
     'assets/icons/maskable-192.png', 'assets/icons/maskable-512.png',
     'assets/.htaccess',
     'uploads/index.php', 'uploads/.htaccess', 'uploads/.gitkeep',
+    'uploads/branding/index.php', 'uploads/branding/.gitkeep',
+    'uploads/banners/index.php', 'uploads/banners/.gitkeep',
     'database/schema.sql', 'database/seeds.sql', 'database/.htaccess',
     'database/index.php', 'database/migrations/README.md',
     'database/migrations/.gitkeep',
@@ -388,6 +390,19 @@ check(strpos((string) @file_get_contents($root . '/database/seeds.sql'), 'WELCOM
 check(strpos((string) @file_get_contents($root . '/database/seeds.sql'), 'wallet_balance_cap_minor') !== false, 'seeds.sql: wallet limits');
 $manifest = json_decode((string) @file_get_contents($root . '/addons/example/addon.json'), true);
 check(is_array($manifest) && ($manifest['slug'] ?? '') === 'example', 'addon.json: valid manifest');
+
+// --- Growth B2: banners, PWA desk, locations desk ---
+check(strpos((string) @file_get_contents($root . '/includes/marketing.php'), 'function mk_banner_upload') !== false, 'marketing lib: banner upload helper');
+check(strpos((string) @file_get_contents($root . '/admin/marketing.php'), 'banner_image') !== false, 'marketing desk: banner file input');
+check(strpos((string) @file_get_contents($root . '/index.php'), 'url((string) $b[') !== false, 'homepage: banners use url()');
+check(strpos((string) @file_get_contents($root . '/admin/pwa.php'), 'function pwa_regenerate') !== false, 'pwa desk: manifest regenerator');
+check(strpos((string) @file_get_contents($root . '/includes/admin.php'), "'pwa' =>") !== false, 'admin lib: pwa settings group');
+check(strpos((string) @file_get_contents($root . '/database/seeds.sql'), 'pwa_short_name') !== false, 'seeds.sql: PWA defaults');
+check(strpos((string) @file_get_contents($root . '/includes/sidebar.php'), 'admin/pwa.php') !== false, 'sidebar: PWA desk');
+check(strpos((string) @file_get_contents($root . '/includes/sidebar.php'), 'admin/locations.php') !== false, 'sidebar: locations desk');
+check(strpos((string) @file_get_contents($root . '/admin/locations.php'), 'zones.manage') !== false, 'locations desk: zones gate');
+$pwa = json_decode((string) @file_get_contents($root . '/manifest.webmanifest'), true);
+check(is_array($pwa) && ($pwa['display'] ?? '') === 'standalone', 'manifest.webmanifest: valid PWA JSON');
 
 // --- php -l over every PHP file ---
 $linted = 0;

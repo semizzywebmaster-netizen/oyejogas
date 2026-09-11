@@ -48,8 +48,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             [$ok, $msg] = mk_campaign_delete((int) ($_POST['item_id'] ?? 0), (int) $me['id']);
             $ok ? $message = $msg : $errors[] = $msg;
         } elseif ($action === 'banner_save') {
-            [$ok, $msg] = mk_banner_save((int) ($_POST['item_id'] ?? 0), $_POST, (int) $me['id']);
-            $ok ? $message = $msg : $errors[] = $msg;
+            if (isset($_FILES['banner_image']) && ($_FILES['banner_image']['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE) {
+                [$uok, $umsg] = mk_banner_upload($_FILES['banner_image']);
+                if (!$uok) {
+                    $errors[] = $umsg;
+                } else {
+                    $_POST['image'] = $umsg;
+                }
+            }
+            if (!$errors) {
+                [$ok, $msg] = mk_banner_save((int) ($_POST['item_id'] ?? 0), $_POST, (int) $me['id']);
+                $ok ? $message = $msg : $errors[] = $msg;
+            }
         } elseif ($action === 'banner_delete') {
             [$ok, $msg] = mk_banner_delete((int) ($_POST['item_id'] ?? 0), (int) $me['id']);
             $ok ? $message = $msg : $errors[] = $msg;
@@ -170,13 +180,15 @@ require BASE_PATH . '/includes/header.php';
 </div>
 <div class="card">
   <h2><?= $edit ? 'Edit banner' : 'Create banner' ?></h2>
-  <form method="post" action="<?= e(url($base)) ?>" class="stack">
+  <form method="post" action="<?= e(url($base)) ?>" class="stack" enctype="multipart/form-data">
     <?= csrf_field() ?>
     <input type="hidden" name="tab" value="banners">
     <input type="hidden" name="action" value="banner_save">
     <input type="hidden" name="item_id" value="<?= (int) ($edit['id'] ?? 0) ?>">
     <label>Title<input name="title" value="<?= e((string) ($edit['title'] ?? '')) ?>" maxlength="190" required></label>
-    <label>Image URL (optional)<input name="image" value="<?= e((string) ($edit['image'] ?? '')) ?>" maxlength="255" placeholder="/assets/images/..."></label>
+    <?php if (!empty($edit['image'])) : ?><p><img src="<?= e(preg_match('#^https?://#i', (string) $edit['image']) ? $edit['image'] : url((string) $edit['image'])) ?>" alt="" style="max-height:90px"></p><?php endif; ?>
+    <label>Upload image (JPG/PNG/WebP, max 1 MB)<input type="file" name="banner_image" accept=".jpg,.jpeg,.png,.webp"></label>
+    <label>…or image URL (optional)<input name="image" value="<?= e((string) ($edit['image'] ?? '')) ?>" maxlength="255" placeholder="/assets/images/..."></label>
     <label>Link URL (optional)<input name="link_url" value="<?= e((string) ($edit['link_url'] ?? '')) ?>" maxlength="255" placeholder="/shop.php"></label>
     <label>Position
       <select name="position">

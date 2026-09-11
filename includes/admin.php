@@ -884,6 +884,7 @@ function adm_setting_groups() {
             'online_gateway_label'],
         'notifications' => ['notif_from_name', 'notif_from_email', 'admin_alert_email'],
         'appearance' => ['site_logo', 'site_favicon', 'site_color_primary', 'site_color_accent'],
+        'pwa' => ['pwa_name', 'pwa_short_name', 'pwa_theme_color', 'pwa_bg_color'],
     ];
     // Installed add-ons contribute one group each (AO-03).
     if (function_exists('addon_setting_groups')) {
@@ -938,6 +939,16 @@ function adm_settings_save($group, $data, $actor_id) {
         if (in_array($key, ['site_color_primary', 'site_color_accent'], true) && $v !== ''
             && !preg_match('/^#[0-9a-fA-F]{6}$/', $v)) {
             return [false, 'Colour for ' . $key . ' must be hex like #0b6b3a.'];
+        }
+        if (in_array($key, ['pwa_theme_color', 'pwa_bg_color'], true) && $v !== ''
+            && !preg_match('/^#[0-9a-fA-F]{6}$/', $v)) {
+            return [false, 'Colour for ' . $key . ' must be hex like #0b6b3a.'];
+        }
+        if ($key === 'pwa_name' && (mb_strlen($v) < 3 || mb_strlen($v) > 120)) {
+            return [false, 'App name must be 3–120 characters.'];
+        }
+        if ($key === 'pwa_short_name' && (mb_strlen($v) < 2 || mb_strlen($v) > 30)) {
+            return [false, 'Short name must be 2–30 characters.'];
         }
         if (in_array($key, ['site_logo', 'site_favicon'], true) && $v !== ''
             && !str_starts_with($v, 'uploads/branding/')) {

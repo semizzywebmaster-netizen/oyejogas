@@ -1,7 +1,7 @@
 {
   "name": "Oyejo Gas - LPG ordering, refills & delivery",
   "short_name": "Oyejo Gas",
-  "description": "Order cooking gas, book refills and track deliveries.",
+  "description": "Cooking gas, delivered.",
   "start_url": "./index.php",
   "scope": "./",
   "display": "standalone",
