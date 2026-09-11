@@ -12,12 +12,13 @@ if (isset($_SERVER['SCRIPT_FILENAME']) && basename($_SERVER['SCRIPT_FILENAME']) 
 }
 
 define('OYEJO_BOOT', true);
-define('OYEJO_VERSION', '0.30.0'); // platform version add-ons declare against
+define('OYEJO_VERSION', '0.31.0'); // platform version add-ons declare against
 
 require_once __DIR__ . '/../config/config.php';
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/functions.php';
 require_once __DIR__ . '/mailer.php';
+require_once __DIR__ . '/growth.php';
 require_once __DIR__ . '/auth.php';
 require_once __DIR__ . '/rbac.php';
 require_once __DIR__ . '/notify.php';
@@ -58,6 +59,7 @@ auth_tick();
 if (PHP_SAPI === 'cli' || is_file(STORAGE_PATH . '/install.lock')) {
     daily_ensure_schema();
     wish_ensure_schema();
+    growth_ensure_schema();
 }
 
 // --- Maintenance mode (Phase 23): locked storefront, staff exempt ---

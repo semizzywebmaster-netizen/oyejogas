@@ -34,7 +34,7 @@ $expected = [
     'includes/inventory.php', 'includes/admin.php', 'includes/delivery.php',
     'includes/payments.php', 'includes/support.php', 'includes/marketing.php',
     'includes/spin.php', 'includes/referrals.php', 'includes/ops.php', 'includes/errors.php',
-    'includes/addons.php', 'includes/push.php', 'includes/daily.php', 'includes/wishlist.php', 'includes/sidebar.php',
+    'includes/addons.php', 'includes/push.php', 'includes/daily.php', 'includes/wishlist.php', 'includes/growth.php', 'includes/sidebar.php',
     'includes/footer.php',
     'admin/index.php', 'admin/wallet.php', 'admin/refills.php',
     'admin/pickups.php', 'admin/inventory.php', 'admin/purchases.php',
@@ -55,7 +55,7 @@ $expected = [
     'customer/tickets.php', 'customer/wallet.php', 'customer/statement.php',
     'customer/refills.php', 'customer/pickups.php', 'customer/payments.php',
     'customer/reviews.php', 'customer/spin.php', 'customer/referrals.php', 'customer/daily.php',
-    'customer/wishlist.php',
+    'customer/wishlist.php', 'customer/pay.php', 'customer/pay-return.php', 'customer/suggest-location.php',
     'driver/index.php',
     'api/index.php', 'api/payments-callback.php', 'api/push-subscribe.php',
     'install/index.php', 'install/installer.php',
@@ -73,6 +73,7 @@ $expected = [
     'database/index.php', 'database/migrations/README.md',
     'database/migrations/.gitkeep',
     'database/migrations/20260911153000_wishlists.sql',
+    'database/migrations/20260911180000_growth_extras.sql',
     'storage/.htaccess',
     'storage/logs/index.php', 'storage/logs/.gitkeep',
     'storage/backups/index.php', 'storage/backups/.gitkeep',
@@ -88,7 +89,7 @@ $expected = [
     'addons/multi-currency/addon.json',
     'cron/README.md', 'cron/.gitkeep', 'cron/index.php',
     'cron/send-notifications.php', 'cron/pickup-reminders.php', 'cron/backup.php', 'cron/rotate-logs.php',
-    'cron/daily-reminders.php',
+    'cron/daily-reminders.php', 'cron/abandoned-carts.php',
     'pwa/README.md', 'pwa/.gitkeep',
     'tests/foundation-check.php', 'tests/index.php', 'tests/phase3-verify.sql',
     'tests/daily-logic.php',
@@ -449,6 +450,36 @@ check(strpos((string) @file_get_contents($root . '/includes/sidebar.php'), 'admi
 check(strpos((string) @file_get_contents($root . '/admin/locations.php'), 'zones.manage') !== false, 'locations desk: zones gate');
 $pwa = json_decode((string) @file_get_contents($root . '/manifest.webmanifest'), true);
 check(is_array($pwa) && ($pwa['display'] ?? '') === 'standalone', 'manifest.webmanifest: valid PWA JSON');
+
+// --- Growth extras: identity, Paystack/Opay, abandoned carts, locations ---
+check(strpos((string) @file_get_contents($root . '/includes/bootstrap.php'), '/growth.php') !== false, 'bootstrap: loads growth');
+check(strpos((string) @file_get_contents($root . '/includes/bootstrap.php'), 'growth_ensure_schema') !== false, 'bootstrap: growth auto-schema');
+check(strpos((string) @file_get_contents($root . '/includes/growth.php'), 'function cart_persist') !== false, 'growth lib: cart persist');
+check(strpos((string) @file_get_contents($root . '/includes/growth.php'), 'function abandoned_queue_reminders') !== false, 'growth lib: abandoned cart cron');
+check(strpos((string) @file_get_contents($root . '/includes/growth.php'), 'function loc_suggest') !== false, 'growth lib: location suggest');
+check(strpos((string) @file_get_contents($root . '/includes/growth.php'), 'function loc_decide') !== false, 'growth lib: location approve');
+check(strpos((string) @file_get_contents($root . '/database/schema.sql'), '`username` VARCHAR(40)') !== false, 'schema: users.username');
+check(strpos((string) @file_get_contents($root . '/database/schema.sql'), '`whatsapp` VARCHAR(30)') !== false, 'schema: users.whatsapp');
+check(strpos((string) @file_get_contents($root . '/database/schema.sql'), 'CREATE TABLE IF NOT EXISTS `abandoned_carts`') !== false, 'schema: abandoned_carts');
+check(strpos((string) @file_get_contents($root . '/database/schema.sql'), 'CREATE TABLE IF NOT EXISTS `location_suggestions`') !== false, 'schema: location_suggestions');
+check(strpos((string) @file_get_contents($root . '/includes/payments.php'), 'function pay_paystack_init') !== false, 'payments: Paystack initialize');
+check(strpos((string) @file_get_contents($root . '/includes/payments.php'), 'function pay_opay_init') !== false, 'payments: Opay initialize');
+check(strpos((string) @file_get_contents($root . '/includes/payments.php'), 'x-paystack-signature') === false
+    && strpos((string) @file_get_contents($root . '/api/payments-callback.php'), 'x-paystack-signature') !== false, 'callback: Paystack HMAC header');
+check(strpos((string) @file_get_contents($root . '/api/payments-callback.php'), 'hash_hmac') !== false, 'callback: HMAC verify');
+check(strpos((string) @file_get_contents($root . '/customer/register.php'), 'whatsapp') !== false, 'register: WhatsApp field');
+check(strpos((string) @file_get_contents($root . '/customer/login.php'), 'username or WhatsApp') !== false, 'login: username/WhatsApp copy');
+check(strpos((string) @file_get_contents($root . '/includes/auth.php'), 'whatsapp_send') !== false, 'auth: WhatsApp OTP');
+check(strpos((string) @file_get_contents($root . '/checkout.php'), 'customer/pay.php') !== false, 'checkout: online gateway redirect');
+check(strpos((string) @file_get_contents($root . '/admin/locations.php'), 'loc_decide') !== false, 'locations desk: approve suggestions');
+check(strpos((string) @file_get_contents($root . '/includes/sidebar.php'), 'customer/suggest-location.php') !== false, 'sidebar: suggest a location');
+check(strpos((string) @file_get_contents($root . '/includes/admin.php'), "'cart' =>") !== false, 'admin lib: cart settings group');
+check(strpos((string) @file_get_contents($root . '/.env.example'), 'OPAY_PRIVATE_KEY') !== false, '.env.example: Opay keys');
+check(strpos((string) @file_get_contents($root . '/includes/notify.php'), 'abandoned_cart') !== false, 'notify: abandoned_cart event');
+check(strpos((string) @file_get_contents($root . '/cron/abandoned-carts.php'), 'abandoned_queue_reminders') !== false, 'cron: abandoned carts');
+check(strpos((string) @file_get_contents($root . '/index.php'), 'banner-copy') !== false, 'homepage: banner captions');
+check(strpos((string) @file_get_contents($root . '/admin/marketing.php'), 'name="body"') !== false, 'marketing desk: banner body');
+check(strpos((string) @file_get_contents($root . '/install/installer.php'), "'26'") !== false, 'installer: still 26 feature toggles');
 
 // --- php -l over every PHP file ---
 $linted = 0;

@@ -232,7 +232,9 @@ INSERT INTO `settings` (`key`, `value`, `group_name`) VALUES
 ('daily_mission_order_minor', '20000', 'daily'),
 ('daily_mystery_chance', '10', 'daily'),
 ('daily_mystery_min_minor', '5000', 'daily'),
-('daily_mystery_max_minor', '20000', 'daily');
+('daily_mystery_max_minor', '20000', 'daily'),
+('abandoned_cart_start_at', NOW(), 'cart'),
+('abandoned_cart_idle_hours', '2', 'cart');
 
 -- ------------------------------------------------------- product categories
 INSERT INTO `categories` (`slug`, `name`, `description`, `sort_order`, `is_active`) VALUES
@@ -291,7 +293,11 @@ INSERT INTO `notification_templates` (`slug`, `channel`, `event`, `subject`, `bo
 ('promo-email', 'email', 'promo', '{{subject}}',
 '{{message}}', 1),
 ('promo-whatsapp', 'whatsapp', 'promo', NULL,
-'*{{subject}}*\n{{message}}', 1);
+'*{{subject}}*\n{{message}}', 1),
+('abandoned-cart-whatsapp', 'whatsapp', 'abandoned_cart', NULL,
+'Hello {{name}}, you left items in your {{site}} cart. Complete checkout here: {{link}}', 1),
+('abandoned-cart-email', 'email', 'abandoned_cart', 'You left items in your cart',
+'Hello {{name}}, you still have items in your {{site}} cart. Finish checkout: {{link}}', 1);
 
 -- ------------------------------------------------------------ starter FAQs
 INSERT INTO `faqs` (`question`, `answer`, `category`, `sort_order`, `is_active`) VALUES
@@ -319,6 +325,7 @@ INSERT INTO `homepage_sections` (`slug`, `title`, `content`, `sort_order`, `is_a
 
 -- ---------------------------------------------------------- schema baseline
 INSERT INTO `migrations` (`migration`, `batch`) VALUES ('0000_base_schema', 1);
+INSERT INTO `migrations` (`migration`, `batch`) VALUES ('20260911_growth_extras', 1);
 
 -- ---------------------------------------------------------- demo products
 -- Category ids 1-4 and size ids 1-5 are deterministic on a fresh install.

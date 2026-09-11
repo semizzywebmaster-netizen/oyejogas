@@ -45,7 +45,8 @@ function notify_events() {
     return [
         'registration' => ['Registration', ['email']],
         'verification' => ['Verification', ['email']],
-        'password_reset' => ['Password reset', ['email']],
+        'password_reset' => ['Password reset', ['email', 'whatsapp']],
+        'abandoned_cart' => ['Abandoned cart', ['email', 'whatsapp']],
         'order_confirmation' => ['Order confirmation', ['email', 'whatsapp']],
         'payment_confirmation' => ['Payment confirmation', ['email', 'whatsapp']],
         'refill_requested' => ['Refill requests', ['email', 'sms']],
@@ -224,7 +225,19 @@ function notify_recipient($customer_id) {
          JOIN `users` u ON u.`id` = c.`user_id` WHERE c.`id` = ?'
     );
     $stmt->execute([(int) $customer_id]);
-    return $stmt->fetch() ?: ['name' => '', 'email' => '', 'phone' => ''];
+    $row = $stmt->fetch() ?: ['name' => '', 'email' => '', 'phone' => ''];
+    if (function_exists('growth_has_column') && growth_has_column('users', 'whatsapp')) {
+        try {
+            $w = db()->prepare(
+                'SELECT u.`whatsapp` FROM `customers` c JOIN `users` u ON u.`id` = c.`user_id` WHERE c.`id` = ?'
+            );
+            $w->execute([(int) $customer_id]);
+            $row['whatsapp'] = (string) $w->fetchColumn();
+        } catch (Throwable $t) {
+            $row['whatsapp'] = '';
+        }
+    }
+    return $row;
 }
 
 /** Missing row = subscribed; explicit 0 = opted out. */
@@ -265,7 +278,9 @@ function notify_send($event, $customer_id, array $vars = [], $subject = '', $bod
             if ($toggles[$ch] !== null && !oyejo_feature($toggles[$ch])) {
                 continue;
             }
-            $recipient = in_array($ch, ['sms', 'whatsapp'], true) ? $to['phone'] : $to['email'];
+            $recipient = in_array($ch, ['sms', 'whatsapp'], true)
+                ? (($ch === 'whatsapp' && !empty($to['whatsapp'])) ? $to['whatsapp'] : $to['phone'])
+                : $to['email'];
             if ($ch === 'push') {
                 $recipient = $to['email'] !== '' ? $to['email'] : ('customer:' . (int) $customer_id);
             }

@@ -892,6 +892,7 @@ function adm_setting_groups() {
             'daily_mission_profile_minor', 'daily_mission_order_minor',
             'daily_mystery_chance', 'daily_mystery_min_minor', 'daily_mystery_max_minor',
         ],
+        'cart' => ['abandoned_cart_start_at', 'abandoned_cart_idle_hours'],
     ];
     // Installed add-ons contribute one group each (AO-03).
     if (function_exists('addon_setting_groups')) {
@@ -976,6 +977,12 @@ function adm_settings_save($group, $data, $actor_id) {
         }
         if ($key === 'wallet_daily_topup_count' && (!ctype_digit($v) || (int) $v < 1 || (int) $v > 100)) {
             return [false, 'Daily top-up count must be between 1 and 100.'];
+        }
+        if ($key === 'abandoned_cart_idle_hours' && (!ctype_digit($v) || (int) $v < 1 || (int) $v > 168)) {
+            return [false, 'Idle hours must be between 1 and 168.'];
+        }
+        if ($key === 'abandoned_cart_start_at' && $v !== '' && strtotime($v) === false) {
+            return [false, 'Abandoned-cart start must look like YYYY-MM-DD HH:MM:SS.'];
         }
         if (mb_strlen($v) > 2000) {
             return [false, 'Value for ' . $key . ' is too long.'];

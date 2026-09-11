@@ -72,6 +72,7 @@ function sidebar_customer_links() {
         array_splice($links, 3, 0, [['Daily earn', 'customer/daily.php']]);
     }
     $links[] = ['Profile', 'customer/profile.php'];
+    $links[] = ['Suggest a location', 'customer/suggest-location.php'];
     $links[] = ['Addresses', 'customer/addresses.php'];
     $links[] = ['Phones', 'customer/phones.php'];
     $links[] = ['Security', 'customer/security.php'];

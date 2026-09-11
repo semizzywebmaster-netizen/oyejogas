@@ -19,7 +19,10 @@ if (!$can_zones && !$can_slots) {
     exit;
 }
 $tab = (string) ($_GET['tab'] ?? $_POST['tab'] ?? 'zones');
-if (!in_array($tab, ['zones', 'slots'], true)) {
+if (!in_array($tab, ['zones', 'slots', 'suggestions'], true)) {
+    $tab = 'zones';
+}
+if ($tab === 'suggestions' && !$can_zones) {
     $tab = 'zones';
 }
 if ($tab === 'zones' && !$can_zones) {
@@ -36,8 +39,8 @@ if (request_method() === 'POST') {
         $errors[] = 'Your session expired. Please try again.';
     } else {
         $action = (string) post('action', '');
-        $need_zones = in_array($action, ['zone_save', 'zone_delete'], true);
-        if (($need_zones && !$can_zones) || (!$need_zones && !$can_slots)) {
+        $need_zones = in_array($action, ['zone_save', 'zone_delete', 'loc_approve', 'loc_reject'], true);
+        if (($need_zones && !$can_zones) || (!$need_zones && $action !== '' && !$can_slots)) {
             $errors[] = 'You do not have permission for that action.';
         } elseif ($action === 'zone_save') {
             [$ok, $msg] = del_zone_save((int) post('item_id', 0), $_POST, (int) $me['id']);
@@ -51,13 +54,19 @@ if (request_method() === 'POST') {
         } elseif ($action === 'slot_delete') {
             [$ok, $msg] = del_slot_delete((int) post('item_id', 0), (int) $me['id']);
             $ok ? $message = $msg : $errors[] = $msg;
+        } elseif ($action === 'loc_approve') {
+            [$ok, $msg] = loc_decide((int) post('item_id', 0), true, (int) $me['id'], post('note', ''), post('fee', 0));
+            $ok ? $message = $msg : $errors[] = $msg;
+        } elseif ($action === 'loc_reject') {
+            [$ok, $msg] = loc_decide((int) post('item_id', 0), false, (int) $me['id'], post('note', ''));
+            $ok ? $message = $msg : $errors[] = $msg;
         }
     }
 }
 
 $edit = null;
 $edit_id = (int) ($_GET['edit'] ?? 0);
-if ($edit_id > 0) {
+if ($edit_id > 0 && in_array($tab, ['zones', 'slots'], true)) {
     $t = $tab === 'zones' ? 'delivery_zones' : 'delivery_slots';
     $s = db()->prepare('SELECT * FROM `' . $t . '` WHERE `id` = ?');
     $s->execute([$edit_id]);
@@ -74,6 +83,7 @@ require BASE_PATH . '/includes/header.php';
 <p>
   <?php if ($can_zones) : ?><a class="btn<?= $tab === 'zones' ? ' primary' : ' ghost' ?>" href="<?= e(url('admin/locations.php?tab=zones')) ?>">Zones</a><?php endif; ?>
   <?php if ($can_slots) : ?><a class="btn<?= $tab === 'slots' ? ' primary' : ' ghost' ?>" href="<?= e(url('admin/locations.php?tab=slots')) ?>">Time slots</a><?php endif; ?>
+  <?php if ($can_zones) : ?><a class="btn<?= $tab === 'suggestions' ? ' primary' : ' ghost' ?>" href="<?= e(url('admin/locations.php?tab=suggestions')) ?>">Suggestions</a><?php endif; ?>
 </p>
 <?php if ($message !== '') : ?><div class="alert alert-success"><?= e($message) ?></div><?php endif; ?>
 <?php foreach ($errors as $e) : ?><div class="alert alert-error"><?= e($e) ?></div><?php endforeach; ?>

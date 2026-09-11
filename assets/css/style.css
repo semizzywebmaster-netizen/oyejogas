@@ -311,6 +311,8 @@ html[data-theme="dark"] .daily-week li.on { background: #1d3a28; }
 html[data-theme="dark"] .meter { background: #2b3630; }
 
 /* --- Homepage banners --- */
-section.banner { margin-bottom: 20px; }
+section.banner { margin-bottom: 20px; position: relative; }
 section.banner img { width: 100%; max-height: 340px; object-fit: cover; border-radius: var(--radius); display: block; }
 section.banner a { display: block; }
+section.banner .banner-copy { margin-top: 8px; }
+section.banner .banner-copy strong { display: block; font-size: 1.1rem; }

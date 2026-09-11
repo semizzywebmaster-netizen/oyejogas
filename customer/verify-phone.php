@@ -10,10 +10,12 @@ $me = current_user();
 $u = auth_db_user($me['id']);
 $errors = [];
 $info = '';
+$dest = trim((string) (($u['whatsapp'] ?? '') !== '' ? $u['whatsapp'] : ($u['phone'] ?? '')));
+$verified = !empty($u['phone_verified_at']) || !empty($u['whatsapp_verified_at']);
 
-if ($u && empty($u['phone'])) {
-    $errors[] = 'No phone number on your account yet. Add one under My account → Phones.';
-} elseif ($u && empty($u['phone_verified_at']) && request_method() === 'POST') {
+if ($u && $dest === '') {
+    $errors[] = 'No phone or WhatsApp number on your account yet. Add one under Profile.';
+} elseif ($u && !$verified && request_method() === 'POST') {
     if (!csrf_verify(post('csrf_token'))) {
         $errors[] = 'Security token mismatch. Reload and try again.';
     } else {
@@ -21,16 +23,22 @@ if ($u && empty($u['phone'])) {
         if ($action === 'send') {
             list($ok, $msg) = auth_send_phone_code($u);
             if ($ok) {
-                $info = 'Code sent to ' . $u['phone'] . '. It expires in 10 minutes.';
+                $info = 'Code sent to ' . $dest . ' on WhatsApp. It expires in 10 minutes.';
             } else {
                 $errors[] = $msg;
             }
         } elseif ($action === 'check') {
             list($ok, $msg) = auth_check_phone_code((string) post('code', ''));
             if ($ok) {
-                db()->prepare('UPDATE `users` SET `phone_verified_at` = NOW() WHERE `id` = ?')->execute([$u['id']]);
+                if (function_exists('growth_has_column') && growth_has_column('users', 'whatsapp_verified_at')) {
+                    db()->prepare('UPDATE `users` SET `phone_verified_at` = NOW(), `whatsapp_verified_at` = NOW() WHERE `id` = ?')
+                        ->execute([$u['id']]);
+                } else {
+                    db()->prepare('UPDATE `users` SET `phone_verified_at` = NOW() WHERE `id` = ?')->execute([$u['id']]);
+                }
                 $u = auth_db_user($u['id']);
-                $info = 'Phone number verified.';
+                $verified = true;
+                $info = 'Number verified.';
             } else {
                 $errors[] = $msg;
             }
@@ -50,18 +58,18 @@ require BASE_PATH . '/includes/header.php';
   <?php if ($info !== '') : ?>
     <div class="alert alert-success"><?= e($info) ?></div>
   <?php endif; ?>
-  <?php if ($u && !empty($u['phone']) && !empty($u['phone_verified_at'])) : ?>
+  <?php if ($u && $verified && $dest !== '') : ?>
     <div class="card">
-      <p><strong><?= e($u['phone']) ?></strong> is verified.</p>
+      <p><strong><?= e($dest) ?></strong> is verified.</p>
       <p><a href="<?= e(url('customer/')) ?>">Back to My account</a></p>
     </div>
-  <?php elseif ($u && !empty($u['phone'])) : ?>
+  <?php elseif ($u && $dest !== '') : ?>
     <div class="card">
-      <h2>1. Send a code</h2>
+      <h2>1. Send a WhatsApp code</h2>
       <form method="post" action="">
         <?= csrf_field() ?>
         <input type="hidden" name="action" value="send">
-        <p><button class="btn ghost" type="submit">Send code to <?= e($u['phone']) ?></button></p>
+        <p><button class="btn ghost" type="submit">Send code to <?= e($dest) ?></button></p>
       </form>
     </div>
     <div class="card">

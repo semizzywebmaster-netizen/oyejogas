@@ -125,11 +125,30 @@ function auth_log_attempt($email, $success) {
 
 // ------------------------------------------------------------------ users
 function auth_find_user($identifier) {
-    $s = db()->prepare(
-        'SELECT u.*, r.slug AS role FROM `users` u JOIN `roles` r ON r.id = u.role_id
-         WHERE u.email = ? OR u.phone = ? LIMIT 1'
-    );
-    $s->execute([$identifier, $identifier]);
+    $identifier = trim((string) $identifier);
+    $sql = 'SELECT u.*, r.slug AS role FROM `users` u JOIN `roles` r ON r.id = u.role_id
+            WHERE u.email = ? OR u.phone = ?';
+    $args = [$identifier, $identifier];
+    if (function_exists('growth_has_column') && growth_has_column('users', 'username')) {
+        $sql .= ' OR u.username = ?';
+        $args[] = $identifier;
+    }
+    if (function_exists('growth_has_column') && growth_has_column('users', 'whatsapp')) {
+        $sql .= ' OR u.whatsapp = ?';
+        $args[] = $identifier;
+    }
+    $norm = function_exists('growth_norm_phone') ? growth_norm_phone($identifier) : $identifier;
+    if ($norm !== '' && $norm !== $identifier) {
+        $sql .= ' OR u.phone = ?';
+        $args[] = $norm;
+        if (function_exists('growth_has_column') && growth_has_column('users', 'whatsapp')) {
+            $sql .= ' OR u.whatsapp = ?';
+            $args[] = $norm;
+        }
+    }
+    $sql .= ' LIMIT 1';
+    $s = db()->prepare($sql);
+    $s->execute($args);
     $row = $s->fetch();
     return $row ? $row : null;
 }
@@ -154,8 +173,14 @@ function auth_rand_code($len) {
 }
 
 /** Register a customer (input must be validated first). [userId|null, error] */
-function auth_register_customer($name, $email, $phone, $password) {
+function auth_register_customer($name, $email, $phone, $password, $username = '', $whatsapp = '') {
     $pdo = db();
+    $username = trim((string) $username);
+    $whatsapp = function_exists('growth_norm_phone') ? growth_norm_phone($whatsapp) : trim((string) $whatsapp);
+    $phone = function_exists('growth_norm_phone') ? growth_norm_phone($phone) : trim((string) $phone);
+    if ($phone === '' && $whatsapp !== '') {
+        $phone = $whatsapp;
+    }
     try {
         $pdo->beginTransaction();
         $role = $pdo->query("SELECT `id` FROM `roles` WHERE `slug` = 'customer'")->fetch();
@@ -163,15 +188,31 @@ function auth_register_customer($name, $email, $phone, $password) {
             $pdo->rollBack();
             return [null, 'Customer role is missing. Re-run the installer.'];
         }
-        $stmt = $pdo->prepare(
-            'INSERT INTO `users` (`role_id`, `name`, `email`, `phone`, `password_hash`, `status`)
-             VALUES (?, ?, ?, ?, ?, \'pending\')'
-        );
-        $stmt->execute([
-            $role['id'], $name, $email,
-            $phone !== '' ? $phone : null,
-            password_hash($password, PASSWORD_DEFAULT),
-        ]);
+        $has_user = function_exists('growth_has_column') && growth_has_column('users', 'username');
+        $has_wa = function_exists('growth_has_column') && growth_has_column('users', 'whatsapp');
+        if ($has_user && $has_wa) {
+            $stmt = $pdo->prepare(
+                'INSERT INTO `users` (`role_id`, `name`, `email`, `username`, `phone`, `whatsapp`, `password_hash`, `status`)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, \'pending\')'
+            );
+            $stmt->execute([
+                $role['id'], $name, $email,
+                $username !== '' ? $username : null,
+                $phone !== '' ? $phone : null,
+                $whatsapp !== '' ? $whatsapp : null,
+                password_hash($password, PASSWORD_DEFAULT),
+            ]);
+        } else {
+            $stmt = $pdo->prepare(
+                'INSERT INTO `users` (`role_id`, `name`, `email`, `phone`, `password_hash`, `status`)
+                 VALUES (?, ?, ?, ?, ?, \'pending\')'
+            );
+            $stmt->execute([
+                $role['id'], $name, $email,
+                $phone !== '' ? $phone : null,
+                password_hash($password, PASSWORD_DEFAULT),
+            ]);
+        }
         $uid = (int) $pdo->lastInsertId();
         $done = false;
         for ($i = 0; $i < 5 && !$done; $i++) {
@@ -197,7 +238,7 @@ function auth_register_customer($name, $email, $phone, $password) {
             $pdo->rollBack();
         }
         if ($e->getCode() === '23000') {
-            return [null, 'That email or phone is already registered. Try logging in.'];
+            return [null, 'That email, username, phone or WhatsApp is already registered. Try logging in.'];
         }
         report_error('auth', 'error', $e);
         return [null, 'Registration failed. Please try again.'];
@@ -230,6 +271,21 @@ function auth_attempt_login($identifier, $password) {
         return [false, 'Too many attempts. Try again in 15 minutes.', null];
     }
     $u = auth_find_user($identifier);
+    if ($u) {
+        $id_l = mb_strtolower($identifier);
+        $idn = function_exists('growth_norm_phone') ? growth_norm_phone($identifier) : $identifier;
+        $used_wa = isset($u['whatsapp']) && $u['whatsapp'] !== ''
+            && ($identifier === $u['whatsapp'] || $idn === $u['whatsapp']);
+        $used_phone = isset($u['phone']) && $u['phone'] !== ''
+            && ($identifier === $u['phone'] || $idn === $u['phone']);
+        if ($used_wa && empty($u['whatsapp_verified_at']) && empty($u['phone_verified_at'])) {
+            return [false, 'Verify your WhatsApp number before using it to log in.', null];
+        }
+        if ($used_phone && empty($u['phone_verified_at']) && empty($u['whatsapp_verified_at'])
+            && $id_l !== mb_strtolower((string) $u['email'])) {
+            return [false, 'Verify your phone/WhatsApp before using it to log in.', null];
+        }
+    }
     if (!$u || !password_verify((string) $password, $u['password_hash'])) {
         if ($u) {
             auth_register_fail($u);
@@ -270,6 +326,9 @@ function auth_attempt_login($identifier, $password) {
     $_SESSION['last_regen'] = time();
     $_SESSION['ua'] = auth_ua_hash();
     auth_log_attempt($u['email'], true);
+    if (function_exists('cart_restore_abandoned')) {
+        cart_restore_abandoned();
+    }
     return [true, '', $_SESSION['user']];
 }
 
@@ -320,12 +379,13 @@ function auth_request_reset($email) {
             'INSERT INTO `password_resets` (`user_id`, `token_hash`, `expires_at`) VALUES (?, ?, ?)'
         )->execute([$u['id'], hash('sha256', $token), date('Y-m-d H:i:s', time() + 3600)]);
         $link = url('customer/reset-password.php') . '?token=' . $token;
-        send_mail(
-            $u['email'],
-            'Reset your password',
-            "Hello {$u['name']},\n\nReset your password here: $link\n\n"
-            . "This link expires in 1 hour. Ignore this message if it was not you."
-        );
+        $body = "Hello {$u['name']},\n\nReset your password here: $link\n\n"
+            . "This link expires in 1 hour. Ignore this message if it was not you.";
+        send_mail($u['email'], 'Reset your password', $body);
+        $wa = trim((string) (($u['whatsapp'] ?? '') !== '' ? $u['whatsapp'] : ($u['phone'] ?? '')));
+        if ($wa !== '') {
+            whatsapp_send($wa, 'Oyejo Gas password reset (expires in 1 hour): ' . $link);
+        }
     }
 }
 
@@ -373,7 +433,12 @@ function auth_send_phone_code($user) {
     $_SESSION['phone_exp'] = $now + 600;
     $_SESSION['phone_tries'] = 0;
     $_SESSION['phone_cooldown'] = $now + 60;
-    sms_send($user['phone'], 'Your verification code is ' . $code . '. It expires in 10 minutes.');
+    $to = trim((string) (($user['whatsapp'] ?? '') !== '' ? $user['whatsapp'] : ($user['phone'] ?? '')));
+    $msg = 'Your Oyejo Gas verification code is ' . $code . '. It expires in 10 minutes.';
+    [$wa_ok] = whatsapp_send($to, $msg);
+    if (!$wa_ok) {
+        sms_send($to, $msg);
+    }
     return [true, ''];
 }
 

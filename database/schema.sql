@@ -59,11 +59,14 @@ CREATE TABLE IF NOT EXISTS `users` (
     `role_id` INT UNSIGNED NOT NULL,
     `name` VARCHAR(150) NOT NULL,
     `email` VARCHAR(190) NOT NULL,
+    `username` VARCHAR(40) NULL,
     `phone` VARCHAR(30) NULL,
+    `whatsapp` VARCHAR(30) NULL,
     `password_hash` VARCHAR(255) NOT NULL,
     `status` ENUM('active','pending','suspended') NOT NULL DEFAULT 'pending',
     `email_verified_at` DATETIME NULL,
     `phone_verified_at` DATETIME NULL,
+    `whatsapp_verified_at` DATETIME NULL,
     `failed_logins` INT NOT NULL DEFAULT 0,
     `locked_until` DATETIME NULL,
     `last_login_at` DATETIME NULL,
@@ -72,7 +75,9 @@ CREATE TABLE IF NOT EXISTS `users` (
     `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`),
     UNIQUE KEY `uq_users_email` (`email`),
+    UNIQUE KEY `uq_users_username` (`username`),
     UNIQUE KEY `uq_users_phone` (`phone`),
+    UNIQUE KEY `uq_users_whatsapp` (`whatsapp`),
     KEY `idx_users_role` (`role_id`),
     KEY `idx_users_status` (`status`),
     CONSTRAINT `fk_users_role` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`) ON DELETE RESTRICT
@@ -609,7 +614,7 @@ CREATE TABLE IF NOT EXISTS `payments` (
     `customer_id` INT UNSIGNED NOT NULL,
     `wallet_txn_id` INT UNSIGNED NULL,
     `method` ENUM('wallet','cod','transfer','online') NOT NULL,
-    `gateway` VARCHAR(30) NULL COMMENT 'paystack|flutterwave',
+    `gateway` VARCHAR(30) NULL COMMENT 'paystack|opay',
     `gateway_ref` VARCHAR(100) NULL,
     `amount_minor` INT NOT NULL COMMENT 'minor units',
     `status` ENUM('pending','verified','failed','refunded','partially_refunded') NOT NULL DEFAULT 'pending',
@@ -724,6 +729,7 @@ CREATE TABLE IF NOT EXISTS `reviews` (
 CREATE TABLE IF NOT EXISTS `banners` (
     `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
     `title` VARCHAR(190) NOT NULL,
+    `body` TEXT NULL,
     `image` VARCHAR(255) NULL,
     `link_url` VARCHAR(255) NULL,
     `position` VARCHAR(50) NOT NULL DEFAULT 'home_top',
@@ -1166,6 +1172,40 @@ CREATE TABLE IF NOT EXISTS `daily_mission_claims` (
     CONSTRAINT `fk_mission_customer` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- -------------------------------------------------------- abandoned_carts
+CREATE TABLE IF NOT EXISTS `abandoned_carts` (
+    `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `customer_id` INT UNSIGNED NOT NULL,
+    `items` TEXT NOT NULL,
+    `notified_at` DATETIME NULL,
+    `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uq_abandoned_customer` (`customer_id`),
+    KEY `idx_abandoned_notify` (`notified_at`, `updated_at`),
+    CONSTRAINT `fk_abandoned_customer` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------- location_suggestions
+CREATE TABLE IF NOT EXISTS `location_suggestions` (
+    `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `customer_id` INT UNSIGNED NOT NULL,
+    `name` VARCHAR(100) NOT NULL,
+    `city` VARCHAR(100) NOT NULL,
+    `description` VARCHAR(255) NULL,
+    `status` ENUM('pending','approved','rejected') NOT NULL DEFAULT 'pending',
+    `zone_id` INT UNSIGNED NULL,
+    `reviewed_by` INT UNSIGNED NULL,
+    `reviewed_at` DATETIME NULL,
+    `review_note` VARCHAR(255) NULL,
+    `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    KEY `idx_locsug_status` (`status`, `created_at`),
+    CONSTRAINT `fk_locsug_customer` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`id`) ON DELETE CASCADE,
+    CONSTRAINT `fk_locsug_zone` FOREIGN KEY (`zone_id`) REFERENCES `delivery_zones` (`id`) ON DELETE SET NULL,
+    CONSTRAINT `fk_locsug_reviewer` FOREIGN KEY (`reviewed_by`) REFERENCES `users` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- -------------------------------------------------------------- wishlists
 CREATE TABLE IF NOT EXISTS `wishlists` (
     `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -1195,5 +1235,5 @@ CREATE TABLE IF NOT EXISTS `push_subscriptions` (
 
 -- =====================================================================
 SET FOREIGN_KEY_CHECKS = 1;
--- End of schema: 68 tables + 2 triggers.
+-- End of schema: 70 tables + 2 triggers.
 -- =====================================================================

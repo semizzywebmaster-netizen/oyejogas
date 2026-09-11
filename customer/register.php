@@ -23,6 +23,8 @@ $done = false;
 $name = '';
 $email = '';
 $phone = '';
+$username = '';
+$whatsapp = '';
 $refcode = strtoupper(trim((string) ($_GET['ref'] ?? '')));
 $ref_notice = '';
 
@@ -37,6 +39,8 @@ if (request_method() === 'POST') {
         $name = trim((string) post('name', ''));
         $email = trim((string) post('email', ''));
         $phone = trim((string) post('phone', ''));
+        $username = trim((string) post('username', ''));
+        $whatsapp = function_exists('growth_norm_phone') ? growth_norm_phone(post('whatsapp', '')) : trim((string) post('whatsapp', ''));
         $pw = (string) post('password', '');
         $pw2 = (string) post('password_confirm', '');
         if (strlen($name) < 2 || strlen($name) > 100) {
@@ -47,6 +51,12 @@ if (request_method() === 'POST') {
         }
         if ($phone !== '' && !preg_match('/^[0-9+\s()\-]{7,20}$/', $phone)) {
             $errors[] = 'Phone number looks invalid.';
+        }
+        if ($username !== '' && (!function_exists('growth_valid_username') || !growth_valid_username($username))) {
+            $errors[] = 'Username must start with a letter and be 3–30 letters, numbers or underscores.';
+        }
+        if ($whatsapp === '' || !function_exists('growth_valid_phone') || !growth_valid_phone($whatsapp)) {
+            $errors[] = 'Enter a valid WhatsApp number.';
         }
         if (strlen($pw) < 8) {
             $errors[] = 'Password must be at least 8 characters.';
@@ -69,8 +79,22 @@ if (request_method() === 'POST') {
                 $errors[] = 'That phone number is already registered.';
             }
         }
+        if (!$errors && $username !== '' && function_exists('growth_has_column') && growth_has_column('users', 'username')) {
+            $s = db()->prepare('SELECT `id` FROM `users` WHERE `username` = ? LIMIT 1');
+            $s->execute([$username]);
+            if ($s->fetch()) {
+                $errors[] = 'That username is already taken.';
+            }
+        }
+        if (!$errors && $whatsapp !== '' && function_exists('growth_has_column') && growth_has_column('users', 'whatsapp')) {
+            $s = db()->prepare('SELECT `id` FROM `users` WHERE `whatsapp` = ? LIMIT 1');
+            $s->execute([$whatsapp]);
+            if ($s->fetch()) {
+                $errors[] = 'That WhatsApp number is already registered.';
+            }
+        }
         if (!$errors) {
-            list($uid, $err) = auth_register_customer($name, $email, $phone, $pw);
+            list($uid, $err) = auth_register_customer($name, $email, $phone, $pw, $username, $whatsapp);
             if (!$uid) {
                 $errors[] = $err;
             } else {
@@ -101,7 +125,7 @@ require BASE_PATH . '/includes/header.php';
       <h2 class="ok" style="color:#0b6b3a">Check your email</h2>
       <p>Your account was created. We sent a verification link to
         <strong><?= e($email) ?></strong> — open it within 24 hours to activate
-        your account, then log in.</p>
+        your account, then log in and verify your WhatsApp number.</p>
       <?php if ($ref_notice !== '') : ?><p><?= e($ref_notice) ?></p><?php endif; ?>
       <p><a class="btn primary" href="<?= e(url('customer/login.php')) ?>">Go to login</a></p>
     </div>
@@ -113,7 +137,9 @@ require BASE_PATH . '/includes/header.php';
       <?= csrf_field() ?>
       <label>Full name<input name="name" value="<?= e($name) ?>" required maxlength="100"></label>
       <label>Email<input type="email" name="email" value="<?= e($email) ?>" required maxlength="190"></label>
-      <label>Phone (optional, needed for phone verification)<input name="phone" value="<?= e($phone) ?>" maxlength="30"></label>
+      <label>Username (optional, 3–30 letters)<input name="username" value="<?= e($username) ?>" maxlength="30" autocomplete="username"></label>
+      <label>WhatsApp number<input name="whatsapp" value="<?= e($whatsapp) ?>" required maxlength="30" placeholder="e.g. +2348012345678"></label>
+      <label>Phone (optional)<input name="phone" value="<?= e($phone) ?>" maxlength="30"></label>
       <label>Password (min 8, letter + number)<input type="password" name="password" autocomplete="new-password" required></label>
       <label>Confirm password<input type="password" name="password_confirm" autocomplete="new-password" required></label>
       <label>Referral code (optional)<input name="refcode" value="<?= e($refcode) ?>" maxlength="20"></label>

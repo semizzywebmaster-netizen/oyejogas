@@ -70,6 +70,7 @@ function mk_banners_live($position) {
 
 function mk_banner_save($id, $data, $actor_id) {
     $title = trim((string) ($data['title'] ?? ''));
+    $body = mb_substr(trim((string) ($data['body'] ?? '')), 0, 2000);
     $image = trim((string) ($data['image'] ?? ''));
     $link = trim((string) ($data['link_url'] ?? ''));
     $pos = trim((string) ($data['position'] ?? 'home_top'));
@@ -103,17 +104,31 @@ function mk_banner_save($id, $data, $actor_id) {
         if (!$old) {
             return [false, 'Banner not found.'];
         }
-        db()->prepare(
-            'UPDATE `banners` SET `title` = ?, `image` = ?, `link_url` = ?, `position` = ?,
-             `sort_order` = ?, `starts_at` = ?, `ends_at` = ?, `is_active` = ? WHERE `id` = ?'
-        )->execute([$title, $image ?: null, $link ?: null, $pos, $sort, $starts, $ends, $active, $id]);
+        if (function_exists('growth_has_column') && growth_has_column('banners', 'body')) {
+            db()->prepare(
+                'UPDATE `banners` SET `title` = ?, `body` = ?, `image` = ?, `link_url` = ?, `position` = ?,
+                 `sort_order` = ?, `starts_at` = ?, `ends_at` = ?, `is_active` = ? WHERE `id` = ?'
+            )->execute([$title, $body !== '' ? $body : null, $image ?: null, $link ?: null, $pos, $sort, $starts, $ends, $active, $id]);
+        } else {
+            db()->prepare(
+                'UPDATE `banners` SET `title` = ?, `image` = ?, `link_url` = ?, `position` = ?,
+                 `sort_order` = ?, `starts_at` = ?, `ends_at` = ?, `is_active` = ? WHERE `id` = ?'
+            )->execute([$title, $image ?: null, $link ?: null, $pos, $sort, $starts, $ends, $active, $id]);
+        }
         mk_audit('marketing.banner_save', $actor_id, $id, ['title' => $old['title']], ['title' => $title]);
         return [true, 'Banner saved.'];
     }
-    db()->prepare(
-        'INSERT INTO `banners` (`title`, `image`, `link_url`, `position`, `sort_order`, `starts_at`, `ends_at`, `is_active`)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
-    )->execute([$title, $image ?: null, $link ?: null, $pos, $sort, $starts, $ends, $active]);
+    if (function_exists('growth_has_column') && growth_has_column('banners', 'body')) {
+        db()->prepare(
+            'INSERT INTO `banners` (`title`, `body`, `image`, `link_url`, `position`, `sort_order`, `starts_at`, `ends_at`, `is_active`)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)'
+        )->execute([$title, $body !== '' ? $body : null, $image ?: null, $link ?: null, $pos, $sort, $starts, $ends, $active]);
+    } else {
+        db()->prepare(
+            'INSERT INTO `banners` (`title`, `image`, `link_url`, `position`, `sort_order`, `starts_at`, `ends_at`, `is_active`)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
+        )->execute([$title, $image ?: null, $link ?: null, $pos, $sort, $starts, $ends, $active]);
+    }
     mk_audit('marketing.banner_create', $actor_id, (int) db()->lastInsertId(), null, ['title' => $title]);
     return [true, 'Banner created.'];
 }

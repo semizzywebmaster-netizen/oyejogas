@@ -44,7 +44,7 @@ require BASE_PATH . '/includes/header.php';
   <form method="post" action="" class="stack">
     <?= csrf_field() ?>
     <input type="hidden" name="next" value="<?= e($next) ?>">
-    <label>Email or phone<input name="identifier" value="<?= e($identifier) ?>" required maxlength="190" autocomplete="username"></label>
+    <label>Email, username or WhatsApp<input name="identifier" value="<?= e($identifier) ?>" required maxlength="190" autocomplete="username"></label>
     <label>Password<input type="password" name="password" required autocomplete="current-password"></label>
     <p><button class="btn primary" type="submit">Log in</button></p>
   </form>

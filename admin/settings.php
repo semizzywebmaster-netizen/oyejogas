@@ -46,6 +46,7 @@ $group_labels = [
     'orders' => 'Orders', 'wallet' => 'Wallet limits', 'payment' => 'Payments (no secrets here)',
     'notifications' => 'Notifications', 'appearance' => 'Appearance', 'pwa' => 'PWA',
     'daily' => 'Daily rewards',
+    'cart' => 'Abandoned carts',
 ];
 $naira_minor = ['min_order_minor', 'wallet_topup_min_minor', 'wallet_topup_max_minor',
     'wallet_balance_cap_minor', 'wallet_daily_topup_max_minor',

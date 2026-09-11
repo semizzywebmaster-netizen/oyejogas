@@ -23,10 +23,31 @@ function pay_audit($action, $user_id, $entity_id, $old, $new) {
 }
 
 /** Config-driven gateway info. Secrets stay in environment (PY-15). */
+function pay_gateways() {
+    $out = [];
+    $ps = trim((string) env('PAYSTACK_SECRET_KEY', getenv('PAYSTACK_SECRET_KEY') ?: ''));
+    if ($ps === '') {
+        $ps = trim((string) env('GATEWAY_SECRET_KEY', getenv('GATEWAY_SECRET_KEY') ?: ''));
+    }
+    if ($ps !== '') {
+        $out['paystack'] = ['label' => 'Paystack', 'public' => (string) env('PAYSTACK_PUBLIC_KEY', '')];
+    }
+    $opay_prv = trim((string) env('OPAY_PRIVATE_KEY', getenv('OPAY_PRIVATE_KEY') ?: ''));
+    $opay_mid = trim((string) env('OPAY_MERCHANT_ID', getenv('OPAY_MERCHANT_ID') ?: ''));
+    if ($opay_prv !== '' && $opay_mid !== '') {
+        $out['opay'] = ['label' => 'Opay'];
+    }
+    return $out;
+}
+
 function pay_gateway() {
-    $name = getenv('ONLINE_GATEWAY') ?: 'paystack';
-    $secret = getenv('PAYSTACK_SECRET_KEY') ?: getenv('GATEWAY_SECRET_KEY') ?: '';
-    return ['name' => strtolower($name), 'configured' => $secret !== ''];
+    $all = pay_gateways();
+    $pref = strtolower(trim((string) env('ONLINE_GATEWAY', getenv('ONLINE_GATEWAY') ?: '')));
+    if ($pref !== '' && isset($all[$pref])) {
+        return ['name' => $pref, 'configured' => true];
+    }
+    $first = array_key_first($all);
+    return ['name' => $first ?: 'paystack', 'configured' => $first !== null];
 }
 
 function pay_unique_ref($pdo, $table, $column, $prefix) {
@@ -118,7 +139,8 @@ function pay_list($status = '', $method = '', $limit = 100) {
 function pay_get($id) {
     $stmt = db()->prepare(
         'SELECT p.*, o.`order_number`, o.`status` AS order_status, o.`total_minor` AS order_total,
-                u.`name` AS customer_name, u.`email` AS customer_email
+                u.`name` AS customer_name, u.`email` AS customer_email, u.`phone` AS customer_phone,
+                u.`whatsapp` AS customer_whatsapp
          FROM `payments` p LEFT JOIN `orders` o ON o.`id` = p.`order_id`
          JOIN `customers` c ON c.`id` = p.`customer_id`
          JOIN `users` u ON u.`id` = c.`user_id` WHERE p.`id` = ?'
@@ -538,6 +560,187 @@ function recon_mark($collection_id, $actor_id) {
 }
 
 /* ---------------- finance reports (PY-13) ---------------- */
+
+function pay_by_reference($ref) {
+    $stmt = db()->prepare(
+        'SELECT p.*, o.`order_number`, o.`status` AS order_status, o.`total_minor` AS order_total,
+                u.`name` AS customer_name, u.`email` AS customer_email, u.`phone` AS customer_phone,
+                u.`whatsapp` AS customer_whatsapp
+         FROM `payments` p LEFT JOIN `orders` o ON o.`id` = p.`order_id`
+         JOIN `customers` c ON c.`id` = p.`customer_id`
+         JOIN `users` u ON u.`id` = c.`user_id` WHERE p.`payment_reference` = ? LIMIT 1'
+    );
+    $stmt->execute([(string) $ref]);
+    $row = $stmt->fetch();
+    return $row ?: null;
+}
+
+function pay_http($url, $method, array $headers, $body = null) {
+    if (!function_exists('curl_init')) {
+        return [false, 'curl unavailable', null];
+    }
+    $ch = curl_init($url);
+    $opts = [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_TIMEOUT => 20,
+        CURLOPT_CONNECTTIMEOUT => 8,
+        CURLOPT_HTTPHEADER => $headers,
+        CURLOPT_CUSTOMREQUEST => strtoupper($method),
+    ];
+    if ($body !== null) {
+        $opts[CURLOPT_POSTFIELDS] = is_string($body) ? $body : json_encode($body);
+    }
+    curl_setopt_array($ch, $opts);
+    $resp = curl_exec($ch);
+    $code = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $err = curl_error($ch);
+    curl_close($ch);
+    if ($resp === false) {
+        return [false, 'gateway unreachable: ' . $err, null];
+    }
+    $data = json_decode((string) $resp, true);
+    return [$code >= 200 && $code < 300, (string) $resp, is_array($data) ? $data : null];
+}
+
+function pay_mark_gateway($payment_id, $gateway, $gateway_ref = '') {
+    db()->prepare('UPDATE `payments` SET `gateway` = ?, `gateway_ref` = COALESCE(NULLIF(?, \'\'), `gateway_ref`) WHERE `id` = ?')
+        ->execute([$gateway, mb_substr((string) $gateway_ref, 0, 100), (int) $payment_id]);
+}
+
+/** Returns [ok, message, redirect_url|null]. */
+function pay_paystack_init(array $p) {
+    $secret = trim((string) env('PAYSTACK_SECRET_KEY', getenv('PAYSTACK_SECRET_KEY') ?: ''));
+    if ($secret === '') {
+        $secret = trim((string) env('GATEWAY_SECRET_KEY', ''));
+    }
+    if ($secret === '') {
+        return [false, 'Paystack is not configured.', null];
+    }
+    $email = (string) ($p['customer_email'] ?? '');
+    if ($email === '') {
+        $full = pay_get((int) $p['id']);
+        $email = (string) ($full['customer_email'] ?? '');
+        $p = $full ?: $p;
+    }
+    if ($email === '') {
+        return [false, 'Your account needs an email for Paystack.', null];
+    }
+    $callback = url('customer/pay-return.php?gateway=paystack');
+    [$ok, $raw, $data] = pay_http('https://api.paystack.co/transaction/initialize', 'POST', [
+        'Authorization: Bearer ' . $secret,
+        'Content-Type: application/json',
+    ], [
+        'email' => $email,
+        'amount' => (int) $p['amount_minor'],
+        'reference' => $p['payment_reference'],
+        'callback_url' => $callback,
+        'metadata' => ['payment_id' => (int) $p['id'], 'order_id' => (int) ($p['order_id'] ?? 0)],
+    ]);
+    if (!$ok || empty($data['status']) || empty($data['data']['authorization_url'])) {
+        $msg = is_array($data) ? (string) ($data['message'] ?? 'Paystack initialize failed') : 'Paystack initialize failed';
+        return [false, $msg, null];
+    }
+    pay_mark_gateway((int) $p['id'], 'paystack', (string) ($data['data']['reference'] ?? $p['payment_reference']));
+    return [true, 'Redirecting to Paystack.', (string) $data['data']['authorization_url']];
+}
+
+function pay_paystack_verify(array $p) {
+    $secret = trim((string) env('PAYSTACK_SECRET_KEY', getenv('PAYSTACK_SECRET_KEY') ?: ''));
+    if ($secret === '') {
+        $secret = trim((string) env('GATEWAY_SECRET_KEY', ''));
+    }
+    if ($secret === '') {
+        return [false, 'Paystack is not configured.'];
+    }
+    $ref = rawurlencode((string) $p['payment_reference']);
+    [$ok, $raw, $data] = pay_http('https://api.paystack.co/transaction/verify/' . $ref, 'GET', [
+        'Authorization: Bearer ' . $secret,
+    ]);
+    if (!$ok || empty($data['status'])) {
+        return [false, 'Could not verify with Paystack yet. Try again shortly.'];
+    }
+    $st = strtolower((string) ($data['data']['status'] ?? ''));
+    $paid = (int) ($data['data']['amount'] ?? 0);
+    if ($st === 'success' && $paid >= (int) $p['amount_minor']) {
+        $gref = (string) ($data['data']['reference'] ?? $p['payment_reference']);
+        pay_mark_gateway((int) $p['id'], 'paystack', $gref);
+        return pay_verify((int) $p['id'], true, null, 'paystack verify');
+    }
+    return [false, 'Paystack has not confirmed this payment yet.'];
+}
+
+function pay_opay_base() {
+    $u = trim((string) env('OPAY_BASE_URL', getenv('OPAY_BASE_URL') ?: ''));
+    return rtrim($u !== '' ? $u : 'https://liveapi.opaycheckout.com', '/');
+}
+
+function pay_opay_sign($json, $private) {
+    return hash_hmac('sha512', $json, $private);
+}
+
+function pay_opay_init(array $p) {
+    $prv = trim((string) env('OPAY_PRIVATE_KEY', getenv('OPAY_PRIVATE_KEY') ?: ''));
+    $mid = trim((string) env('OPAY_MERCHANT_ID', getenv('OPAY_MERCHANT_ID') ?: ''));
+    if ($prv === '' || $mid === '') {
+        return [false, 'Opay is not configured.', null];
+    }
+    $full = pay_get((int) $p['id']) ?: $p;
+    $payload = [
+        'country' => 'NG',
+        'reference' => (string) $p['payment_reference'],
+        'amount' => ['total' => (int) $p['amount_minor'], 'currency' => 'NGN'],
+        'returnUrl' => url('customer/pay-return.php?gateway=opay&reference=' . rawurlencode((string) $p['payment_reference'])),
+        'callbackUrl' => url('api/payments-callback.php?gateway=opay'),
+        'cancelUrl' => url('customer/payments.php'),
+        'expireAt' => '30',
+        'userInfo' => [
+            'userEmail' => (string) ($full['customer_email'] ?? ''),
+            'userId' => (string) (int) $p['customer_id'],
+            'userMobile' => (string) ($full['customer_phone'] ?? $full['customer_whatsapp'] ?? ''),
+            'userName' => (string) ($full['customer_name'] ?? ''),
+        ],
+        'product' => [
+            'name' => 'Order ' . (string) ($full['order_number'] ?? $p['payment_reference']),
+            'description' => 'Oyejo Gas order payment',
+        ],
+    ];
+    $json = json_encode($payload, JSON_UNESCAPED_SLASHES);
+    $sig = pay_opay_sign($json, $prv);
+    [$ok, $raw, $data] = pay_http(pay_opay_base() . '/api/v1/international/cashier/create', 'POST', [
+        'Content-Type: application/json',
+        'MerchantId: ' . $mid,
+        'Authorization: Bearer ' . $sig,
+    ], $json);
+    $cashier = is_array($data) ? ($data['data']['cashierUrl'] ?? $data['data']['payUrl'] ?? '') : '';
+    if (!$ok || $cashier === '') {
+        $msg = is_array($data) ? (string) ($data['message'] ?? $data['msg'] ?? 'Opay initialize failed') : 'Opay initialize failed';
+        return [false, $msg, null];
+    }
+    pay_mark_gateway((int) $p['id'], 'opay', (string) $p['payment_reference']);
+    return [true, 'Redirecting to Opay.', (string) $cashier];
+}
+
+function pay_opay_verify(array $p) {
+    $prv = trim((string) env('OPAY_PRIVATE_KEY', getenv('OPAY_PRIVATE_KEY') ?: ''));
+    $mid = trim((string) env('OPAY_MERCHANT_ID', getenv('OPAY_MERCHANT_ID') ?: ''));
+    if ($prv === '' || $mid === '') {
+        return [false, 'Opay is not configured.'];
+    }
+    $payload = ['country' => 'NG', 'reference' => (string) $p['payment_reference']];
+    $json = json_encode($payload, JSON_UNESCAPED_SLASHES);
+    $sig = pay_opay_sign($json, $prv);
+    [$ok, $raw, $data] = pay_http(pay_opay_base() . '/api/v1/international/cashier/status', 'POST', [
+        'Content-Type: application/json',
+        'MerchantId: ' . $mid,
+        'Authorization: Bearer ' . $sig,
+    ], $json);
+    $st = strtoupper((string) ($data['data']['status'] ?? $data['data']['orderStatus'] ?? ''));
+    if ($ok && in_array($st, ['SUCCESS', 'SUCCESSFUL', 'COMPLETED', 'PAID'], true)) {
+        pay_mark_gateway((int) $p['id'], 'opay', (string) $p['payment_reference']);
+        return pay_verify((int) $p['id'], true, null, 'opay verify');
+    }
+    return [false, 'Opay has not confirmed this payment yet.'];
+}
 
 function pay_reports() {
     $pdo = db();
