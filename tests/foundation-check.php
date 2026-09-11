@@ -34,7 +34,7 @@ $expected = [
     'includes/inventory.php', 'includes/admin.php', 'includes/delivery.php',
     'includes/payments.php', 'includes/support.php', 'includes/marketing.php',
     'includes/spin.php', 'includes/referrals.php', 'includes/ops.php', 'includes/errors.php',
-    'includes/addons.php', 'includes/push.php', 'includes/daily.php', 'includes/sidebar.php',
+    'includes/addons.php', 'includes/push.php', 'includes/daily.php', 'includes/wishlist.php', 'includes/sidebar.php',
     'includes/footer.php',
     'admin/index.php', 'admin/wallet.php', 'admin/refills.php',
     'admin/pickups.php', 'admin/inventory.php', 'admin/purchases.php',
@@ -55,6 +55,7 @@ $expected = [
     'customer/tickets.php', 'customer/wallet.php', 'customer/statement.php',
     'customer/refills.php', 'customer/pickups.php', 'customer/payments.php',
     'customer/reviews.php', 'customer/spin.php', 'customer/referrals.php', 'customer/daily.php',
+    'customer/wishlist.php',
     'driver/index.php',
     'api/index.php', 'api/payments-callback.php', 'api/push-subscribe.php',
     'install/index.php', 'install/installer.php',
@@ -71,6 +72,7 @@ $expected = [
     'database/schema.sql', 'database/seeds.sql', 'database/.htaccess',
     'database/index.php', 'database/migrations/README.md',
     'database/migrations/.gitkeep',
+    'database/migrations/20260911153000_wishlists.sql',
     'storage/.htaccess',
     'storage/logs/index.php', 'storage/logs/.gitkeep',
     'storage/backups/index.php', 'storage/backups/.gitkeep',
@@ -414,6 +416,26 @@ check(strpos((string) @file_get_contents($root . '/cron/daily-reminders.php'), '
 check(strpos((string) @file_get_contents($root . '/includes/admin.php'), "'daily' =>") !== false, 'admin lib: daily settings group');
 check(strpos((string) @file_get_contents($root . '/assets/css/style.css'), '.daily-week') !== false, 'style.css: daily earn styles');
 check(strpos((string) @file_get_contents($root . '/install/installer.php'), "'26'") !== false, 'installer: 26 feature toggles');
+
+// --- Wishlist (saved products) ---
+check(strpos((string) @file_get_contents($root . '/includes/wishlist.php'), 'function wish_add') !== false, 'wishlist lib: add');
+check(strpos((string) @file_get_contents($root . '/includes/wishlist.php'), 'function wish_remove') !== false, 'wishlist lib: remove');
+check(strpos((string) @file_get_contents($root . '/includes/wishlist.php'), 'function wish_clear') !== false, 'wishlist lib: clear');
+check(strpos((string) @file_get_contents($root . '/includes/wishlist.php'), 'function wish_button') !== false, 'wishlist lib: shop/product button');
+check(strpos((string) @file_get_contents($root . '/includes/wishlist.php'), 'WISH_MAX') !== false, 'wishlist lib: cap');
+check(strpos((string) @file_get_contents($root . '/includes/wishlist.php'), 'rate_limit') !== false, 'wishlist lib: rate limit');
+check(strpos((string) @file_get_contents($root . '/database/schema.sql'), 'CREATE TABLE IF NOT EXISTS `wishlists`') !== false, 'schema: wishlists');
+check(strpos((string) @file_get_contents($root . '/database/schema.sql'), 'uq_wish_customer_product') !== false, 'schema: unique customer+product');
+check(strpos((string) @file_get_contents($root . '/includes/bootstrap.php'), '/wishlist.php') !== false, 'bootstrap: loads wishlist');
+check(strpos((string) @file_get_contents($root . '/includes/bootstrap.php'), 'wish_ensure_schema') !== false, 'bootstrap: auto-schema');
+check(strpos((string) @file_get_contents($root . '/customer/wishlist.php'), 'csrf_field') !== false, 'wishlist page: CSRF');
+check(strpos((string) @file_get_contents($root . '/customer/wishlist.php'), 'require_login') !== false, 'wishlist page: login gate');
+check(strpos((string) @file_get_contents($root . '/customer/wishlist.php'), 'to_cart_all') !== false, 'wishlist page: add all to cart');
+check(strpos((string) @file_get_contents($root . '/includes/sidebar.php'), 'customer/wishlist.php') !== false, 'sidebar: wishlist');
+check(strpos((string) @file_get_contents($root . '/includes/header.php'), 'customer/wishlist.php') !== false, 'header: wishlist count');
+check(strpos((string) @file_get_contents($root . '/customer/index.php'), 'customer/wishlist.php') !== false, 'dashboard: wishlist link');
+check(strpos((string) @file_get_contents($root . '/shop.php'), 'wish_button') !== false, 'shop: wish button');
+check(strpos((string) @file_get_contents($root . '/product.php'), 'wish_button') !== false, 'product: wish button');
 
 // --- Growth B2: banners, PWA desk, locations desk ---
 check(strpos((string) @file_get_contents($root . '/includes/marketing.php'), 'function mk_banner_upload') !== false, 'marketing lib: banner upload helper');

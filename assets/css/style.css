@@ -287,6 +287,9 @@ html[data-theme="dark"] .maint { background: #3a2c10; color: #ffd98a; }
   .side .side-home { margin-bottom: 0; }
 }
 
+.wish-form { margin-top: 8px; }
+.wish-form .btn { width: auto; }
+
 /* --- Daily earn --- */
 .daily-nudge a { color: inherit; font-weight: 800; }
 .daily-hero { text-align: center; background: linear-gradient(135deg, var(--green-dark), var(--green)); color: #fff; }

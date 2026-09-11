@@ -12,7 +12,7 @@ if (isset($_SERVER['SCRIPT_FILENAME']) && basename($_SERVER['SCRIPT_FILENAME']) 
 }
 
 define('OYEJO_BOOT', true);
-define('OYEJO_VERSION', '0.29.0'); // platform version add-ons declare against
+define('OYEJO_VERSION', '0.30.0'); // platform version add-ons declare against
 
 require_once __DIR__ . '/../config/config.php';
 require_once __DIR__ . '/../config/database.php';
@@ -25,6 +25,7 @@ require_once __DIR__ . '/errors.php';
 require_once __DIR__ . '/addons.php';
 require_once __DIR__ . '/push.php';
 require_once __DIR__ . '/daily.php';
+require_once __DIR__ . '/wishlist.php';
 
 // --- Uninstalled apps go to the installer (Phase 4) ---
 if (PHP_SAPI !== 'cli' && !defined('OYEJO_SKIP_INSTALL_CHECK')) {
@@ -56,6 +57,7 @@ auth_tick();
 // --- Daily rewards schema (existing installs) ---
 if (PHP_SAPI === 'cli' || is_file(STORAGE_PATH . '/install.lock')) {
     daily_ensure_schema();
+    wish_ensure_schema();
 }
 
 // --- Maintenance mode (Phase 23): locked storefront, staff exempt ---

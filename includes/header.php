@@ -96,6 +96,15 @@ if (function_exists('daily_should_nudge') && !str_ends_with($__script, '/custome
         <a href="<?= e(url('cart.php')) ?>">Cart (<?= (int) $cartN ?>)</a>
       <?php endif; ?>
       <?php if (is_logged_in()) : ?>
+        <?php
+        $wishN = 0;
+        try {
+            $wishN = function_exists('wish_nav_count') ? wish_nav_count() : 0;
+        } catch (Throwable $t) {
+            $wishN = 0;
+        }
+        ?>
+        <a href="<?= e(url('customer/wishlist.php')) ?>">Wishlist<?= $wishN > 0 ? ' (' . (int) $wishN . ')' : '' ?></a>
         <span class="who">Hi, <?= e(current_user()['name']) ?></span>
         <a href="<?= e(url('customer/logout.php')) ?>">Logout</a>
       <?php endif; ?>

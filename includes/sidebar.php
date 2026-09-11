@@ -53,6 +53,7 @@ function sidebar_customer_links() {
     $links = [
         ['Dashboard', 'customer/'],
         ['Orders', 'customer/orders.php'],
+        ['Wishlist', 'customer/wishlist.php'],
         ['Wallet', 'customer/wallet.php'],
         ['Refills', 'customer/refills.php'],
         ['Pickups', 'customer/pickups.php'],

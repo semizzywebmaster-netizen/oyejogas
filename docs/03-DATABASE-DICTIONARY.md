@@ -111,6 +111,7 @@ Verify any time: import into a scratch DB, then run `tests/phase3-verify.sql`.
 | `spins` | One row per spin; **UNIQUE(campaign, customer, period)** enforces one-spin-per-period in the DB | → campaigns/customers (RESTRICT), prizes (SET NULL) |
 | `daily_checkins` | One wallet-credit check-in per customer per Lagos day; streak + mystery bonus | → customers (CASCADE); UNIQUE(customer, date) |
 | `daily_mission_claims` | Shop/refer/profile/order mission claims | → customers (CASCADE); UNIQUE(customer, mission, date) |
+| `wishlists` | Saved products per customer | → customers/products (CASCADE); UNIQUE(customer, product) |
 
 ### Referrals (Phase 21)
 | Table | Purpose | Key relations |

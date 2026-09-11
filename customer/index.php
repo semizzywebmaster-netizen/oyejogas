@@ -94,6 +94,15 @@ require BASE_PATH . '/includes/header.php';
   <article class="card"><h3><?= $open_tickets ?></h3><p>Open tickets</p><p><a href="<?= e(url('customer/tickets.php')) ?>">Support</a></p></article>
   <?php if (oyejo_feature('reviews')) : ?><article class="card"><h3><?= $review_count ?></h3><p>Reviews</p><p><a href="<?= e(url('customer/reviews.php')) ?>">My reviews</a></p></article><?php endif; ?>
   <?php if (oyejo_feature('spin_to_win')) : ?><article class="card"><h3>Spin</h3><p>Spin-to-win</p><p><a href="<?= e(url('customer/spin.php')) ?>">Spin now</a></p></article><?php endif; ?>
+  <?php
+  $wish_count = 0;
+  try {
+      $wish_count = function_exists('wish_count') ? wish_count($cid) : 0;
+  } catch (Throwable $t) {
+      $wish_count = 0;
+  }
+  ?>
+  <article class="card"><h3><?= (int) $wish_count ?></h3><p>Wishlist</p><p><a href="<?= e(url('customer/wishlist.php')) ?>">Saved items</a></p></article>
   <?php if (function_exists('daily_enabled') && daily_enabled()) : ?>
     <article class="card">
       <h3>Daily earn</h3>
@@ -179,6 +188,7 @@ require BASE_PATH . '/includes/header.php';
       <li><a href="<?= e(url('customer/profile.php')) ?>">Profile</a></li>
       <li><a href="<?= e(url('customer/addresses.php')) ?>">Addresses (<?= $addr_count ?>)</a></li>
       <li><a href="<?= e(url('customer/phones.php')) ?>">Phones</a></li>
+      <li><a href="<?= e(url('customer/wishlist.php')) ?>">Wishlist</a></li>
       <li><a href="<?= e(url('customer/refills.php')) ?>">Refills</a></li>
       <li><a href="<?= e(url('customer/pickups.php')) ?>">Pickups</a></li>
       <li><a href="<?= e(url('customer/payments.php')) ?>">Payments</a></li>
