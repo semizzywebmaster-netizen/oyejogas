@@ -69,6 +69,9 @@ $expected = [
     'uploads/index.php', 'uploads/.htaccess', 'uploads/.gitkeep',
     'uploads/branding/index.php', 'uploads/branding/.gitkeep',
     'uploads/banners/index.php', 'uploads/banners/.gitkeep',
+    'uploads/products/index.php', 'uploads/products/.gitkeep',
+    'uploads/categories/index.php', 'uploads/categories/.gitkeep',
+    'uploads/payment-proof/index.php', 'uploads/payment-proof/.gitkeep',
     'database/schema.sql', 'database/seeds.sql', 'database/.htaccess',
     'database/index.php', 'database/migrations/README.md',
     'database/migrations/.gitkeep',
@@ -480,6 +483,19 @@ check(strpos((string) @file_get_contents($root . '/cron/abandoned-carts.php'), '
 check(strpos((string) @file_get_contents($root . '/index.php'), 'banner-copy') !== false, 'homepage: banner captions');
 check(strpos((string) @file_get_contents($root . '/admin/marketing.php'), 'name="body"') !== false, 'marketing desk: banner body');
 check(strpos((string) @file_get_contents($root . '/install/installer.php'), "'26'") !== false, 'installer: still 26 feature toggles');
+
+// --- Additional growth: product/category images, appearance, abandoned cart UI, location suggestions desk ---
+check(strpos((string) @file_get_contents($root . '/includes/admin.php'), 'function adm_upload_image') !== false, 'admin lib: image upload helper');
+check(strpos((string) @file_get_contents($root . '/admin/products.php'), 'product_image') !== false, 'products desk: image file input');
+check(strpos((string) @file_get_contents($root . '/admin/products.php'), 'category_image') !== false, 'products desk: category image input');
+check(strpos((string) @file_get_contents($root . '/admin/appearance.php'), 'site_logo') !== false, 'appearance desk: logo handling');
+check(strpos((string) @file_get_contents($root . '/admin/appearance.php'), 'site_favicon') !== false, 'appearance desk: favicon handling');
+check(strpos((string) @file_get_contents($root . '/admin/locations.php'), 'suggestions') !== false && strpos((string) @file_get_contents($root . '/admin/locations.php'), 'loc_decide') !== false, 'locations desk: suggestions tab with approve');
+check(strpos((string) @file_get_contents($root . '/admin/settings.php'), 'abandoned_cart_start_at') !== false && strpos((string) @file_get_contents($root . '/admin/settings.php'), 'datetime-local') !== false, 'settings desk: abandoned cart datetime-local');
+check(strpos((string) @file_get_contents($root . '/customer/profile.php'), 'whatsapp') !== false && strpos((string) @file_get_contents($root . '/customer/profile.php'), 'username') !== false, 'profile page: whatsapp + username fields');
+check(strpos((string) @file_get_contents($root . '/customer/suggest-location.php'), 'loc_suggest') !== false, 'suggest-location page: uses loc_suggest');
+check(strpos((string) @file_get_contents($root . '/includes/growth.php'), 'abandoned_carts') !== false, 'growth lib: abandoned_carts table');
+check(strpos((string) @file_get_contents($root . '/includes/growth.php'), 'location_suggestions') !== false, 'growth lib: location_suggestions table');
 
 // --- php -l over every PHP file ---
 $linted = 0;

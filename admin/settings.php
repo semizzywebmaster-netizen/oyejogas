@@ -3,6 +3,7 @@
  * Oyejo Gas - website / payment / notification settings + feature
  * toggles desk (Phase 15, AD-15…AD-18). Payment secrets are never stored
  * here — they live in server environment / protected config only.
+ * Includes abandoned-cart recovery start date/time controls.
  */
 require_once __DIR__ . '/../includes/bootstrap.php';
 reject_path_info();
@@ -25,6 +26,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (!$can_edit) {
                 $errors[] = 'You do not have permission to edit settings.';
             } else {
+                // Normalize datetime-local for abandoned cart
+                if (($_POST['group'] ?? '') === 'cart' && isset($_POST['abandoned_cart_start_at'])) {
+                    $raw = trim((string) $_POST['abandoned_cart_start_at']);
+                    // Accept datetime-local format YYYY-MM-DDTHH:MM and convert to MySQL datetime
+                    if (preg_match('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/', $raw)) {
+                        $raw = str_replace('T', ' ', $raw) . ':00';
+                    }
+                    $_POST['abandoned_cart_start_at'] = $raw;
+                }
                 [$ok, $msg] = adm_settings_save($_POST['group'] ?? '', $_POST, (int) $me['id']);
                 $ok ? $message = $msg : $errors[] = $msg;
             }
@@ -46,7 +56,7 @@ $group_labels = [
     'orders' => 'Orders', 'wallet' => 'Wallet limits', 'payment' => 'Payments (no secrets here)',
     'notifications' => 'Notifications', 'appearance' => 'Appearance', 'pwa' => 'PWA',
     'daily' => 'Daily rewards',
-    'cart' => 'Abandoned carts',
+    'cart' => 'Abandoned carts (recovery notifications)',
 ];
 $naira_minor = ['min_order_minor', 'wallet_topup_min_minor', 'wallet_topup_max_minor',
     'wallet_balance_cap_minor', 'wallet_daily_topup_max_minor',
@@ -66,15 +76,36 @@ require BASE_PATH . '/includes/header.php';
 <?php foreach ($groups as $group => $keys) : ?>
 <div class="card">
   <h2><?= e($group_labels[$group] ?? ucfirst($group)) ?></h2>
+  <?php if ($group === 'cart') : ?>
+    <p class="result-meta">Abandoned-cart recovery: the cron <code>cron/abandoned-carts.php</code> queues WhatsApp/email reminders for carts left idle. Set the <strong>start date/time</strong> below — only carts updated after that moment are eligible. Idle hours controls how long a cart must be untouched before we nudge.</p>
+  <?php endif; ?>
   <form method="post" action="" class="stack">
     <?= csrf_field() ?>
     <input type="hidden" name="action" value="save_group">
     <input type="hidden" name="group" value="<?= e($group) ?>">
     <?php foreach ($keys as $k) : ?>
       <?php $val = $all[$k] ?? ''; ?>
-      <label><?= e(ucwords(str_replace('_', ' ', preg_replace('/_minor$/', ' (₦)', $k)))) ?>
-        <input name="<?= e($k) ?>" value="<?= e(in_array($k, $naira_minor, true) && is_numeric($val) ? (string) ($val / 100) : (string) $val) ?>"<?= $can_edit ? '' : ' readonly' ?>>
-      </label>
+      <?php if ($k === 'abandoned_cart_start_at') : ?>
+        <?php
+          $dt_val = $val;
+          // Convert MySQL datetime to datetime-local value
+          if (preg_match('/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/', $dt_val)) {
+              $dt_val = substr(str_replace(' ', 'T', $dt_val), 0, 16);
+          }
+        ?>
+        <label>Abandoned-cart recovery start (admin specifies date/time)
+          <input type="datetime-local" name="<?= e($k) ?>" value="<?= e($dt_val) ?>"<?= $can_edit ? '' : ' readonly' ?>>
+          <span class="result-meta">Example: 2026-09-11 14:00 — carts updated after this time will be nudged after idle hours.</span>
+        </label>
+      <?php elseif ($k === 'abandoned_cart_idle_hours') : ?>
+        <label>Idle hours before reminder (1–168)
+          <input type="number" min="1" max="168" name="<?= e($k) ?>" value="<?= e($val) ?>"<?= $can_edit ? '' : ' readonly' ?>>
+        </label>
+      <?php else : ?>
+        <label><?= e(ucwords(str_replace('_', ' ', preg_replace('/_minor$/', ' (₦)', $k)))) ?>
+          <input name="<?= e($k) ?>" value="<?= e(in_array($k, $naira_minor, true) && is_numeric($val) ? (string) ($val / 100) : (string) $val) ?>"<?= $can_edit ? '' : ' readonly' ?>>
+        </label>
+      <?php endif; ?>
     <?php endforeach; ?>
     <?php if ($can_edit) : ?><p><button class="btn small primary" type="submit">Save <?= e($group_labels[$group] ?? $group) ?></button></p><?php endif; ?>
   </form>
