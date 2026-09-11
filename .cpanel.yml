@@ -1,0 +1,12 @@
+---
+# Oyejo Gas - cPanel "Pull or Deploy" recipe.
+# Clone this repo OUTSIDE the web root (e.g. /home/cpuser/oyejogas),
+# then cPanel copies the live files to public_html on every deploy.
+# .git never touches the public web; the live .env, uploads, backups
+# and logs are never overwritten (they are not in this list).
+# (.gitignore/README.md intentionally not deployed.)
+deployment:
+  tasks:
+    - export DEPLOYPATH=$HOME/public_html/
+    - /bin/cp -Rf .htaccess .env.example *.php manifest.webmanifest service-worker.js assets admin api config cron customer driver errors includes install pwa storage uploads addons database docs tests $DEPLOYPATH
+    - /bin/chmod 755 $DEPLOYPATH/storage $DEPLOYPATH/storage/backups $DEPLOYPATH/storage/cache $DEPLOYPATH/storage/logs $DEPLOYPATH/uploads

@@ -287,10 +287,13 @@ INSERT INTO `faqs` (`question`, `answer`, `category`, `sort_order`, `is_active`)
 'payments', 4, 1);
 
 -- ------------------------------------------------------ homepage sections
+-- NOTE: hero/services/how_it_works render statically on the homepage, so
+-- these CMS rows ship inactive as editable spares. Content must be plain
+-- text with blank-line paragraphs - the renderer escapes it, not JSON.
 INSERT INTO `homepage_sections` (`slug`, `title`, `content`, `sort_order`, `is_active`) VALUES
-('hero', 'Hero', '{"heading":"Cooking gas, delivered.","sub":"Order LPG, book refills and swap cylinders."}', 1, 1),
-('services', 'Services', '{"items":["Order LPG","Gas refill","Pickup and exchange","Track delivery"]}', 2, 1),
-('how_it_works', 'How it works', '{"steps":["Choose","Check out","Relax"]}', 3, 1);
+('hero', 'Hero', 'Cooking gas, delivered.\n\nOrder LPG, book refills and swap cylinders - with live delivery tracking.', 1, 0),
+('services', 'Services', 'Order LPG, gas refills, pickup and exchange, and fast delivery - everything around your cooking gas, in one place.', 2, 0),
+('how_it_works', 'How it works', 'Choose your cylinder size or refill.\n\nCheck out with wallet, transfer, card or cash.\n\nRelax while we pick up, refill and deliver.', 3, 0);
 
 -- ---------------------------------------------------------- schema baseline
 INSERT INTO `migrations` (`migration`, `batch`) VALUES ('0000_base_schema', 1);
