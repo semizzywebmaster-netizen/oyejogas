@@ -45,9 +45,14 @@ $group_labels = [
     'site' => 'Website', 'contact' => 'Contact', 'locale' => 'Locale & currency',
     'orders' => 'Orders', 'wallet' => 'Wallet limits', 'payment' => 'Payments (no secrets here)',
     'notifications' => 'Notifications', 'appearance' => 'Appearance', 'pwa' => 'PWA',
+    'daily' => 'Daily rewards',
 ];
 $naira_minor = ['min_order_minor', 'wallet_topup_min_minor', 'wallet_topup_max_minor',
-    'wallet_balance_cap_minor', 'wallet_daily_topup_max_minor'];
+    'wallet_balance_cap_minor', 'wallet_daily_topup_max_minor',
+    'daily_base_reward_minor', 'daily_streak_step_minor', 'daily_week_bonus_minor',
+    'daily_meter_target_minor', 'daily_mission_shop_minor', 'daily_mission_refer_minor',
+    'daily_mission_profile_minor', 'daily_mission_order_minor',
+    'daily_mystery_min_minor', 'daily_mystery_max_minor'];
 
 $page_title = 'Settings';
 require BASE_PATH . '/includes/header.php';

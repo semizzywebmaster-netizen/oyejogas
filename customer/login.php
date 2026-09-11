@@ -21,7 +21,12 @@ if (request_method() === 'POST') {
         $identifier = trim((string) post('identifier', ''));
         list($ok, $msg, $u) = auth_attempt_login($identifier, (string) post('password', ''));
         if ($ok) {
-            redirect(safe_next($next, landing_for_role($u['role'])));
+            $dest = safe_next($next, landing_for_role($u['role']));
+            if ($next === '' && ($u['role'] ?? '') === 'customer'
+                && function_exists('daily_should_nudge') && daily_should_nudge((int) $u['id'])) {
+                $dest = url('customer/daily.php');
+            }
+            redirect($dest);
         }
         $errors[] = $msg;
     }

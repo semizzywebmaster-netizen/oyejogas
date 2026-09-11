@@ -67,6 +67,20 @@ $__favicon_url = str_starts_with($__favicon, 'assets/') ? asset($__favicon) : ur
 <?php if (oyejo_feature('maintenance_mode')) : ?>
 <div class="maint" role="alert">Scheduled maintenance is in progress. Some services may be unavailable.</div>
 <?php endif; ?>
+<?php
+$__daily_nudge = false;
+$__script = (string) ($_SERVER['SCRIPT_NAME'] ?? '');
+if (function_exists('daily_should_nudge') && !str_ends_with($__script, '/customer/daily.php')) {
+    try {
+        $__daily_nudge = daily_should_nudge();
+    } catch (Throwable $t) {
+        $__daily_nudge = false;
+    }
+}
+?>
+<?php if ($__daily_nudge) : ?>
+<div class="maint daily-nudge" role="status">Your daily gas credit is waiting. <a href="<?= e(url('customer/daily.php')) ?>">Claim it now →</a></div>
+<?php endif; ?>
 <header class="site">
   <div class="wrap nav">
     <a class="brand" href="<?= e(url('')) ?>">

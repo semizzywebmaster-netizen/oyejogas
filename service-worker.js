@@ -2,7 +2,7 @@
  * Keep VERSION in sync with OYEJO_VERSION (E2E asserts this).
  * Security: only same-origin GETs are ever cached; admin, customer,
  * driver, api, install and cron traffic always bypasses the cache. */
-var VERSION = '0.28.0';
+var VERSION = '0.29.0';
 var STATIC_CACHE = 'oyejo-static-' + VERSION;
 var PRECACHE = [
   './',

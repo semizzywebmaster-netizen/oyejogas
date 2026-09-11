@@ -26,7 +26,8 @@ oyejo-gas/
 |-------|-------|--------|
 | 1–6 | Foundation → RBAC (all verified) | ✅ Approved |
 | 7 | Public website and responsive design | 🟡 In progress (autopilot) |
-| 8–28 | See `docs/00-PROJECT-PLAN-28-PHASES.md` | ⬜ Not started |
+| 8–28 | See `docs/00-PROJECT-PLAN-28-PHASES.md` | ✅ Built |
+| — | Daily earn (check-in, streaks, missions → wallet) | ✅ |
 
 **New sites:** open the homepage once and the one-click installer
 (see `docs/04-INSTALLATION-GUIDE.md`) sets up database, seeds and admin.

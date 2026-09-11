@@ -34,7 +34,7 @@ $expected = [
     'includes/inventory.php', 'includes/admin.php', 'includes/delivery.php',
     'includes/payments.php', 'includes/support.php', 'includes/marketing.php',
     'includes/spin.php', 'includes/referrals.php', 'includes/ops.php', 'includes/errors.php',
-    'includes/addons.php', 'includes/push.php', 'includes/sidebar.php',
+    'includes/addons.php', 'includes/push.php', 'includes/daily.php', 'includes/sidebar.php',
     'includes/footer.php',
     'admin/index.php', 'admin/wallet.php', 'admin/refills.php',
     'admin/pickups.php', 'admin/inventory.php', 'admin/purchases.php',
@@ -45,7 +45,7 @@ $expected = [
     'admin/reviews.php', 'admin/marketing.php', 'admin/faqs.php',
     'admin/posts.php', 'admin/newsletter.php', 'admin/spin.php',
     'admin/referrals.php', 'admin/notifications.php', 'admin/backups.php', 'admin/logs.php',
-    'admin/addon.php', 'admin/appearance.php', 'admin/pwa.php', 'admin/locations.php',
+    'admin/addon.php', 'admin/appearance.php', 'admin/pwa.php', 'admin/locations.php', 'admin/daily.php',
     'customer/index.php', 'customer/register.php', 'customer/login.php',
     'customer/logout.php', 'customer/forgot-password.php',
     'customer/reset-password.php', 'customer/verify-email.php',
@@ -54,7 +54,7 @@ $expected = [
     'customer/notifications.php', 'customer/invoice.php', 'customer/reorder.php',
     'customer/tickets.php', 'customer/wallet.php', 'customer/statement.php',
     'customer/refills.php', 'customer/pickups.php', 'customer/payments.php',
-    'customer/reviews.php', 'customer/spin.php', 'customer/referrals.php',
+    'customer/reviews.php', 'customer/spin.php', 'customer/referrals.php', 'customer/daily.php',
     'driver/index.php',
     'api/index.php', 'api/payments-callback.php', 'api/push-subscribe.php',
     'install/index.php', 'install/installer.php',
@@ -86,8 +86,10 @@ $expected = [
     'addons/multi-currency/addon.json',
     'cron/README.md', 'cron/.gitkeep', 'cron/index.php',
     'cron/send-notifications.php', 'cron/pickup-reminders.php', 'cron/backup.php', 'cron/rotate-logs.php',
+    'cron/daily-reminders.php',
     'pwa/README.md', 'pwa/.gitkeep',
     'tests/foundation-check.php', 'tests/index.php', 'tests/phase3-verify.sql',
+    'tests/daily-logic.php',
     'docs/00-PROJECT-PLAN-28-PHASES.md',
     'docs/01-MASTER-REQUIREMENTS-CHECKLIST.md',
     'docs/01-Phase-1-Verification-Report.md',
@@ -390,6 +392,28 @@ check(strpos((string) @file_get_contents($root . '/database/seeds.sql'), 'WELCOM
 check(strpos((string) @file_get_contents($root . '/database/seeds.sql'), 'wallet_balance_cap_minor') !== false, 'seeds.sql: wallet limits');
 $manifest = json_decode((string) @file_get_contents($root . '/addons/example/addon.json'), true);
 check(is_array($manifest) && ($manifest['slug'] ?? '') === 'example', 'addon.json: valid manifest');
+
+// --- Daily earn (check-in / streak / missions) ---
+check(strpos((string) @file_get_contents($root . '/includes/daily.php'), 'function daily_checkin') !== false, 'daily lib: check-in');
+check(strpos((string) @file_get_contents($root . '/includes/daily.php'), 'function daily_compute_reward') !== false, 'daily lib: server-side reward math');
+check(strpos((string) @file_get_contents($root . '/includes/daily.php'), 'random_int') !== false, 'daily lib: secure mystery roll');
+check(strpos((string) @file_get_contents($root . '/includes/daily.php'), 'UNIQUE') !== false || strpos((string) @file_get_contents($root . '/database/schema.sql'), 'uq_checkin_day') !== false, 'schema: one check-in per day');
+check(strpos((string) @file_get_contents($root . '/database/schema.sql'), 'CREATE TABLE IF NOT EXISTS `daily_checkins`') !== false, 'schema: daily_checkins');
+check(strpos((string) @file_get_contents($root . '/database/schema.sql'), 'CREATE TABLE IF NOT EXISTS `daily_mission_claims`') !== false, 'schema: daily_mission_claims');
+check(strpos((string) @file_get_contents($root . '/database/seeds.sql'), 'daily_rewards') !== false, 'seeds.sql: daily_rewards toggle');
+check(strpos((string) @file_get_contents($root . '/includes/bootstrap.php'), "'daily_rewards'") !== false, 'bootstrap: daily_rewards default');
+check(strpos((string) @file_get_contents($root . '/customer/daily.php'), 'daily_enabled') !== false, 'daily page: toggle gate');
+check(strpos((string) @file_get_contents($root . '/customer/daily.php'), 'csrf_field') !== false, 'daily page: CSRF');
+check(strpos((string) @file_get_contents($root . '/admin/daily.php'), 'daily.manage') !== false, 'daily desk: manage permission');
+check(strpos((string) @file_get_contents($root . '/includes/sidebar.php'), 'customer/daily.php') !== false, 'sidebar: daily earn');
+check(strpos((string) @file_get_contents($root . '/includes/sidebar.php'), 'admin/daily.php') !== false, 'sidebar: daily desk');
+check(strpos((string) @file_get_contents($root . '/customer/index.php'), 'customer/daily.php') !== false, 'dashboard: daily earn link');
+check(strpos((string) @file_get_contents($root . '/customer/login.php'), 'daily_should_nudge') !== false, 'login: daily landing nudge');
+check(strpos((string) @file_get_contents($root . '/shop.php'), "daily_mark_seen('shop')") !== false, 'shop: mission seen');
+check(strpos((string) @file_get_contents($root . '/cron/daily-reminders.php'), 'daily_queue_reminders') !== false, 'cron: streak reminders');
+check(strpos((string) @file_get_contents($root . '/includes/admin.php'), "'daily' =>") !== false, 'admin lib: daily settings group');
+check(strpos((string) @file_get_contents($root . '/assets/css/style.css'), '.daily-week') !== false, 'style.css: daily earn styles');
+check(strpos((string) @file_get_contents($root . '/install/installer.php'), "'26'") !== false, 'installer: 26 feature toggles');
 
 // --- Growth B2: banners, PWA desk, locations desk ---
 check(strpos((string) @file_get_contents($root . '/includes/marketing.php'), 'function mk_banner_upload') !== false, 'marketing lib: banner upload helper');

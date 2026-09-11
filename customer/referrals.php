@@ -43,6 +43,9 @@ $refs = ref_for_referrer($cid);
 $rewards = ref_rewards_for($cid);
 
 $page_title = 'Referrals';
+if (function_exists('daily_mark_seen')) {
+    daily_mark_seen('refer');
+}
 require BASE_PATH . '/includes/header.php';
 ?>
 <p class="crumbs"><a href="<?= e(url('customer/')) ?>">My account</a> &rsaquo; Referrals</p>

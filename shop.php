@@ -95,6 +95,9 @@ function shop_url(array $over = []) {
 
 $types = oyejo_product_types();
 $page_title = $cat ? ('Shop ' . $cat['name']) : 'Shop';
+if (function_exists('daily_mark_seen') && is_logged_in()) {
+    daily_mark_seen('shop');
+}
 require BASE_PATH . '/includes/header.php';
 ?>
 <div class="page-hero">

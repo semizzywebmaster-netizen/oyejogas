@@ -94,6 +94,13 @@ require BASE_PATH . '/includes/header.php';
   <article class="card"><h3><?= $open_tickets ?></h3><p>Open tickets</p><p><a href="<?= e(url('customer/tickets.php')) ?>">Support</a></p></article>
   <?php if (oyejo_feature('reviews')) : ?><article class="card"><h3><?= $review_count ?></h3><p>Reviews</p><p><a href="<?= e(url('customer/reviews.php')) ?>">My reviews</a></p></article><?php endif; ?>
   <?php if (oyejo_feature('spin_to_win')) : ?><article class="card"><h3>Spin</h3><p>Spin-to-win</p><p><a href="<?= e(url('customer/spin.php')) ?>">Spin now</a></p></article><?php endif; ?>
+  <?php if (function_exists('daily_enabled') && daily_enabled()) : ?>
+    <article class="card">
+      <h3>Daily earn</h3>
+      <p><?= function_exists('daily_should_nudge') && daily_should_nudge() ? 'Claim today’s gas credit' : 'Streak &amp; missions' ?></p>
+      <p><a href="<?= e(url('customer/daily.php')) ?>">Open daily earn</a></p>
+    </article>
+  <?php endif; ?>
 </div>
 
 <div class="grid dash-grid">

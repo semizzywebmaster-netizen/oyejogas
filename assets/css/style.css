@@ -287,6 +287,26 @@ html[data-theme="dark"] .maint { background: #3a2c10; color: #ffd98a; }
   .side .side-home { margin-bottom: 0; }
 }
 
+/* --- Daily earn --- */
+.daily-nudge a { color: inherit; font-weight: 800; }
+.daily-hero { text-align: center; background: linear-gradient(135deg, var(--green-dark), var(--green)); color: #fff; }
+.daily-hero .pill { color: #fff; }
+.daily-hero h2 { margin: 8px 0; }
+.daily-amount { font-size: 40px; font-weight: 800; margin: 8px 0; }
+.daily-hero .result-meta { color: rgba(255,255,255,0.85); }
+.daily-hero .stack { max-width: 320px; margin: 0 auto; }
+.daily-week { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; list-style: none; padding: 0; margin: 0 0 24px; }
+.daily-week li { background: var(--card); border: 1px solid var(--line); border-radius: 12px; text-align: center; padding: 10px 4px; }
+.daily-week li span { display: block; font-size: 12px; color: var(--muted); }
+.daily-week li strong { font-size: 20px; }
+.daily-week li.on { background: #e9f7ee; border-color: #bfe6cd; }
+.daily-week li.today { outline: 2px solid var(--green); }
+.meter { height: 14px; background: #e3e8e3; border-radius: 999px; overflow: hidden; }
+.meter span { display: block; height: 100%; background: var(--orange); }
+html[data-theme="dark"] .daily-week li { background: var(--card); }
+html[data-theme="dark"] .daily-week li.on { background: #1d3a28; }
+html[data-theme="dark"] .meter { background: #2b3630; }
+
 /* --- Homepage banners --- */
 section.banner { margin-bottom: 20px; }
 section.banner img { width: 100%; max-height: 340px; object-fit: cover; border-radius: var(--radius); display: block; }

@@ -281,7 +281,7 @@ function inst_validate($pdo, $dbName) {
         ['Tables created', (string) $expected_tables, (string) $tables, $tables === $expected_tables],
         ['Roles seeded', '12', (string) $count('roles'), $count('roles') === 12],
         ['Permissions seeded', '>= 70', (string) $perms, $perms >= 70],
-        ['Feature toggles seeded', '25', (string) $count('feature_toggles'), $count('feature_toggles') === 25],
+        ['Feature toggles seeded', '26', (string) $count('feature_toggles'), $count('feature_toggles') === 26],
         ['Settings seeded', '>= 10', (string) $settings, $settings >= 10],
         ['Categories seeded', '>= 4', (string) $count('categories'), $count('categories') >= 4],
         ['Cylinder sizes seeded', '5', (string) $count('cylinder_sizes'), $count('cylinder_sizes') === 5],
