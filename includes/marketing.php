@@ -150,8 +150,8 @@ function mk_banner_upload($file) {
     if (!is_array($file) || ($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
         return [false, 'Choose a banner image to upload.'];
     }
-    if ((int) $file['size'] > 1024 * 1024) {
-        return [false, 'Banner image must be 1 MB or smaller.'];
+    if ((int) $file['size'] > 5 * 1024 * 1024) {
+        return [false, 'Banner image must be 5 MB or smaller.'];
     }
     $info = @getimagesize($file['tmp_name']);
     $map = [IMAGETYPE_JPEG => 'jpg', IMAGETYPE_PNG => 'png', IMAGETYPE_WEBP => 'webp'];

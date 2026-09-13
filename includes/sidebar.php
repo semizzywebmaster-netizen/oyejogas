@@ -32,6 +32,7 @@ function sidebar_admin_desks() {
         ['Support', 'admin/tickets.php', 'tickets.manage'],
         ['Reviews', 'admin/reviews.php', 'reviews.moderate'],
         ['Marketing', 'admin/marketing.php', 'marketing.campaigns'],
+        ['Plant Images', 'admin/plant-images.php', 'marketing.banners'],
         ['FAQs', 'admin/faqs.php', 'marketing.faqs'],
         ['Posts', 'admin/posts.php', 'marketing.posts'],
         ['Newsletter', 'admin/newsletter.php', 'marketing.newsletter'],
